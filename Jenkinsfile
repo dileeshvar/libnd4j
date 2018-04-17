@@ -1,5 +1,5 @@
 #!groovy
-@Library('skymind@feature/ssh-add-k8s-support') _
+@Library('skymind@bugfix/change-platform-object-structure') _
 
 jenkinsBuilder()
 
