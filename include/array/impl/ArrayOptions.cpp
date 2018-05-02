@@ -3,7 +3,7 @@
 
 namespace nd4j {
     bool ArrayOptions::isNewFormat(int *shapeInfo) {
-        return (shape::offset(shapeInfo) != 0);
+        return (shape::extra(shapeInfo) != 0);
     }
 
     bool ArrayOptions::isSparseArray(int *shapeInfo) {

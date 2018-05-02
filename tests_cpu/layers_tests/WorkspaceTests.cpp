@@ -227,5 +227,13 @@ TEST_F(WorkspaceTests, Test_Externalized_1) {
     ASSERT_NEAR(2.0f, m, 1e-5);
 }
 
+// TODO: uncomment this test once long shapes are introduced
+/*
+TEST_F(WorkspaceTests, Test_Big_Allocation_1) {
+    Workspace ws(65536);
+    NDArray<float> x('c', {256, 64, 384, 384}, &ws);
+}
+*/
+
 
 #endif //LIBND4J_WORKSPACETESTS_H
