@@ -714,6 +714,13 @@ ND4J_EXPORT bool isLikeVector(int *shapeInfo, int& posOfNonUnityDim);
 
     ND4J_EXPORT int offset(int *buffer);
 
+
+#ifdef __CUDACC__
+    __host__ __device__
+#endif
+
+    ND4J_EXPORT int& extra(int *buffer);
+
 /**
  * Returns the ordering
  * for this shape information buffer
@@ -3383,6 +3390,15 @@ __host__ __device__
     INLINEDEF int offset(int *buffer) {
         return buffer[shape::shapeInfoLength(shape::rank(buffer)) - 3];
     }
+
+    #ifdef __CUDACC__
+    __host__ __device__
+#endif
+
+    INLINEDEF int& extra(int *buffer) {
+        return buffer[shape::shapeInfoLength(shape::rank(buffer)) - 3];
+    }
+
 
 /**
  * Returns the ordering
