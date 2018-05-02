@@ -9,8 +9,9 @@
 #include <array/SpaceType.h>
 #include <initializer_list>
 
-#define ARRAY_DENSE 2
-#define ARRAY_SPARSE 4
+#define ARRAY_DENSE 1
+#define ARRAY_SPARSE 2
+#define ARRAY_COMPRESSED 4
 
 #define ARRAY_CSR 16
 #define ARRAY_COO 32

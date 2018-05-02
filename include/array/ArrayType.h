@@ -5,6 +5,7 @@ namespace nd4j {
     enum ArrayType {
         DENSE = 1,
         SPARSE = 2,
+        COMPRESSED = 3,
     };
 }
 

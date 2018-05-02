@@ -4,7 +4,8 @@
 namespace nd4j {
     enum SpaceType {
         CONTINUOUS = 1,
-        QUANTIZED = 2,
+        COMPLEX = 2,
+        QUANTIZED = 3,
     };
 }
 

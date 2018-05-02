@@ -24,7 +24,7 @@ TEST_F(ArrayOptionsTests, TestShape_Basic_0) {
 
 
 TEST_F(ArrayOptionsTests, TestShape_Basic_1) {
-    shape[5] = 4;
+    shape[5] = 2;
     
 
     ASSERT_TRUE(ArrayOptions::isNewFormat(shape));
@@ -33,7 +33,7 @@ TEST_F(ArrayOptionsTests, TestShape_Basic_1) {
 
 
 TEST_F(ArrayOptionsTests, TestShape_Basic_2) {
-    shape[5] = 260;
+    shape[5] = 258;
     
     ASSERT_TRUE(ArrayOptions::isNewFormat(shape));
 

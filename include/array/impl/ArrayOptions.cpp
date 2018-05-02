@@ -42,6 +42,8 @@ namespace nd4j {
     SpaceType ArrayOptions::spaceType(int *shapeInfo) {
         if (hasPropertyBitSet(shapeInfo, ARRAY_QUANTIZED))
             return SpaceType::QUANTIZED;
+        if (hasPropertyBitSet(shapeInfo, ARRAY_COMPLEX))
+            return SpaceType::COMPLEX;
         else // by default we return continuous type here
             return SpaceType::CONTINUOUS;
     }
