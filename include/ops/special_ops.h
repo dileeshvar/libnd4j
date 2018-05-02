@@ -541,6 +541,8 @@ namespace simdOps {
 			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
 			/*kernel[0], kernel[1], stride[0], stride[1], padding[0], padding[1], 0, false*/
 
+			T zeroPadVal = (T) 0.0f;
+
 			int kH = (int)extraParams[0];
 			int kW = (int)extraParams[1];
 			int sH = (int)extraParams[2];
@@ -549,119 +551,110 @@ namespace simdOps {
 			int pW = (int)extraParams[5];
 			int dH = (int)extraParams[6];			//Dilation, height/y dimension
 			int dW = (int)extraParams[7];			//Dilation, width/x dimension
-			int kSize = kH * kW;
 
             const int *outShape  = shape::shapeOf(resultShapeBuffer);
-            const char outOrder  = shape::order(resultShapeBuffer);
             const int *outStride = shape::stride(resultShapeBuffer);
             const int *inShape = shape::shapeOf(xShapeBuffer);
             const int *inStride = shape::stride(xShapeBuffer);
 
-            const int bS = inShape[0];
-            const int iC = inShape[1];
-            const int iH = inShape[2];
-            const int iW = inShape[3];
-            const int oH = outShape[4];
-            const int oW = outShape[5];
-            const int outStride0  = outStride[0];
-            const int outStride1  = outStride[1];
-            const int outStride2  = outStride[2];
-            const int outStride3  = outStride[3];
-            const int outStride4  = outStride[4];
-            const int outStride5  = outStride[5];
-            const int inStride0   = inStride[0];
-            const int inStride1   = inStride[1];
-            const int inStride2   = inStride[2];
-            const int inStride3   = inStride[3];
+                const int bS = inShape[0];
+                const int iC = inShape[1];
+                const int iH = inShape[2];
+                const int iW = inShape[3];
+                const int oH = outShape[4];
+                const int oW = outShape[5];
+                const int outStride0  = outStride[0];
+                const int outStride1  = outStride[1];
+                const int outStride2  = outStride[2];
+                const int outStride3  = outStride[3];
+                const int outStride4  = outStride[4];
+                const int outStride5  = outStride[5];
+                const int inStride0   = inStride[0];
+                const int inStride1   = inStride[1];
+                const int inStride2   = inStride[2];
+                const int inStride3   = inStride[3];
 
-            int inRowStart, inColStart, inRow, inCol;
-            T *in0, *in1;
+                const T* in0End = dx + inStride1 * iC;
+                const int kRowEnd = -pH + kH * dH;
+                const int kColEnd = -pW + kW * dW;
+                const int oHW = oH * oW;
+                const int inRowEnd = oH * sH;
+                const int inColEnd = oW * sW;
+                
+                T *in0, *in1;
 
-            T zeroPadVal = (T) 0.0f;
+                if (shape::order(xShapeBuffer) == 'c' &&  shape::order(resultShapeBuffer) == 'c' && shape::strideDescendingCAscendingF(xShapeBuffer) && shape::strideDescendingCAscendingF(resultShapeBuffer)) {
 
-            if (shape::order(xShapeBuffer) == 'c' &&  shape::order(resultShapeBuffer) == 'c' && shape::strideDescendingCAscendingF(xShapeBuffer) && shape::strideDescendingCAscendingF(resultShapeBuffer)) {
+#pragma omp parallel for schedule(static) proc_bind(close) private(in0, in1)
+                    for (int b = 0; b < bS; b++) {
+                        T *output = result + (b * outStride0);                        
 
-#pragma omp parallel for schedule(static) proc_bind(close) private(in0, in1, inRowStart, inColStart, inRow, inCol)
-                for (int b = 0; b < bS; b++) {
-                    in0 = dx + (b * inStride0);
-                    T *output = result + (b * outStride0);
+                        for (in0 = dx + (b * inStride0); in0 < (b * inStride0) + in0End; in0 += inStride1) {
 
-                    for (int channel = 0; channel < iC; ++channel, in0 += inStride1) {
+                            for (int kRow = -pH; kRow < kRowEnd; kRow+=dH) {
 
-                        for (int kRow = 0; kRow < kH; kRow++) {
-                            inRowStart = -pH + kRow * dH;
+                                for (int kCol = -pW; kCol < kColEnd; kCol+=dW) {
 
-                            for (int kCol = 0; kCol < kW; kCol++) {
-                                inRow = inRowStart;
-                                inColStart = -pW + kCol * dW;
+                                    for (int inRow = kRow; inRow < kRow + inRowEnd; inRow+=sH) {
 
-                                for (int outRow = 0; outRow < oH; ++outRow, inRow += sH) {
-
-                                    if (!is_a_ge_zero_and_a_lt_b(inRow, iH))
-                                        for (int outCol = 0; outCol < oW; ++outCol, ++output) {
-                                            *output = zeroPadVal;
-                                        }
-                                    else {
-                                        inCol = inColStart;
-                                        in1 = in0 + inRow * inStride2;
-
-                                        for (int outCol = 0; outCol < oW; ++outCol, inCol += sW, ++output)
-                                            if (is_a_ge_zero_and_a_lt_b(inCol, iW))
-                                                *output = *(in1 + inCol * inStride3);
-                                            else
+                                        if (!is_a_ge_zero_and_a_lt_b(inRow, iH)) {
+                                            for (T* outStart = output; output < outStart + oW; ++output) 
                                                 *output = zeroPadVal;
+                                        } 
+                                        else {                                            
+                                            in1 = in0 + inRow * inStride2;
+
+                                            for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, ++output)
+                                                if (is_a_ge_zero_and_a_lt_b(inCol, iW)) 
+                                                    *output = *(in1 + inCol * inStride3);                                                
+                                                else 
+                                                    *output = zeroPadVal;                                            
+                                        }        
                                     }
                                 }
                             }
                         }
                     }
-                }
-            }
-            else {
+                } 
+                else {
+                    const int col4End = oW * outStride5;
+                    T *out0, *out1, *out2, *out3, *out4;
+#pragma omp parallel for schedule(static) proc_bind(close) private(in0, in1, out0, out1, out2, out3, out4)
+                    for (int b = 0; b < bS; b++) {                        
+                        out0  = result + b * outStride0;
 
-                T *out0, *out1, *out2, *out3, *out4;
-#pragma omp parallel for schedule(static) proc_bind(close) private(in0, in1, out0, out1, out2, out3, out4, inRowStart, inColStart, inRow, inCol)
-                for (int b = 0; b < bS; b++) {
-                    in0 = dx + (b * inStride0);
-                    out0  = result + b * outStride0;
+                        for (in0 = dx + (b * inStride0); in0 < (b * inStride0) + in0End; in0+=inStride1, out0+=outStride1) {                        
+                            out1 = out0;
 
-                    for (int channel = 0; channel < iC; ++channel, in0 += inStride1, out0+=outStride1) {
-                        out1 = out0;
+                            for (int kRow = -pH; kRow < kRowEnd; kRow+=dH, out1+=outStride2) {                            
+                                out2 = out1;
 
-                        for (int kRow = 0; kRow < kH; kRow++, out1 += outStride2) {
-                            out2 = out1;
-                            inRowStart = -pH + kRow * dH;
+                                for (int kCol = -pW; kCol < kColEnd; kCol+=dW, out2+=outStride3) {                                
+                                    out3 = out2;                                    
 
-                            for (int kCol = 0; kCol < kW; kCol++, out2 += outStride3) {
-                                out3 = out2;
-                                inRow = inRowStart;
-                                inColStart = -pW + kCol * dW;
+                                    for (int inRow = kRow; inRow < kRow + inRowEnd; inRow+=sH, out3+=outStride4) {                                    
+                                        out4 = out3;
 
-                                for (int outRow = 0; outRow < oH; ++outRow, inRow += sH, out3 += outStride4) {
-                                    out4 = out3;
+                                        if (!is_a_ge_zero_and_a_lt_b(inRow, iH)) {
+                                            for (; out4 < out3 + col4End; out4+=outStride5) 
+                                               *out4 = 0.;                                                                             
+                                        } 
+                                        else {                                            
+                                            in1 = in0 +  inRow * inStride2;
 
-                                    if (!is_a_ge_zero_and_a_lt_b(inRow, iH))
-                                        for (int outCol = 0; outCol < oW; ++outCol, out4 += outStride5) {
-                                            *out4 = zeroPadVal;
-                                        }
-                                    else {
-                                        inCol = inColStart;
-                                        in1 = in0 +  inRow * inStride2;
-
-                                        for (int outCol = 0; outCol < oW; ++outCol, inCol += sW, out4 += outStride5) {
-                                            if (is_a_ge_zero_and_a_lt_b(inCol, iW))
-                                                *out4 = *(in1 + inCol * inStride3);
-                                            else
-                                                *out4 = zeroPadVal;
-                                        }
+                                            for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, out4+=outStride5)                                            
+                                                if (is_a_ge_zero_and_a_lt_b(inCol, iW)) 
+                                                    *out4 = *(in1 + inCol * inStride3);
+                                                else 
+                                                    *out4 = zeroPadVal;                                            
+                                        }          
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-            }
+                }
 
 		}
 
