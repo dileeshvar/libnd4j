@@ -35,8 +35,30 @@ namespace nd4j {
             return nd4j::DataType::DataType_DOUBLE;
         else if (hasPropertyBitSet(shapeInfo, ARRAY_HALF))
             return nd4j::DataType::DataType_HALF;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_HALF2))
+            return nd4j::DataType ::DataType_HALF2;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_UNSIGNED)) {
+            if (hasPropertyBitSet(shapeInfo, ARRAY_CHAR))
+                return nd4j::DataType ::DataType_UINT8;
+            else if (hasPropertyBitSet(shapeInfo, ARRAY_SHORT))
+                return nd4j::DataType ::DataType_UINT16;
+            else if (hasPropertyBitSet(shapeInfo, ARRAY_INT))
+                return nd4j::DataType ::DataType_UINT32;
+            else if (hasPropertyBitSet(shapeInfo, ARRAY_LONG))
+                return nd4j::DataType ::DataType_UINT64;
+            else
+                throw std::runtime_error("Bad datatype");
+        }
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_CHAR))
+            return nd4j::DataType ::DataType_INT8;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_SHORT))
+            return nd4j::DataType ::DataType_INT16;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_INT))
+            return nd4j::DataType ::DataType_INT32;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_LONG))
+            return nd4j::DataType ::DataType_INT64;
         else
-            return nd4j::DataType::DataType_INHERIT;
+            throw std::runtime_error("Bad datatype");
     }
 
     SpaceType ArrayOptions::spaceType(int *shapeInfo) {
@@ -61,10 +83,26 @@ namespace nd4j {
         return hasPropertyBitSet(shapeInfo, property);
     }
 
-    bool ArrayOptions::setPropertyBit(int *shapeInfo, int property) {
+    void ArrayOptions::setPropertyBit(int *shapeInfo, int property) {
         shape::extra(shapeInfo) |= property;
+    }
 
-        return hasPropertyBitSet(shapeInfo, property);
+    void ArrayOptions::unsetPropertyBit(int *shapeInfo, int property) {
+        shape::extra(shapeInfo) &= property;
+    }
+
+    SparseType ArrayOptions::sparseType(int *shapeInfo) {
+        if (!isSparseArray(shapeInfo))
+            throw std::runtime_error("Not a sparse array");
+
+        if (hasPropertyBitSet(shapeInfo, ARRAY_CSC))
+            return SparseType::CSC;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_CSR))
+            return SparseType::CSR;
+        else if (hasPropertyBitSet(shapeInfo, ARRAY_COO))
+            return SparseType::COO;
+        else
+            return SparseType::LIL;
     }
 
     void ArrayOptions::setPropertyBits(int *shapeInfo, std::initializer_list<int> properties) {

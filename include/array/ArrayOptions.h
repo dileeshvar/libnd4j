@@ -1,3 +1,7 @@
+//
+// @author raver119@gmail.com
+//
+
 #ifndef ND4J_ARRAY_OPTIONS_H
 #define ND4J_ARRAY_OPTIONS_H
 
@@ -7,23 +11,24 @@
 #include <array/DataType.h>
 #include <array/ArrayType.h>
 #include <array/SpaceType.h>
+#include <array/SparseType.h>
 #include <initializer_list>
 
-#define ARRAY_DENSE 1
+
 #define ARRAY_SPARSE 2
 #define ARRAY_COMPRESSED 4
 
 #define ARRAY_CSR 16
-#define ARRAY_COO 32
+#define ARRAY_CSC 32
+#define ARRAY_COO 64
 
-// reals
-#define ARRAY_CONTINUOUS 256
 
 // complex values
 #define ARRAY_COMPLEX 512
 
 // quantized values
 #define ARRAY_QUANTIZED 1024
+
 
 //  16 bit float
 #define ARRAY_HALF 4096
@@ -52,6 +57,7 @@
 // flag for extras 
 #define ARRAY_EXTRAS 2097152
 
+
 // flag for signed/unsigned integers
 #define ARRAY_UNSIGNED 8388608
 
@@ -63,7 +69,8 @@ namespace nd4j {
         static bool isNewFormat(int *shapeInfo);
         static bool hasPropertyBitSet(int *shapeInfo, int property);
         static bool togglePropertyBit(int *shapeInfo, int property);
-        static bool setPropertyBit(int *shapeInfo, int property);
+        static void unsetPropertyBit(int *shapeInfo, int property);
+        static void setPropertyBit(int *shapeInfo, int property);
         static void setPropertyBits(int *shapeInfo, std::initializer_list<int> properties);
 
         static bool isSparseArray(int *shapeInfo);
@@ -72,6 +79,7 @@ namespace nd4j {
         static nd4j::DataType dataType(int *shapeInfo);
         static SpaceType spaceType(int *shapeInfo);
         static ArrayType arrayType(int *shapeInfo);
+        static SparseType sparseType(int *shapeInfo);
 
         static bool hasExtraProperties(int *shapeInfo);
     };

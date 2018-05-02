@@ -1,3 +1,7 @@
+//
+// @author raver119@gmail.com
+//
+
 #ifndef ND4J_ARRAY_TYPE_H
 #define ND4J_ARRAY_TYPE_H
 

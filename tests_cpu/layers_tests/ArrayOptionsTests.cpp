@@ -44,14 +44,12 @@ TEST_F(ArrayOptionsTests, TestShape_Basic_2) {
 TEST_F(ArrayOptionsTests, TestShape_Basic_3) {
     ASSERT_EQ(0, shape::extra(shape));
     
-    ArrayOptions::setPropertyBit(shape, ARRAY_CONTINUOUS);
-
-    ASSERT_EQ(ARRAY_CONTINUOUS, shape::extra(shape));
+    ASSERT_EQ(SpaceType::CONTINUOUS, ArrayOptions::spaceType(shape));
 }
 
 TEST_F(ArrayOptionsTests, TestShape_Basic_4) {
 
-    ArrayOptions::setPropertyBits(shape, {ARRAY_DENSE, ARRAY_HALF, ARRAY_QUANTIZED});
+    ArrayOptions::setPropertyBits(shape, {ARRAY_HALF, ARRAY_QUANTIZED});
 
     ASSERT_FALSE(ArrayOptions::isSparseArray(shape));
     ASSERT_TRUE(nd4j::DataType::DataType_HALF == ArrayOptions::dataType(shape));
@@ -59,3 +57,10 @@ TEST_F(ArrayOptionsTests, TestShape_Basic_4) {
     ASSERT_EQ(nd4j::SpaceType::QUANTIZED, ArrayOptions::spaceType(shape));
 }
 
+TEST_F(ArrayOptionsTests, TestShape_Basic_5) {
+    ArrayOptions::setPropertyBits(shape, {ARRAY_SPARSE, ARRAY_INT, ARRAY_CSC});
+
+    ASSERT_TRUE(ArrayOptions::isSparseArray(shape));
+    ASSERT_TRUE(nd4j::DataType::DataType_INT32 == ArrayOptions::dataType(shape));
+    ASSERT_EQ(nd4j::SparseType::CSC, ArrayOptions::sparseType(shape));
+}
