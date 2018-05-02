@@ -16,21 +16,43 @@
 #define ARRAY_CSR 16
 #define ARRAY_COO 32
 
+// reals
 #define ARRAY_CONTINUOUS 256
+
+// complex values
 #define ARRAY_COMPLEX 512
+
+// quantized values
 #define ARRAY_QUANTIZED 1024
 
-#define ARRAY_FLOAT 4096
-#define ARRAY_DOUBLE 8192
-#define ARRAY_HALF 16384
-#define ARRAY_HALF2 32768
+//  16 bit float
+#define ARRAY_HALF 4096
+
+// 16 bit float that uses 32 bits of memort (heym, CUDA!)
+#define ARRAY_HALF2 8192
+
+// regular 32 bit float
+#define ARRAY_FLOAT 16384
+
+// regular 64 biy float
+#define ARRAY_DOUBLE 32768
+
+// 8 bit integer
 #define ARRAY_CHAR 65536
+
+// 16 bit integer
 #define ARRAY_SHORT 131072
+
+// 32 bit integer
 #define ARRAY_INT 262144
+
+// 64 bit integer
 #define ARRAY_LONG 524288
 
+// flag for extras 
 #define ARRAY_EXTRAS 2097152
 
+// flag for signed/unsigned integers
 #define ARRAY_UNSIGNED 8388608
 
 
