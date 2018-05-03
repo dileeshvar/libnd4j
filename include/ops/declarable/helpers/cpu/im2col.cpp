@@ -92,13 +92,13 @@ namespace nd4j {
                         for (in0 = in + (b * inStride0); in0 < (b * inStride0) + in0End; in0+=inStride1, out0+=outStride1) {                        
                             out1 = out0;
 
-                            for (int kRow = -pH; kRow < kRowEnd; kRow+=dH, out1+=outStride2) {                            
+                            for (int kRow = -pH; kRow < kRowEnd; kRow+=dH, out1+=outStride2) {
                                 out2 = out1;
 
-                                for (int kCol = -pW; kCol < kColEnd; kCol+=dW, out2+=outStride3) {                                
+                                for (int kCol = -pW; kCol < kColEnd; kCol+=dW, out2+=outStride3) {
                                     out3 = out2;                                    
 
-                                    for (int inRow = kRow; inRow < kRow + inRowEnd; inRow+=sH, out3+=outStride4) {                                    
+                                    for (int inRow = kRow; inRow < kRow + inRowEnd; inRow+=sH, out3+=outStride4) {
                                         out4 = out3;
 
                                         if (!is_a_ge_zero_and_a_lt_b(inRow, iH)) {
@@ -108,7 +108,7 @@ namespace nd4j {
                                         else {                                            
                                             in1 = in0 +  inRow * inStride2;
 
-                                            for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, out4+=outStride5)                                            
+                                            for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, out4+=outStride5)
                                                 if (is_a_ge_zero_and_a_lt_b(inCol, iW)) 
                                                     *out4 = *(in1 + inCol * inStride3);
                                                 else 
