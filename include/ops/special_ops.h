@@ -1058,15 +1058,19 @@ namespace simdOps {
                                         else {                                            
                                             out1 = out0 + inRow * outStride2;
 
-                                            // if (channel == iC && is_a_ge_zero_and_a_lt_b(inCol, iW))
-                                            //     *(out1 + inCol * outStride3) = (T) 0.0f;
-
-                                            for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, input += inStride5) {                                            
-                                                if (is_a_ge_zero_and_a_lt_b(inCol, iW)) {
-                                                    out2 = out1 + inCol * outStride3;
-                                                    *out2 += *input;                                                    
-                                                }
+                                            if(kRow == -pH && kCol == -pW) { 		// first pass
+                                            	for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, input += inStride5)
+                                                	if (is_a_ge_zero_and_a_lt_b(inCol, iW))
+                                                    	*(out1 + inCol * outStride3) = *input;
                                             }
+                                            else {
+                                            	for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, input += inStride5) {                                            
+                                                	if (is_a_ge_zero_and_a_lt_b(inCol, iW)) {
+                                                    	out2 = out1 + inCol * outStride3;
+                                                    	*out2 += *input;                                                    
+                                                	}
+                                            	}
+                                        	}	
                                         }
                                     }
                                 }
@@ -1099,14 +1103,18 @@ namespace simdOps {
                                         else {                                            
                                             out1 = out0 + inRow * outStride2;
 
-                                            // if (channel == iC && is_a_ge_zero_and_a_lt_b(inCol, iW))
-                                            //     *(out1 + inCol * outStride3) = (T) 0.0f;
-
-                                            for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, in4+=inStride5) {                                            
-                                                if (is_a_ge_zero_and_a_lt_b(inCol, iW)) {
-                                                    out2 = out1 + inCol * outStride3;
-                                                    *out2 += *in4;
-                                                }
+                                            if(kRow == -pH && kCol == -pW) { 		// first pass
+                                            	for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, in4+=inStride5) 
+                                                	if (is_a_ge_zero_and_a_lt_b(inCol, iW)) 
+                                                    	*(out1 + inCol * outStride3) = *in4;
+                                            }
+                                            else {
+                                            	for (int inCol = kCol; inCol < kCol + inColEnd; inCol+=sW, in4+=inStride5) {                                            
+                                                	if (is_a_ge_zero_and_a_lt_b(inCol, iW)) {
+                                                    	out2 = out1 + inCol * outStride3;
+                                                    	*out2 += *in4;
+                                                	}
+                                            	}
                                             }
                                         }
                                     }
@@ -1115,7 +1123,6 @@ namespace simdOps {
                         }
                     }
                 }
-
 		}
 
 		op_def static T op(T d1, T *params) {

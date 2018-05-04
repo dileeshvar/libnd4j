@@ -48,33 +48,36 @@ namespace nd4j {
                 T *im0, *im1, *im2;
 
                 if (shape::order(colShapeInfo) == 'c' &&  shape::order(imShapeInfo) == 'c' && shape::strideDescendingCAscendingF(colShapeInfo) && shape::strideDescendingCAscendingF(imShapeInfo)) {
-
+                    int i = 0;
 #pragma omp parallel for schedule(guided) proc_bind(close) private(im0, im1, im2)
                     for (int b = 0; b < bS; b++) {
                         T *col0 = col + (b * colStride0);
                         
                         for (im0 = im + (b * imStride0); im0 < (b * imStride0) + im0End; im0 += imStride1) {
-
                             for (int kRow = -pH; kRow < kRowEnd; kRow+=dH) {                               
                                 
                                 for (int kCol = -pW; kCol < kColEnd; kCol+=dW) {
                 
-                                    for (int colRow = kRow; colRow < kRow + colRowEnd; colRow+=sH) {                                    
-                                        
+                                    for (int colRow = kRow; colRow < kRow + colRowEnd; colRow+=sH) {                                                                            
+
                                         if (!is_a_ge_zero_and_a_lt_b(colRow, iH)) {
                                             col0 += colStepOW;
                                         } 
                                         else {                                            
-                                            im1 = im0 + colRow * imStride2;
-
-                                            // if (channel == iC && is_a_ge_zero_and_a_lt_b(colCol, iW))
-                                            //     *(im1 + colCol * imStride3) = (T) 0.0f;
-
-                                            for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col0+=colStride5) {
-                                                if (is_a_ge_zero_and_a_lt_b(colCol, iW)) {
-                                                    im2 = im1 + colCol * imStride3;
-                                                    *im2 += *col0;                                                    
-                                                }
+                                            im1 = im0 + colRow * imStride2;                                            
+                                            
+                                            if(kRow == -pH && kCol == -pW) {        // first pass
+                                                for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col0+=colStride5) 
+                                                    if (is_a_ge_zero_and_a_lt_b(colCol, iW)) 
+                                                        *(im1 + colCol * imStride3) = *col0;                                                                                                                                                        
+                                            }
+                                            else {
+                                                for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col0+=colStride5) {
+                                                    if (is_a_ge_zero_and_a_lt_b(colCol, iW)) {
+                                                        im2 = im1 + colCol * imStride3;                                                    
+                                                        *im2 += *col0;                                                    
+                                                    }
+                                                }                                                   
                                             }
                                         }
                                     }
@@ -108,13 +111,17 @@ namespace nd4j {
                                         else {                                            
                                             im1 = im0 + colRow * imStride2;
 
-                                            // if (channel == iC && is_a_ge_zero_and_a_lt_b(colCol, iW))
-                                            //     *(im1 + colCol * imStride3) = (T) 0.0f;
-
-                                            for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col4+=colStride5) {                                            
-                                                if (is_a_ge_zero_and_a_lt_b(colCol, iW)) {
-                                                    im2 = im1 + colCol * imStride3;
-                                                    *im2 += *col4;
+                                            if(kRow == -pH && kCol == -pW) {        // first pass
+                                                for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col4+=colStride5) 
+                                                   if (is_a_ge_zero_and_a_lt_b(colCol, iW)) 
+                                                        *(im1 + colCol * imStride3) = *col4;
+                                            }
+                                            else { 
+                                                for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col4+=colStride5) {
+                                                   if (is_a_ge_zero_and_a_lt_b(colCol, iW)) {
+                                                        im2 = im1 + colCol * imStride3;
+                                                        *im2 += *col4;                                                    
+                                                    }
                                                 }
                                             }
                                         }

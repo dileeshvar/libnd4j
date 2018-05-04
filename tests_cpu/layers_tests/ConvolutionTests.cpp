@@ -14,6 +14,7 @@
 #include <NDArrayFactory.h>
 #include <ops/declarable/CustomOperations.h>
 #include <ops/declarable/generic/helpers/convolutions.h>
+#include <ops/declarable/helpers/col2im.h>
 
 using namespace nd4j;
 using namespace nd4j::graph;
@@ -986,7 +987,7 @@ TEST_F(ConvolutionTests, Test_Conv1D_ff_2) {
 TEST_F(ConvolutionTests, Test_Conv2D_4_1) {
     NDArray<double> input('c', {1, 1, 1, 4});
     NDArray<double> weights('c', {4, 1, 1, 1});
-    NDArray<double> exp('c', {1, 4, 1, 4}, {2.000000, 4.000000, 6.000000, 8.000000, 2.000000, 4.000000, 6.000000, 8.000000, 2.000000, 4.000000, 6.000000, 8.000000, 2.000000, 4.000000, 6.000000, 8.000000});
+    NDArray<double> exp('c', {1, 4, 1, 4}, {2., 4., 6., 8., 2., 4., 6., 8., 2., 4., 6., 8., 2., 4., 6., 8.});
 
     weights.assign(2.0);
     NDArrayFactory<double>::linspace(1, input);
@@ -2093,6 +2094,27 @@ TEST_F(ConvolutionTests, vol2col_test2) {
 
     ASSERT_TRUE(columns.equalsTo(columnsExpected));    
 }
+
+//////////////////////////////////////////////////////////////////////
+TEST_F(ConvolutionTests, col2im_test1) {
+
+    int bS=2, iH=2,iW=2,  iC=2,oC=2, kH=2,kW=2,  sD=1,sH=1,sW=1,  pD=0,pH=0,pW=0,  dD=1,dH=1,dW=1;
+    int       oH=2,oW=2;
+    
+    NDArray<float> image ('c', {bS, iC, iH, iW});
+    image = -2.;
+    
+    NDArray<float> columns('c', {bS, iC, kH, kW, oH, oW});
+    nd4j::NDArrayFactory<float>::linspace(1, columns);
+
+    NDArray<float> imageExpected('c', {bS, iC, iH, iW}, {1., 7., 12., 34., 17., 39., 44., 98., 33., 71., 76., 162., 49., 103., 108., 226.});
+
+    LaunchContext ctx;
+    nd4j::ops::helpers::_col2im<float>(ctx, image.getBuffer(), columns.getBuffer(), image.getShapeInfo(), columns.getShapeInfo(), sH, sW, pH, pW, iH, iW, dH, dW);    
+    
+    ASSERT_TRUE(image.equalsTo(imageExpected));    
+}
+
 
 #endif //LIBND4J_CONVOLUTIONTESTS_H
 

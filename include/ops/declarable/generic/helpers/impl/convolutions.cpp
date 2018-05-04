@@ -1618,10 +1618,17 @@ void ConvolutionUtils<T>::col2vol(NDArray<T>& columns, NDArray<T>& volume, const
                                         else {                                            
                                             vol2 = vol1 + volRow * volStride3;
 
-                                            for (int volCol = kCol; volCol < kCol + volColEnd; volCol+=sW, col0+=colStride7) {
-                                                if (static_cast<unsigned>(volCol) < static_cast<unsigned>(iW)) {
-                                                    vol3 = vol2 + volCol * volStride4;
-                                                    *vol3 += *col0;
+                                            if(kDep == -pD &&  kRow == -pH && kCol == -pW) {        // first pass
+                                                for (int volCol = kCol; volCol < kCol + volColEnd; volCol+=sW, col0+=colStride7) 
+                                                    if (static_cast<unsigned>(volCol) < static_cast<unsigned>(iW)) 
+                                                        *(vol2 + volCol * volStride4) = *col0;                                                        
+                                            }
+                                            else {
+                                                for (int volCol = kCol; volCol < kCol + volColEnd; volCol+=sW, col0+=colStride7) {
+                                                    if (static_cast<unsigned>(volCol) < static_cast<unsigned>(iW)) {
+                                                        vol3 = vol2 + volCol * volStride4;
+                                                        *vol3 += *col0;
+                                                    }
                                                 }
                                             }
                                         }
@@ -1672,10 +1679,17 @@ void ConvolutionUtils<T>::col2vol(NDArray<T>& columns, NDArray<T>& volume, const
                                         else {                                            
                                             vol2 = vol1 + volRow * volStride3;
 
-                                            for (int volCol = kCol; volCol < kCol + volColEnd; volCol+=sW, col6+=colStride7) {
-                                                if (static_cast<unsigned>(volCol) < static_cast<unsigned>(iW)) {
-                                                    vol3 = vol2 + volCol * volStride4;
-                                                    *vol3 += *col6;   
+                                            if(kDep == -pD &&  kRow == -pH && kCol == -pW) {        // first pass
+                                                for (int volCol = kCol; volCol < kCol + volColEnd; volCol+=sW, col6+=colStride7) 
+                                                    if (static_cast<unsigned>(volCol) < static_cast<unsigned>(iW)) 
+                                                        *(vol2 + volCol * volStride4) = *col6;
+                                            }
+                                            else {
+                                                for (int volCol = kCol; volCol < kCol + volColEnd; volCol+=sW, col6+=colStride7) {
+                                                    if (static_cast<unsigned>(volCol) < static_cast<unsigned>(iW)) {
+                                                        vol3 = vol2 + volCol * volStride4;
+                                                        *vol3 += *col6;   
+                                                    }
                                                 }
                                             }
                                         }        
