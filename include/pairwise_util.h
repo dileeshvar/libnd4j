@@ -343,12 +343,12 @@ template <typename T>
 #ifdef __CUDACC__
 __host__ __device__
 #endif
-int PrepareTwoRawArrayIter(int ndim, int *shape,
-                           T *dataA, int *stridesA,
-                           T *dataB, int *stridesB,
-                           int *out_ndim, int *outShape,
-                           T **out_dataA, int *outStridesA,
-                           T **out_dataB, int *outStridesB) {
+int PrepareTwoRawArrayIter(int ndim, Nd4jLong *shape,
+                           T *dataA, Nd4jLong *stridesA,
+                           T *dataB, Nd4jLong *stridesB,
+                           int *out_ndim, Nd4jLong *outShape,
+                           T **out_dataA, Nd4jLong *outStridesA,
+                           T **out_dataB, Nd4jLong *outStridesB) {
     int i;
 
 /* Sort the axes based on the destination strides */
@@ -360,9 +360,9 @@ int PrepareTwoRawArrayIter(int ndim, int *shape,
 
 /* Reverse any negative strides of operand A */
     for (i = 0; i < ndim; i++) {
-        int stride_entryA = outStridesA[i];
-        int stride_entryB = outStridesB[i];
-        int shape_entry = outShape[i];
+        Nd4jLong stride_entryA = outStridesA[i];
+        Nd4jLong stride_entryB = outStridesB[i];
+        Nd4jLong shape_entry = outShape[i];
 
         if (stride_entryA < 0) {
             dataA += stride_entryA * (shape_entry - 1);

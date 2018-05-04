@@ -349,7 +349,7 @@ void NativeOpExcutioner<T>::execTransform(int opNum, T *dx, Nd4jLong *xShapeInfo
 
 ////////////////////////////////////////////////////////////////////////
 template<typename T>
-void NativeOpExcutioner<T>::execAggregate(int opNum, T **arguments, Nd4jLong numArguments, Nd4jLong **shapeArguments, Nd4jLong numShapeArguments, Nd4jLong *indexArguments, Nd4jLong numIndexArguments, Nd4jLong **intArrays, Nd4jLong numIntArrays, T *realArguments, Nd4jLong numRealArguments) {
+void NativeOpExcutioner<T>::execAggregate(int opNum, T **arguments, int numArguments, Nd4jLong **shapeArguments, int numShapeArguments, int *indexArguments, int numIndexArguments, int **intArrays, int numIntArrays, T *realArguments, int numRealArguments) {
     functions::aggregate::AggregatedFunction<T>::exec(opNum, arguments, numArguments, shapeArguments, numShapeArguments, indexArguments, numIndexArguments, intArrays, numIntArrays, realArguments, numRealArguments);
 }
 

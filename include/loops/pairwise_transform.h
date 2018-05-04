@@ -45,25 +45,25 @@ namespace functions {
 
 #ifdef __CUDACC__
 
-            static __host__ void execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, int xStride, T *y, int yStride, T *result, int resultStride, T *extraParams, Nd4jLong n);
+            static __host__ void execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, Nd4jLong xStride, T *y, Nd4jLong yStride, T *result, Nd4jLong resultStride, T *extraParams, Nd4jLong n);
 
-            static __host__ void execudaCudaShaped(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, int *xShapeInfo, T *y, int *yShapeInfo, T *result, int *resultShapeInfo, T *extraParams);
+            static __host__ void execudaCudaShaped(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, Nd4jLong *xShapeInfo, T *y, Nd4jLong *yShapeInfo, T *result, Nd4jLong *resultShapeInfo, T *extraParams);
 
-            static __device__ void transformCuda(const int opNum, Nd4jLong n, T *dx, T *y, int incx, int incy, T *extraParams, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+            static __device__ void transformCuda(const int opNum, Nd4jLong n, T *dx, T *y, Nd4jLong incx, Nd4jLong incy, T *extraParams, T *result, Nd4jLong incz, int *allocationPointer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo);
 
-            static __device__ void transformCuda(const int opNum, T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+            static __device__ void transformCuda(const int opNum, T *dx, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *result, Nd4jLong *resultShapeBuffer, T *extraParams, int *allocationPointer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo);
 
-            static __device__ void transformCuda(const int opNum, T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *indexes, int *yIndexes, int *resultIndexes, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+            static __device__ void transformCuda(const int opNum, T *dx, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *result, Nd4jLong *resultShapeBuffer, T *extraParams, Nd4jLong *indexes, Nd4jLong *yIndexes, Nd4jLong *resultIndexes, int *allocationPointer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo);
 
-
-            template<typename OpType>
-	        static __device__ void transformCuda(T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
 
             template<typename OpType>
-	        static __device__ void transformCuda(Nd4jLong n, T *dx, T *dy, int incx, int incy, T *params, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+	        static __device__ void transformCuda(T *dx, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *result, Nd4jLong *resultShapeBuffer, T *extraParams, int *allocationPointer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo);
 
             template<typename OpType>
-	        static __device__ void transform(T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *indexes, int *yIndexes, int *resultIndexes,  int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+	        static __device__ void transformCuda(Nd4jLong n, T *dx, T *dy, Nd4jLong incx, Nd4jLong incy, T *params, T *result, Nd4jLong incz, int *allocationPointer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo);
+
+            template<typename OpType>
+	        static __device__ void transform(T *dx, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *result, Nd4jLong *resultShapeBuffer, T *extraParams, Nd4jLong *indexes, Nd4jLong *yIndexes, Nd4jLong *resultIndexes,  int *allocationPointer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo);
 
 
 #endif
@@ -71,15 +71,15 @@ namespace functions {
 			static void exec(
 				const int opNum,
 				T *dx,
-				int *xShapeBuffer,
+				Nd4jLong *xShapeBuffer,
 				T *y,
-				int *yShapeBuffer,
+				Nd4jLong *yShapeBuffer,
 				T *result,
-				int *resultShapeBuffer,
+				Nd4jLong *resultShapeBuffer,
 				T *extraParams,
-				int *indexes,
-				int *yIndexes,
-				int *resultIndexes) {
+				Nd4jLong *indexes,
+				Nd4jLong *yIndexes,
+				Nd4jLong *resultIndexes) {
                             DISPATCH_BY_OPNUM(exec, PARAMS(dx,
                                                            xShapeBuffer,
                                                            y,
@@ -94,11 +94,11 @@ namespace functions {
 			static void exec(
 				const int opNum,
 				T *dx,
-				int *xShapeBuffer,
+				Nd4jLong *xShapeBuffer,
 				T *y,
-				int *yShapeBuffer,
+				Nd4jLong *yShapeBuffer,
 				T *result,
-				int *resultShapeBuffer,
+				Nd4jLong *resultShapeBuffer,
 				T *extraParams) {
 				DISPATCH_BY_OPNUM(exec, PARAMS(dx,
                                                xShapeBuffer,
@@ -139,9 +139,9 @@ namespace functions {
                     T *result,
                     Nd4jLong* resultShapeBuffer,
                     T *extraParams,
-                    int *indexes,
-                    int *yIndexes,
-                    int *resultIndexes) {
+                    Nd4jLong *indexes,
+                    Nd4jLong *yIndexes,
+                    Nd4jLong *resultIndexes) {
                 Nd4jLong n = shape::length(xShapeBuffer);
 
 #pragma omp parallel for simd schedule(guided) proc_bind(AFFINITY) default(shared)
@@ -160,10 +160,10 @@ namespace functions {
                     T *result,
                     Nd4jLong* resultShapeBuffer,
                     T *extraParams) {
-                Nd4jLong n = shape::length(xShapeBuffer);
-                int xElementWiseStride = shape::elementWiseStride(xShapeBuffer);
-                int yElementWiseStride = shape::elementWiseStride(yShapeBuffer);
-                int resultElementWiseStride = shape::elementWiseStride(resultShapeBuffer);
+                auto n = shape::length(xShapeBuffer);
+                auto xElementWiseStride = shape::elementWiseStride(xShapeBuffer);
+                auto yElementWiseStride = shape::elementWiseStride(yShapeBuffer);
+                auto resultElementWiseStride = shape::elementWiseStride(resultShapeBuffer);
 
                 if (shape::isScalar(yShapeBuffer)) {
                     if (xElementWiseStride == 1 && resultElementWiseStride == 1) {

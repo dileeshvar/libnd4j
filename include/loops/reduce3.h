@@ -153,12 +153,12 @@ template<typename OpType>
 template<typename OpType>
 			static inline __device__ void execScalarCuda(
 					T *dx,
-					int *xShapeInfo,
+					Nd4jLong *xShapeInfo,
 					T *dy,
-					int *yShapeInfo,
+					Nd4jLong *yShapeInfo,
 					T *extraParams,
 					T *result,
-					int *resultShapeInfo, int *allocationPointer, T *reductionBuffer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo) {
+					int *resultShapeInfo, int *allocationPointer, T *reductionBuffer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo) {
 
 
 //		SharedMemory <T> val;
@@ -306,20 +306,20 @@ template<typename OpType>
 			__device__
 			static inline void transformAll(
 					T *dx,
-					int *xShapeInfo,
+					Nd4jLong *xShapeInfo,
 					T *dy,
-					int *yShapeInfo,
+					Nd4jLong *yShapeInfo,
 					T *extraParams,
 					T *result,
-					int *resultShapeInfo,
+					Nd4jLong *resultShapeInfo,
 					int *dimension,
 					int dimensionLength,
 					int postProcessOrNot,
 					int *allocationPointer,
 					UnifiedSharedMemory *manager,
-					int *xTadShapeInfo,
+					Nd4jLong *xTadShapeInfo,
 					Nd4jLong *xOffsets,
-					int *yTadShapeInfo,
+					Nd4jLong *yTadShapeInfo,
 					Nd4jLong *yOffsets) {
 
                         // initialize partials first
@@ -461,20 +461,20 @@ template<typename OpType>
 			__device__
 			static inline void transform(
 					T *dx,
-					int *xShapeInfo,
+					Nd4jLong *xShapeInfo,
 					T *dy,
-					int *yShapeInfo,
+					Nd4jLong *yShapeInfo,
 					T *extraParams,
 					T *result,
-					int *resultShapeInfo,
+					Nd4jLong *resultShapeInfo,
 					int *dimension,
 					int dimensionLength,
 					int postProcessOrNot,
 					int *allocationPointer,
 					UnifiedSharedMemory *manager,
-					int *tadOnlyShapeInfo,
+					Nd4jLong *tadOnlyShapeInfo,
 					Nd4jLong *tadOffsets,
-					int *yTadOnlyShapeInfo,
+					Nd4jLong *yTadOnlyShapeInfo,
 					Nd4jLong *yTadOffsets) {
 				/**
                  * Gpu information for the problem
@@ -693,20 +693,20 @@ template<typename OpType>
 			static inline void exec(
 				const int opNum,
 				T *dx,
-				int *xShapeInfo,
+				Nd4jLong *xShapeInfo,
 				T *dy,
-				int *yShapeInfo,
+				Nd4jLong *yShapeInfo,
 				T *extraParams,
 				T *result,
-				int *resultShapeInfo,
+				Nd4jLong *resultShapeInfo,
 				int *dimension,
 				int dimensionLength,
 				int postProcessOrNot,
 				int *allocationPointer,
 				UnifiedSharedMemory *manager,
-				int *tadOnlyShapeInfo,
+				Nd4jLong *tadOnlyShapeInfo,
 				Nd4jLong *tadOffsets,
-				int *yTadOnlyShapeInfo,
+				Nd4jLong *yTadOnlyShapeInfo,
 				Nd4jLong *yTadOffsets) {
                             DISPATCH_BY_OPNUM(transform, PARAMS(dx, xShapeInfo, dy, yShapeInfo, extraParams, result, resultShapeInfo, dimension, dimensionLength, postProcessOrNot, allocationPointer, manager, tadOnlyShapeInfo, tadOffsets, yTadOnlyShapeInfo, yTadOffsets), REDUCE3_OPS);
 			}
@@ -715,20 +715,20 @@ template<typename OpType>
 			static inline void execAllCuda(
 				const int opNum,
 				T *dx,
-				int *xShapeInfo,
+				Nd4jLong *xShapeInfo,
 				T *dy,
-				int *yShapeInfo,
+				Nd4jLong *yShapeInfo,
 				T *extraParams,
 				T *result,
-				int *resultShapeInfo,
+				Nd4jLong *resultShapeInfo,
 				int *dimension,
 				int dimensionLength,
 				int postProcessOrNot,
 				int *allocationPointer,
 				UnifiedSharedMemory *manager,
-				int *tadOnlyShapeInfo,
+				Nd4jLong *tadOnlyShapeInfo,
 				Nd4jLong *tadOffsets,
-				int *yTadOnlyShapeInfo,
+				Nd4jLong *yTadOnlyShapeInfo,
 				Nd4jLong *yTadOffsets) {
                             DISPATCH_BY_OPNUM(transformAll, PARAMS(dx, xShapeInfo, dy, yShapeInfo, extraParams, result, resultShapeInfo, dimension, dimensionLength, postProcessOrNot, allocationPointer, manager, tadOnlyShapeInfo, tadOffsets, yTadOnlyShapeInfo, yTadOffsets), REDUCE3_OPS);
 			}
@@ -738,16 +738,16 @@ template<typename OpType>
 			static inline void execScalarCuda(
 				const int opNum,
 				T *dx,
-				int *xShapeInfo,
+				Nd4jLong *xShapeInfo,
 				T *dy,
-				int *yShapeInfo,
+				Nd4jLong *yShapeInfo,
 				T *extraParams,
 				T *result,
-				int *resultShapeInfo,
+				Nd4jLong *resultShapeInfo,
 				int * allocationPointer,
 				T *reductionBuffer,
 				UnifiedSharedMemory *manager,
-				int *tadOnlyShapeInfo) {
+				Nd4jLong *tadOnlyShapeInfo) {
                             DISPATCH_BY_OPNUM(execScalarCuda, PARAMS(dx, xShapeInfo, dy, yShapeInfo, extraParams, result, resultShapeInfo, allocationPointer, reductionBuffer, manager, tadOnlyShapeInfo), REDUCE3_OPS);
 			}
 #endif
@@ -760,10 +760,10 @@ template<typename OpType>
             static T execScalar(
                     const int opNum,
                     T *x,
-                    int *xShapeInfo,
+                    Nd4jLong *xShapeInfo,
                     T *extraParamsVals,
                     T *y,
-                    int *yShapeInfo) {
+                    Nd4jLong *yShapeInfo) {
                 RETURNING_DISPATCH_BY_OPNUM(execScalar, PARAMS(x,
                                                                xShapeInfo,
                                                                extraParamsVals,
@@ -772,12 +772,12 @@ template<typename OpType>
             }
 
             static void exec( const int opNum,
-                              T *x, int *xShapeInfo,
+                              T *x, Nd4jLong *xShapeInfo,
                               T *extraParamsVals,
                               T *y,
-                              int *yShapeInfo,
+                              Nd4jLong *yShapeInfo,
                               T *result,
-                              int *resultShapeInfoBuffer,
+                              Nd4jLong *resultShapeInfoBuffer,
                               int *dimension,
                               int dimensionLength) {
                 DISPATCH_BY_OPNUM(exec, PARAMS(x,
@@ -792,14 +792,14 @@ template<typename OpType>
 
 
             static void exec( const int opNum,
-                              T *x, int *xShapeInfo,
+                              T *x, Nd4jLong *xShapeInfo,
                               T *extraParamsVals,
                               T *y,
-                              int *yShapeInfo,
+                              Nd4jLong *yShapeInfo,
                               T *result,
-                              int *resultShapeInfoBuffer,
+                              Nd4jLong *resultShapeInfoBuffer,
                               int *dimension,
-                              int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+                              int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
                 DISPATCH_BY_OPNUM(exec, PARAMS(x,
                                                xShapeInfo,
                                                extraParamsVals,
@@ -812,16 +812,16 @@ template<typename OpType>
 
             static void execAll( const int opNum,
                                  T *x,
-                                 int *xShapeInfo,
+                                 Nd4jLong *xShapeInfo,
                                  T *extraParamsVals,
                                  T *y,
-                                 int *yShapeInfo,
+                                 Nd4jLong *yShapeInfo,
                                  T *result,
-                                 int *resultShapeInfoBuffer,
+                                 Nd4jLong *resultShapeInfoBuffer,
                                  int *dimension,
                                  int dimensionLength,
-                                 int *xTadShapeInfo, Nd4jLong *xOffsets,
-                                 int *yTadShapeInfo, Nd4jLong *yOffsets) {
+                                 Nd4jLong *xTadShapeInfo, Nd4jLong *xOffsets,
+                                 Nd4jLong *yTadShapeInfo, Nd4jLong *yOffsets) {
                 DISPATCH_BY_OPNUM(execAll, PARAMS(x,
                                                   xShapeInfo,
                                                   extraParamsVals,

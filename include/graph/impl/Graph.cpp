@@ -34,8 +34,8 @@ namespace nd4j {
             Nd4jLong result = 0L;
             Nd4jLong lastStep = 0L;
 
-            std::vector<int *> shapes;
-            std::map<std::pair<int,int>, int*> shapesMap;
+            std::vector<Nd4jLong *> shapes;
+            std::map<std::pair<int,int>, Nd4jLong*> shapesMap;
 
             int cntFD = 0;
 
@@ -67,7 +67,7 @@ namespace nd4j {
                         auto in = node->input()->at(0);
 
                         auto block = node->getContextPrototype();
-                        std::vector<int*> inputShapes;
+                        std::vector<Nd4jLong*> inputShapes;
                         int *oldShape;
                         for (auto v: *node->input()) {
                             nd4j_debug("     inputs for estimation are are: %i:%i\n", v.first, v.second);
@@ -86,7 +86,7 @@ namespace nd4j {
                         int cnt = 0;
                         for (auto newShape: *outSha->asVector()) {
                             std::pair<int, int> pairAddr(node->id(), cnt++);
-                            std::pair<std::pair<int, int>, int *> pairShape(pairAddr, newShape);
+                            std::pair<std::pair<int, int>, Nd4jLong*> pairShape(pairAddr, newShape);
 
                             shapesMap.insert(pairShape);
 
@@ -106,11 +106,11 @@ namespace nd4j {
                             auto x = _variableSpace->getVariable(in);
                             auto z = _variableSpace->getVariable(node->id());
 
-                            int *newShape = new int[shape::shapeInfoLength(x->getNDArray()->getShapeInfo())];
+                            auto newShape = new Nd4jLong[shape::shapeInfoLength(x->getNDArray()->getShapeInfo())];
                             memcpy(newShape, x->getNDArray()->getShapeInfo(), shape::shapeInfoByteLength(x->getNDArray()->getShapeInfo()));
 
                             std::pair<int, int> pairAddr(node->id(), 0);
-                            std::pair<std::pair<int, int>, int *> pairShape(pairAddr, newShape);
+                            std::pair<std::pair<int, int>, Nd4jLong*> pairShape(pairAddr, newShape);
 
                             shapesMap.insert(pairShape);
 
@@ -121,11 +121,11 @@ namespace nd4j {
                         } else {
                             auto prevShape = shapesMap.at(in);
 
-                            int *newShape = new int[shape::shapeInfoLength(prevShape)];
+                            auto newShape = new Nd4jLong[shape::shapeInfoLength(prevShape)];
                             memcpy(newShape, prevShape, shape::shapeInfoByteLength(prevShape));
 
                             std::pair<int, int> pairAddr(node->id(), 0);
-                            std::pair<std::pair<int, int>, int *> pairShape(pairAddr, newShape);
+                            std::pair<std::pair<int, int>, Nd4jLong*> pairShape(pairAddr, newShape);
 
                             shapesMap.insert(pairShape);
 
@@ -136,11 +136,11 @@ namespace nd4j {
                         }
 
                     } else if (node->getOpClass() == OpClass_REDUCTION) {
-                        int *newShape = nullptr;
+                        Nd4jLong *newShape = nullptr;
 
                         // if that's scalar output - we don't give a fuck about previous node
                         if (node->getDimensions()->size() == 0 || (node->getDimensions()->size() == 1 && node->getDimensions()->at(0) == MAX_INT)) {
-                            newShape = new int[8];
+                            newShape = new Nd4jLong[8];
 
                             newShape[0] = 2;
                             newShape[1] = 1;
@@ -154,7 +154,7 @@ namespace nd4j {
                         } else {
                             auto in = node->input()->at(0);
 
-                            int *oldShape = nullptr;
+                            Nd4jLong *oldShape = nullptr;
                             // calculate tads here
                             if (in.first < 0) {
                                 auto x = _variableSpace->getVariable(in)->getNDArray();
@@ -167,12 +167,12 @@ namespace nd4j {
 
                             //shape::TAD tad(oldShape, node->getDimensions()->data(), node->getDimensions()->size());
                             Nd4jLong numTads = shape::tadLength(oldShape, node->getDimensions()->data(), node->getDimensions()->size());
-                            int *shape = new int[2]{1, (int) numTads};
+                            auto shape = new Nd4jLong[2]{1, (int) numTads};
                             newShape = shape::shapeBuffer(2, shape);
                         }
 
                         std::pair<int, int> pairAddr(node->id(), 0);
-                        std::pair<std::pair<int, int>, int *> pairShape(pairAddr, newShape);
+                        std::pair<std::pair<int, int>, Nd4jLong*> pairShape(pairAddr, newShape);
 
                         shapesMap.insert(pairShape);
 

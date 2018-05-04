@@ -166,8 +166,8 @@ public:
                            T *extraParams,
                            T *result,
                            Nd4jLong *resultShapeInfo,
-                           Nd4jLong *dimension,
-                           Nd4jLong dimensionLength,
+                           int *dimension,
+                           int dimensionLength,
                            Nd4jLong *tadShapeInfo,
                            Nd4jLong *tadOffsets);
 
@@ -461,15 +461,15 @@ public:
 
     static void execAggregate(int opNum,
                               T **arguments,
-                              Nd4jLong numArguments,
+                              int numArguments,
                               Nd4jLong **shapeArguments,
-                              Nd4jLong numShapeArguments,
-                              Nd4jLong *indexArguments,
-                              Nd4jLong numIndexArguments,
-                              Nd4jLong **intArrays,
-                              Nd4jLong numIntArrays,
+                              int numShapeArguments,
+                              int *indexArguments,
+                              int numIndexArguments,
+                              int **intArrays,
+                              int numIntArrays,
                               T *realArguments,
-                              Nd4jLong numRealArguments);
+                              int numRealArguments);
 
     static void execRandom(int opNum,
                            Nd4jPointer state,

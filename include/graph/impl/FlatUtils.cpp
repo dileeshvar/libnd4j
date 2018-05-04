@@ -20,8 +20,8 @@ namespace nd4j {
 
         template<typename T>
         NDArray<T> *FlatUtils::fromFlatArray(const nd4j::graph::FlatArray *flatArray) {
-            int * newShape = new int[shape::shapeInfoLength((int *)flatArray->shape()->data())];
-            memcpy(newShape, flatArray->shape()->data(), shape::shapeInfoByteLength((int *)flatArray->shape()->data()));
+            auto newShape = new Nd4jLong[shape::shapeInfoLength((Nd4jLong *)flatArray->shape()->data())];
+            memcpy(newShape, flatArray->shape()->data(), shape::shapeInfoByteLength((Nd4jLong *)flatArray->shape()->data()));
 
             T * newBuffer = new T[shape::length(newShape)];
             DataTypeConversions<T>::convertType(newBuffer, (void *) flatArray->buffer()->data(), DataTypeUtils::fromFlatDataType(flatArray->dtype()), ByteOrderUtils::fromFlatByteOrder(flatArray->byteOrder()),  shape::length(newShape));

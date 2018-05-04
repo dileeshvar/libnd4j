@@ -560,7 +560,7 @@ Nd4jPointer GraphExecutioner<T>::executeFlatBuffer(Nd4jPointer pointer) {
 
         nd4j::graph::ByteOrder bo = (nd4j::graph::ByteOrder) BitwiseUtils::asByteOrder();
 
-        auto fArray = CreateFlatArray(builder, fShape, fBuffer, (nd4j::graph::DataType) DataTypeUtils::fromT<T>(), bo);
+        auto fArray = CreateFlatArray(builder, 0, fBuffer, (nd4j::graph::DataType) DataTypeUtils::fromT<T>(), bo);
 
         auto fName = builder.CreateString(*(var->getName()));
         auto id = CreateIntPair(builder, var->id(), var->index());

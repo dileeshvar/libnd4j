@@ -472,7 +472,7 @@ public:
     void   execSummaryStatsDouble(Nd4jPointer *extraPointers,
                                   int opNum,
                                   double *x,
-                                  int *xInfo,
+                                  Nd4jLong *xInfo,
                                   double *extraParams,
                                   double *result,
                                   Nd4jLong *resultShapeInfoBuffer,
@@ -2172,15 +2172,15 @@ public:
     void execAggregateFloat(Nd4jPointer *extraPointers,
                             int opNum,
                             float **arguments,
-                            Nd4jLong numArguments,
+                            int numArguments,
                             Nd4jLong **shapeArguments,
-                            Nd4jLong numShapeArguments,
-                            Nd4jLong *indexArguments,
-                            Nd4jLong numIndexArguments,
-                            Nd4jLong **intArrays,
-                            Nd4jLong numIntArrays,
+                            int numShapeArguments,
+                            int *indexArguments,
+                            int numIndexArguments,
+                            int **intArrays,
+                            int numIntArrays,
                             float *realArguments,
-                            Nd4jLong numRealArguments);
+                            int numRealArguments);
 
     /**
      *
@@ -2200,15 +2200,15 @@ public:
     void execAggregateDouble(Nd4jPointer *extraPointers,
                              int opNum,
                              double **arguments,
-                             Nd4jLong numArguments,
+                             int numArguments,
                              Nd4jLong **shapeArguments,
-                             Nd4jLong numShapeArguments,
-                             Nd4jLong *indexArguments,
-                             Nd4jLong numIndexArguments,
-                             Nd4jLong **intArrays,
-                             Nd4jLong numIntArrays,
+                             int numShapeArguments,
+                             int *indexArguments,
+                             int numIndexArguments,
+                             int **intArrays,
+                             int numIntArrays,
                              double *realArguments,
-                             Nd4jLong numRealArguments);
+                             int numRealArguments);
 
     /**
      *
@@ -2228,15 +2228,15 @@ public:
     void execAggregateHalf(Nd4jPointer *extraPointers,
                            int opNum,
                            float16 **arguments,
-                           Nd4jLong numArguments,
+                           int numArguments,
                            Nd4jLong **shapeArguments,
-                           Nd4jLong numShapeArguments,
-                           Nd4jLong *indexArguments,
-                           Nd4jLong numIndexArguments,
-                           Nd4jLong **intArrays,
-                           Nd4jLong numIntArrays,
+                           int numShapeArguments,
+                           int *indexArguments,
+                           int numIndexArguments,
+                           int **intArrays,
+                           int numIntArrays,
                            float16 *realArguments,
-                           Nd4jLong numRealArguments);
+                           int numRealArguments);
 
 
     /**
@@ -2873,7 +2873,8 @@ public:
      * @param zShapeInfo
      * @return
      */
-    void tearDouble(Nd4jPointer *extraPointers, double *x, Nd4jLong *xShapeInfo, Nd4jPointer *targets, Nd4jLong *zShapeInfo,Nd4jLongint *tadShapeInfo, Nd4jLong *tadOffsets);
+    void tearDouble(Nd4jPointer *extraPointers, double *x, Nd4jLong *xShapeInfo, Nd4jPointer *targets, Nd4jLong *zShapeInfo, Nd4jLong
+     *tadShapeInfo, Nd4jLong *tadOffsets);
 
     /**
      * This method takes single N-dimensional tensor, and copies its TADs to target arrays
