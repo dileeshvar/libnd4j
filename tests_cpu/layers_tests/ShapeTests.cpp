@@ -209,13 +209,13 @@ TEST_F(ShapeTests, Test_Edge_1) {
 
     x.reshapei('c', {4, 4});
 
-    x.printShapeInfo("reshape0");
-    x.printIndexedBuffer("x i");
-    x.printBuffer("x r");
+    //x.printShapeInfo("reshape0");
+    //x.printIndexedBuffer("x i");
+    //x.printBuffer("x r");
 
     x.reshapei({4, 1, 1, 4});
 
-    x.printShapeInfo("reshape1");
+    //x.printShapeInfo("reshape1");
 }
 
 TEST_F(ShapeTests, Test_Edge_2) {
@@ -223,11 +223,11 @@ TEST_F(ShapeTests, Test_Edge_2) {
 
     x.reshapei('f', {3, 4});
 
-    x.printShapeInfo("reshape0");
+    //x.printShapeInfo("reshape0");
 
     x.reshapei({3, 1, 1, 4});
 
-    x.printShapeInfo("reshape1");
+    //x.printShapeInfo("reshape1");
 }
 
 

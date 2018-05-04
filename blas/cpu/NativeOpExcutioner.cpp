@@ -241,13 +241,13 @@ void NativeOpExcutioner<T>::execScalar(int opNum, T *x, int *xShapeInfo, T *resu
 * @param n
 */
 template<typename T>
-void  NativeOpExcutioner<T>::execScalar(int opNum, T *x, int *xShapeInfo, T *result, int *resultShapeInfo, T scalar, T *extraParams, int *xIndexes, int *resultIndexes) {
+void  NativeOpExcutioner<T>::execScalar(int opNum, T *x, Nd4jLong *xShapeInfo, T *result, Nd4jLong *resultShapeInfo, T scalar, T *extraParams, Nd4jLong *xIndexes, Nd4jLong *resultIndexes) {
     functions::scalar::ScalarTransform<T>::transform(opNum, x, xShapeInfo, result, resultShapeInfo, scalar, extraParams, xIndexes, resultIndexes);
 }
 
 ////////////////////////////////////////////////////////////////////////
 template<typename T>
-void NativeOpExcutioner<T>::execScalar(int opNum, T *x, int *xShapeInfo, T *extraParams, T *z, int *zShapeInfo, T *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jIndex *tadOffsets, int *tadShapeInfoZ, Nd4jIndex *tadOffsetsZ) {
+void NativeOpExcutioner<T>::execScalar(int opNum, T *x, Nd4jLong *xShapeInfo, T *extraParams, T *z, Nd4jLong *zShapeInfo, T *scalars, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, Nd4jLong *tadShapeInfoZ, Nd4jLong *tadOffsetsZ) {
     functions::scalar::ScalarTransform<T>::transform(opNum, x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ);
 }
 

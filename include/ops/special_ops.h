@@ -226,10 +226,10 @@ namespace simdOps {
 
 		static void execSpecial(
 				T *dx,
-				int *xShapeBuffer,
+				Nd4jLong *xShapeBuffer,
 				T *result,
-				int *resultShapeBuffer,
-				T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+				Nd4jLong *resultShapeBuffer,
+				T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
 
 			int kH = (int)extraParams[0];
@@ -246,12 +246,12 @@ namespace simdOps {
             const int kHEff = kH + (kH-1)*(dH-1);
             const int kWEff = kW + (kW-1)*(dW-1);
 
-			const int batchSize = shape::sizeAt(xShapeBuffer, 0);
-            const int inChannels = shape::sizeAt(xShapeBuffer, 1);
-            const int outH = shape::sizeAt(resultShapeBuffer, 2);
-            const int outW = shape::sizeAt(resultShapeBuffer, 3);
-            const int inH = shape::sizeAt(xShapeBuffer, 2);
-            const int inW = shape::sizeAt(xShapeBuffer, 3);
+			const int batchSize = (int) shape::sizeAt(xShapeBuffer, 0);
+            const int inChannels = (int) shape::sizeAt(xShapeBuffer, 1);
+            const int outH = (int) shape::sizeAt(resultShapeBuffer, 2);
+            const int outW = (int) shape::sizeAt(resultShapeBuffer, 3);
+            const int inH = (int) shape::sizeAt(xShapeBuffer, 2);
+            const int inW = (int) shape::sizeAt(xShapeBuffer, 3);
 
             int *strideIn = shape::stride(xShapeBuffer);
             int *strideOut = shape::stride(resultShapeBuffer);
@@ -535,10 +535,10 @@ namespace simdOps {
 
 		static void execSpecial(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			/*kernel[0], kernel[1], stride[0], stride[1], padding[0], padding[1], 0, false*/
 
 			T zeroPadVal = (T) 0.0f;
@@ -552,10 +552,10 @@ namespace simdOps {
 			int dH = (int)extraParams[6];			//Dilation, height/y dimension
 			int dW = (int)extraParams[7];			//Dilation, width/x dimension
 
-            const int *outShape  = shape::shapeOf(resultShapeBuffer);
-            const int *outStride = shape::stride(resultShapeBuffer);
-            const int *inShape = shape::shapeOf(xShapeBuffer);
-            const int *inStride = shape::stride(xShapeBuffer);
+            auto outShape  = shape::shapeOf(resultShapeBuffer);
+            auto outStride = shape::stride(resultShapeBuffer);
+            auto inShape = shape::shapeOf(xShapeBuffer);
+            auto inStride = shape::stride(xShapeBuffer);
 
                 const int bS = inShape[0];
                 const int iC = inShape[1];
@@ -806,10 +806,10 @@ namespace simdOps {
 
 		static void execSpecial(
 				T *dx,
-				int *xShapeBuffer,
+				Nd4jLong *xShapeBuffer,
 				T *result,
-				int *resultShapeBuffer,
-				T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+				Nd4jLong *resultShapeBuffer,
+				T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
 			int length = shape::length(xShapeBuffer);
 			int _threads = 2;
@@ -992,10 +992,10 @@ namespace simdOps {
 
 		static void execSpecial(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
             const int *inShape = shape::shapeOf(xShapeBuffer);
             const int *inStride = shape::stride(xShapeBuffer);
@@ -1311,7 +1311,7 @@ namespace simdOps {
 #endif
 
 
-		static void execSpecial(T *dx, int *xShapeBuffer, T *result, int *zShapeBuffer, T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+		static void execSpecial(T *dx, Nd4jLong *xShapeBuffer, T *result, Nd4jLong *zShapeBuffer, T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			Nd4jIndex xLength = shape::length(xShapeBuffer);
 			int xEWS = shape::elementWiseStride(xShapeBuffer);
             char xOrder = shape::order(xShapeBuffer);
@@ -1338,11 +1338,11 @@ namespace simdOps {
                     }
 				} else {
                     int xRank = shape::rank(xShapeBuffer);
-                    int *xShape = shape::shapeOf(xShapeBuffer);
-                    int *xStride = shape::stride(xShapeBuffer);
+                    auto xShape = shape::shapeOf(xShapeBuffer);
+                    auto xStride = shape::stride(xShapeBuffer);
 
-                    int xCoord[MAX_RANK];
-                    int zCoord[MAX_RANK];
+                    Nd4jLong xCoord[MAX_RANK];
+                    Nd4jLong zCoord[MAX_RANK];
 
 #pragma omp parallel for private(xCoord, zCoord) schedule(guided)
                     for (Nd4jIndex e = 0; e < xLength / 2; e++) {
@@ -1362,8 +1362,8 @@ namespace simdOps {
 				}
 			} else {
 				// single step phase here
-				int zEWS = shape::elementWiseStride(zShapeBuffer);
-				char zOrder = shape::order(zShapeBuffer);
+				auto zEWS = shape::elementWiseStride(zShapeBuffer);
+				auto zOrder = shape::order(zShapeBuffer);
 
 				if (xEWS == 1 && zEWS == 1 && xOrder == zOrder) {
 #pragma omp parallel for schedule(guided)
@@ -1378,15 +1378,15 @@ namespace simdOps {
 				} else {
 
 					int xRank = shape::rank(xShapeBuffer);
-                    int *xShape = shape::shapeOf(xShapeBuffer);
-                    int *xStride = shape::stride(xShapeBuffer);
+                    auto xShape = shape::shapeOf(xShapeBuffer);
+                    auto xStride = shape::stride(xShapeBuffer);
 
 					int zRank = shape::rank(zShapeBuffer);
-					int *zShape = shape::shapeOf(zShapeBuffer);
-                    int *zStride = shape::stride(zShapeBuffer);
+					auto zShape = shape::shapeOf(zShapeBuffer);
+                    auto zStride = shape::stride(zShapeBuffer);
 
-					int xCoord[MAX_RANK];
-					int zCoord[MAX_RANK];
+					Nd4jLong xCoord[MAX_RANK];
+					Nd4jLong zCoord[MAX_RANK];
 
 #pragma omp parallel for private(xCoord, zCoord) schedule(guided)
 					for (Nd4jIndex e = 0; e < xLength; e++) {
@@ -1478,21 +1478,21 @@ namespace simdOps {
 
 		static void execSpecial(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			if (shape::isMatrix(xShapeBuffer)) {
-				int *shape = shape::shapeOf(xShapeBuffer);
+				auto shape = shape::shapeOf(xShapeBuffer);
 				//iterate along rows
 				int dimension[1] = { 0 };
 				int maxDimension[1] = { 1 };
 				//compute the row wise maxes
-				std::vector <T> maxResult(shape[0]);
+				std::vector<T> maxResult(shape[0]);
 				for (int i = 0; i < shape[0]; i++)
 					maxResult[i] = 0.0;
-				int maxShape[2] = { shape[0], 1 };
-				int *maxResultShapeBuffer = shape::shapeBuffer(2, maxShape);
+				Nd4jLong maxShape[2] = { shape[0], 1 };
+				auto maxResultShapeBuffer = shape::shapeBuffer(2, maxShape);
 				functions::reduce::ReduceFunction<T>::template exec<simdOps::Max<T>>(dx, xShapeBuffer, extraParams, maxResult.data(), maxResultShapeBuffer, maxDimension, 1,
 					nullptr, nullptr);
 
@@ -1630,13 +1630,13 @@ namespace simdOps {
 
 		static void execSpecial(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
 			if (shape::isMatrix(xShapeBuffer, 2)) {
-				int *shape = shape::shapeOf(xShapeBuffer);
+				auto shape = shape::shapeOf(xShapeBuffer);
 				//iterate along rows
 				int dimension[1] = { 0 };
 				int maxDimension[1] = { 1 };
@@ -1647,8 +1647,8 @@ namespace simdOps {
 				for (int i = 0; i < shape[0]; i++)
 					maxResult[i] = 0.0;
 
-				int maxShape[2] = { shape[0], 1 };
-				int *maxResultShapeBuffer = shape::shapeBuffer(2, maxShape);
+				Nd4jLong maxShape[2] = { shape[0], 1 };
+				auto maxResultShapeBuffer = shape::shapeBuffer(2, maxShape);
 				functions::reduce::ReduceFunction<T>::template exec<simdOps::Max<T>>(dx, xShapeBuffer, extraParams, maxResult.data(), maxResultShapeBuffer, maxDimension, 1,
 					nullptr, nullptr);
 
@@ -1800,14 +1800,14 @@ namespace simdOps {
 
 		static void execSpecial(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			if (shape::isMatrix(xShapeBuffer, 2)) {
-				int *shape = shape::shapeOf(xShapeBuffer);
+				auto shape = shape::shapeOf(xShapeBuffer);
 
-				int resultEleStide = shape::elementWiseStride(resultShapeBuffer);
+				auto resultEleStide = shape::elementWiseStride(resultShapeBuffer);
 
 				//iterate along rows
 				int dimension[1] = { 0 };
@@ -1819,8 +1819,8 @@ namespace simdOps {
 				for (int i = 0; i < shape[0]; i++)
 					maxResult[i] = 0.0;
 
-				int maxShape[2] = { shape[0], 1 };
-				int *maxResultShapeBuffer = shape::shapeBuffer(2, maxShape);
+				Nd4jLong maxShape[2] = { shape[0], 1 };
+				auto maxResultShapeBuffer = shape::shapeBuffer(2, maxShape);
 				functions::reduce::ReduceFunction<T>::template exec<simdOps::Max<T>>(dx, xShapeBuffer, extraParams, maxResult.data(), maxResultShapeBuffer, maxDimension, 1,
 					nullptr, nullptr);
 
@@ -1855,11 +1855,11 @@ namespace simdOps {
 					}
 				}
 				else {
-                    int *zShape = shape::shapeOf(resultShapeBuffer);
-                    int *zStride = shape::stride(resultShapeBuffer);
+                    auto zShape = shape::shapeOf(resultShapeBuffer);
+                    auto zStride = shape::stride(resultShapeBuffer);
                     int zRank = shape::rank(resultShapeBuffer);
 
-                    int zCoord[MAX_RANK];
+                    Nd4jLong zCoord[MAX_RANK];
 
                     for (int i = 0; i < len; i++) {
                         shape::ind2subC(zRank,zShape, i, zCoord);
@@ -1875,8 +1875,8 @@ namespace simdOps {
 				T max = -FLOAT_MAX_VALUE;
 				T sum = 0;
 
-				int elementWiseStride = shape::elementWiseStride(xShapeBuffer);
-				int length = shape::length(xShapeBuffer);
+				auto elementWiseStride = shape::elementWiseStride(xShapeBuffer);
+				auto length = shape::length(xShapeBuffer);
 				if (elementWiseStride == 1) {
 
 #pragma omp simd reduction(maxT:max)
@@ -1995,16 +1995,16 @@ namespace simdOps {
 #endif
 		static void doAll(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
+			Nd4jLong *resultShapeBuffer,
 			T *extraParams) {
 
-			int length = shape::length(xShapeBuffer);
-			int eleStride = shape::elementWiseStride(xShapeBuffer);
-			int resultEleStride = shape::elementWiseStride(resultShapeBuffer);
-			char xOrder = shape::order(xShapeBuffer);
-			char resultOrder = shape::order(resultShapeBuffer);
+			auto length = shape::length(xShapeBuffer);
+			auto eleStride = shape::elementWiseStride(xShapeBuffer);
+			auto resultEleStride = shape::elementWiseStride(resultShapeBuffer);
+			auto xOrder = shape::order(xShapeBuffer);
+			auto resultOrder = shape::order(resultShapeBuffer);
 /*
 			int tadsPerThread = tads / TAD_THRESHOLD;
 			int num_threads = nd4j::math::nd4j_max<int>(1, tadsPerThread);
@@ -2187,10 +2187,10 @@ namespace simdOps {
 
 		static void execSpecial(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			//FIXME: this op should be moved to CustomOps
 			if (extraParams == nullptr || (int)extraParams[0] == 0 ||
 				((int)extraParams[0] == 1 && (int)extraParams[1] == MAX_DIMENSION)) {
@@ -2313,7 +2313,7 @@ namespace simdOps {
                 //moving all dimensions (in sorted order)
                 //to the back.
                 //permuted version of the x shape info for setting up the tad problem				
-				int *tadShapeShapeInfo = tadShapeInfo;
+				auto tadShapeShapeInfo = tadShapeInfo;
 				shape::TAD tad (xShapeBuffer, dimension, dimensionLength);
 				if(tadShapeInfo==nullptr) {
 					tad.createTadOnlyShapeInfo();
@@ -2322,15 +2322,15 @@ namespace simdOps {
 					tadOffsets = tad.tadOffsets;
 				}						                                				
 
-                int tadLength = shape::tadLength(xShapeBuffer, dimension, dimensionLength);
-                int tads = shape::length(xShapeBuffer) / tadLength;
+                auto tadLength = shape::tadLength(xShapeBuffer, dimension, dimensionLength);
+                auto tads = shape::length(xShapeBuffer) / tadLength;
 
                 int tadsPerThread = tads / TAD_THRESHOLD;
                 int num_threads = nd4j::math::nd4j_max<int>(1, tadsPerThread);
                 num_threads = nd4j::math::nd4j_min<int>(num_threads, omp_get_max_threads());
 
-                int tadEWS = shape::elementWiseStride(tadShapeShapeInfo);
-                int zEWS = tadEWS;
+                auto tadEWS = shape::elementWiseStride(tadShapeShapeInfo);
+                auto zEWS = tadEWS;
 
                 int span = (tads / num_threads) + 8;
 

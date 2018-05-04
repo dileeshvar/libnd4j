@@ -96,14 +96,14 @@ std::vector<int> ShapeUtils<T>::evalShapeForTensorDot(const int* aShapeInfo, con
 
 //////////////////////////////////////////////////////////////////////////
 template<typename T>
-std::vector<int> ShapeUtils<T>::evalShapeForTensorDot(const NDArray<T>* a,   const NDArray<T>* b,  const std::vector<int>& axesA, const std::vector<int>& axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<int>& shapeAt, std::vector<int>& shapeBt) {
+std::vector<Nd4jLong> ShapeUtils<T>::evalShapeForTensorDot(const NDArray<T>* a,   const NDArray<T>* b,  const std::vector<int>& axesA, const std::vector<int>& axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLongint>& shapeAt, std::vector<Nd4jLong>& shapeBt) {
 
     return evalShapeForTensorDot(a->getShapeInfo(), b->getShapeInfo(), axesA, axesB, permutAt, permutBt, shapeAt, shapeBt);
 }
 
 //////////////////////////////////////////////////////////////////////////
 template<typename T>
-int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const NDArray<T>& arr, const bool keepDims, const bool supportOldShapes, nd4j::memory::Workspace* workspace) {
+Nd4jLong* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const NDArray<T>& arr, const bool keepDims, const bool supportOldShapes, nd4j::memory::Workspace* workspace) {
 
     return evalReduceShapeInfo(order, dimensions, arr.getShapeInfo(), keepDims, supportOldShapes, workspace);
 }
@@ -111,30 +111,30 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
 //////////////////////////////////////////////////////////////////////////
 // evaluate shape resulting from reduce operation
 template<typename T>
-int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const int *shapeInfo, const bool keepDims, const bool supportOldShapes, nd4j::memory::Workspace* workspace) {
+Nd4jLong* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const Nd4jLong *shapeInfo, const bool keepDims, const bool supportOldShapes, nd4j::memory::Workspace* workspace) {
     int* newShapeInfo = nullptr;
 
     if (dimensions.size() == 0) {                                               // return scalar in this case 
         
         if(supportOldShapes) {
-            ALLOCATE(newShapeInfo, workspace, 8, int);
+            ALLOCATE(newShapeInfo, workspace, 8, Nd4jLong);
             shape::shapeOldScalar(newShapeInfo, 'c');
         }
         else {
-            ALLOCATE(newShapeInfo, workspace, 4, int);
+            ALLOCATE(newShapeInfo, workspace, 4, Nd4jLong);
             shape::shapeScalar(newShapeInfo);
         }
         return newShapeInfo;
     }
 
-    int rank = shape::rank(const_cast<int*>(shapeInfo));
+    int rank = shape::rank(const_cast<Nd4jLong*>(shapeInfo));
     shape::checkDimensions(rank, dimensions);
        
     int dimSize = dimensions.size();
 
     if(keepDims) {
         
-        ALLOCATE(newShapeInfo, workspace, shape::shapeInfoLength(rank), int);
+        ALLOCATE(newShapeInfo, workspace, shape::shapeInfoLength(rank), Nd4jLong);
         newShapeInfo[0] = rank;
         for(int i = 0; i < rank; ++i)
             if (std::binary_search(dimensions.begin(), dimensions.end(), i))                       // dimensions is already sorted after shape::checkDimensions() has been applied
@@ -161,7 +161,7 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
             return newShapeInfo;
 	}
        
-    ALLOCATE(newShapeInfo, workspace, shape::shapeInfoLength(newRank), int);
+    ALLOCATE(newShapeInfo, workspace, shape::shapeInfoLength(newRank), Nd4jLong);
     newShapeInfo[0] = newRank;                      // set rank
     int j=1;
     for(int i = 0; i < rank; ++i)
@@ -172,7 +172,7 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
 	if (newRank == 1 && supportOldShapes) {
         int oldValue = newShapeInfo[1];
         RELEASE(newShapeInfo, workspace);
-        ALLOCATE(newShapeInfo, workspace, shape::shapeInfoLength(2), int);		// set newRank = 2
+        ALLOCATE(newShapeInfo, workspace, shape::shapeInfoLength(2), Nd4jLong);		// set newRank = 2
         newShapeInfo[0] = 2;
         if (dimensions[0] == 0) {
             newShapeInfo[1] = 1; 
@@ -192,14 +192,14 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
 //////////////////////////////////////////////////////////////////////////
 // evaluate shape for array which is result of repeat operation applied to arr
 	template<typename T>
-    std::vector<int> ShapeUtils<T>::evalRepeatShape(int dimension, const std::vector<int>& repeats, const NDArray<T>& arr) {
+    std::vector<Nd4jLong> ShapeUtils<T>::evalRepeatShape(int dimension, const std::vector<Nd4jLong>& repeats, const NDArray<T>& arr) {
 
     int rank = arr.rankOf();
 
     if (dimension < 0)
         dimension += rank;
 
-    std::vector<int> reps;
+    std::vector<Nd4jLong> reps;
 
     if ((int) reps.size() < rank) {
         if (dimension > 0) {
@@ -220,7 +220,7 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
             reps.push_back(r);
     }*/
     
-    std::vector<int> outShape(rank);
+    std::vector<Nd4jLong> outShape(rank);
     for (int i = 0; i < rank; i++)         
         outShape[i] = arr.sizeAt(i) * reps.at(i);        
 
@@ -231,7 +231,7 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
 //////////////////////////////////////////////////////////////////////////
 // evaluate shapeInfo of permuted array
     template<typename T>
-    int* ShapeUtils<T>::evalPermShapeInfo(const int* dimensions, const int rank, const NDArray<T>& arr, nd4j::memory::Workspace* workspace) {
+    Nd4jLong* ShapeUtils<T>::evalPermShapeInfo(const Nd4jLong* dimensions, const int rank, const NDArray<T>& arr, nd4j::memory::Workspace* workspace) {
 
     if (!arr.nonNull() || rank != arr.rankOf())
         throw "ShapeUtils<T>::evalPermShapeInfo static method: wrong arguments in permute method: either array is nullptr or rank is not suitable!";
@@ -239,10 +239,10 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
     int shapeInfoLength = rank*2 + 4;
     // allocate memory for new array - shapeInfo
 
-    int* shapeInfoNew = nullptr;
-    ALLOCATE(shapeInfoNew, workspace, shapeInfoLength, int);
+    Nd4jLong* shapeInfoNew = nullptr;
+    ALLOCATE(shapeInfoNew, workspace, shapeInfoLength, Nd4jLong);
     // copy arr _shapeInfo into new array       
-    memcpy(shapeInfoNew, arr.getShapeInfo(), shapeInfoLength*sizeof(int));  
+    memcpy(shapeInfoNew, arr.getShapeInfo(), shapeInfoLength*sizeof(Nd4jLong));  
     // perform buffer permutation   
     shape::doPermuteShapeInfo(shapeInfoNew, dimensions);      
 
@@ -333,11 +333,11 @@ int* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>& dime
 template <typename T>
 bool ShapeUtils<T>::areShapesBroadcastable(const NDArray<T> &arr1, const NDArray<T> &arr2)
 {
-    return areShapesBroadcastable((int *) arr1.getShapeInfo(), (int *) arr2.getShapeInfo());   
+    return areShapesBroadcastable((Nd4jLong *) arr1.getShapeInfo(), (Nd4jLong *) arr2.getShapeInfo());   
 }
 
 template <typename T>
-bool ShapeUtils<T>::areShapesBroadcastable(int *arr1, int *arr2) {
+bool ShapeUtils<T>::areShapesBroadcastable(Nd4jLong *arr1, Nd4jLong *arr2) {
     int minRank = shape::rank(arr1) < shape::rank(arr2) ? shape::rank(arr1) : shape::rank(arr2);
        
     for (int i = -1; i >= -minRank; --i) 
@@ -347,7 +347,7 @@ bool ShapeUtils<T>::areShapesBroadcastable(int *arr1, int *arr2) {
 }
 
 template <typename T>
-bool ShapeUtils<T>::areShapesBroadcastable(const std::vector<int>& shape1, const std::vector<int>& shape2) {
+bool ShapeUtils<T>::areShapesBroadcastable(const std::vector<Nd4jLong>& shape1, const std::vector<Nd4jLong>& shape2) {
     
     const int rank1 = shape1.size();
     const int rank2 = shape2.size();
@@ -468,7 +468,7 @@ std::vector<int> ShapeUtils<T>::getDimsWithSameShape(const NDArray<T>& max, cons
 //////////////////////////////////////////////////////////////////////////
 // return absolute index of array min, min is sub-array of max, index to be returned is min index and it corresponds maxIdx of max array 
 template <typename T>
-int ShapeUtils<T>::getSubArrayIndex(const int* maxShapeInfo, const int* minShapeInfo, const int maxIdx) {
+Nd4jLong ShapeUtils<T>::getSubArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const Nd4jLong maxIdx) {
     // check shape consistence 
     if(maxShapeInfo[0] < minShapeInfo[0])
         throw "ShapeUtils::getSubArrayIndex: rank of max-array must be greater or equal to min-array rank !";
@@ -484,7 +484,7 @@ int ShapeUtils<T>::getSubArrayIndex(const int* maxShapeInfo, const int* minShape
 //////////////////////////////////////////////////////////////////////////
 // evaluate shapeInfo for resulting array from tile operation
 template <typename T>
-int* ShapeUtils<T>::evalTileShapeInfo(const NDArray<T>& arr, const std::vector<int>& reps, nd4j::memory::Workspace* workspace) {
+Nd4jLong* ShapeUtils<T>::evalTileShapeInfo(const NDArray<T>& arr, const std::vector<Nd4jLong>& reps, nd4j::memory::Workspace* workspace) {
 
     // check whether reps contains at least one zero (then throw exception) or whether all elements in reps are unities (then simply reshape or do nothing)
     int dim = reps.size();  
@@ -498,19 +498,19 @@ int* ShapeUtils<T>::evalTileShapeInfo(const NDArray<T>& arr, const std::vector<i
     int diff = rankOld - dim;
     
     // evaluate new shapeInfo
-    int* newShapeInfo = nullptr;    
+    Nd4jLong* newShapeInfo = nullptr;    
     if(diff < 0) {      
-        ALLOCATE(newShapeInfo, workspace, dim*2 + 4, int);
+        ALLOCATE(newShapeInfo, workspace, dim*2 + 4, Nd4jLong);
         newShapeInfo[0] = dim;                  // set new rank
         for(int i=1; i <= -diff; ++i)
             newShapeInfo[i] = 1;                // set unities to be new dimensions at left-hand side of newShapeInfo shape place
-        memcpy(newShapeInfo + 1 - diff, arr.getShapeInfo() + 1, rankOld*sizeof(int));       // copy old dimensions to the right-hand side of newShapeInfo shape place
+        memcpy(newShapeInfo + 1 - diff, arr.getShapeInfo() + 1, rankOld*sizeof(Nd4jLong));       // copy old dimensions to the right-hand side of newShapeInfo shape place
         for(int i=1; i <= dim; ++i)
             newShapeInfo[i] *= reps[i - 1];     // set new shape by multiplying old dimensions by corresponding numbers from reps 
     }
     else {      
-        ALLOCATE(newShapeInfo, workspace, rankOld*2 + 4, int);
-        memcpy(newShapeInfo, arr.getShapeInfo(), (rankOld*2 + 4)*sizeof(int));      // copy all elements of _shapeInfo to newShapeInfo
+        ALLOCATE(newShapeInfo, workspace, rankOld*2 + 4, Nd4jLong);
+        memcpy(newShapeInfo, arr.getShapeInfo(), (rankOld*2 + 4)*sizeof(Nd4jLong));      // copy all elements of _shapeInfo to newShapeInfo
         for(int i=1; i <= dim; ++i)
             newShapeInfo[rankOld + 1 - i] *= reps[dim - i];     // set new shape by multiplying old dimensions by corresponding numbers from reps 
     }
@@ -579,7 +579,7 @@ int* ShapeUtils<T>::evalTileShapeInfo(const NDArray<T>& arr, const std::vector<i
     }
 
     template<typename T>
-    std::string ShapeUtils<T>::shapeAsString(const int* shapeInfo) {
+    std::string ShapeUtils<T>::shapeAsString(const Nd4jLong* shapeInfo) {
         
         if(!shapeInfo)
             throw "ShapeUtils<T>::shapeAsString method: input shapeInfo must not be nullptr !";

@@ -6,6 +6,7 @@
 #include <helpers/EnumUtils.h>
 #include <graph/FlatUtils.h>
 #include <NativeOps.h>
+#include <vector>
 #include <helpers/ShapeUtils.h>
 #include <ops/declarable/OpRegistrator.h>
 
@@ -552,7 +553,7 @@ namespace nd4j {
                     int tK = it->first;
                     int tF = _unmappedMap.at(cntf++);
 
-                    nd4j_printf("tK: %i; tF: %i\n", tK, tF);
+                    //nd4j_printf("tK: %i; tF: %i\n", tK, tF);
                 //for (int f = 0; f < sz; f++) {
                 //    auto node = _unmapped.at(_unmappedMap.at(f));
                 

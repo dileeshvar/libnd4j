@@ -288,16 +288,16 @@ namespace functions {
             static _CUDA_H void execSummaryStatsReduce(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *x, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfo, int *dimension, int dimensionLength,bool biasCorrected);
 #endif
 
-            static T execScalar(const int opNum, const bool biasCorrected, T *x, int *xShapeInfo, T *extraParams);
+            static T execScalar(const int opNum, const bool biasCorrected, T *x, Nd4jLong *xShapeInfo, T *extraParams);
 
-            static void exec(const int opNum, const bool biasCorrected, T *x, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfoBuffer, int *dimension, int dimensionLength);
-
-            template<typename OpType>
-            static T execScalar(const bool biasCorrected, T *x, int *xShapeInfo, T *extraParams);
-
+            static void exec(const int opNum, const bool biasCorrected, T *x, Nd4jLong *xShapeInfo, T *extraParams, T *result, Nd4jLong *resultShapeInfoBuffer, int *dimension, int dimensionLength);
 
             template<typename OpType>
-            static void exec(const bool biasCorrected, T *x, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfoBuffer, int *dimension, int dimensionLength);
+            static T execScalar(const bool biasCorrected, T *x, Nd4jLong *xShapeInfo, T *extraParams);
+
+
+            template<typename OpType>
+            static void exec(const bool biasCorrected, T *x, Nd4jLong *xShapeInfo, T *extraParams, T *result, Nd4jLong *resultShapeInfoBuffer, int *dimension, int dimensionLength);
 
         };
     }

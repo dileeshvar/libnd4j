@@ -840,14 +840,14 @@ template<typename OpType>
 #endif
             static T execScalar(
                     T *x,
-                    int *xShapeInfo,
+                    Nd4jLong *xShapeInfo,
                     T *extraParams,
                     T *y,
-                    int *yShapeInfo) {
+                    Nd4jLong *yShapeInfo) {
                 T startingVal = OpType::startingValue(x);
                 Nd4jIndex length = shape::length(xShapeInfo);
-                int xElementWiseStride = shape::elementWiseStride(xShapeInfo);
-                int yElementWiseStride = shape::elementWiseStride(yShapeInfo);
+                Nd4jLong xElementWiseStride = shape::elementWiseStride(xShapeInfo);
+                Nd4jLong yElementWiseStride = shape::elementWiseStride(yShapeInfo);
 
                 T extraParamsVals[3] = {(T) 0.0, (T) 0.0, (T) 0.0};
                 // it's possible case for EqualsWithEps op
@@ -886,16 +886,16 @@ template<typename OpType>
 
 
                 else {
-                    int xCoords[MAX_RANK];
-                    int yCoords[MAX_RANK];
+                    Nd4jLong xCoords[MAX_RANK];
+                    Nd4jLong yCoords[MAX_RANK];
 
                     int xRank = shape::rank(xShapeInfo);
                     int yRank = shape::rank(yShapeInfo);
 
-                    int *xShape = shape::shapeOf(xShapeInfo);
-                    int *xStride = shape::stride(xShapeInfo);
-                    int *yShape = shape::shapeOf(yShapeInfo);
-                    int *yStride = shape::stride(yShapeInfo);
+                    Nd4jLong *xShape = shape::shapeOf(xShapeInfo);
+                    Nd4jLong *xStride = shape::stride(xShapeInfo);
+                    Nd4jLong *yShape = shape::shapeOf(yShapeInfo);
+                    Nd4jLong *yStride = shape::stride(yShapeInfo);
 
                     for(unsigned int i = 0 ;i < length; i++) {
                         shape::ind2subC(xRank, xShape, i, xCoords);
@@ -917,46 +917,46 @@ template<typename OpType>
             template<typename OpType>
             static void execAll(
                     T *x,
-                    int *xShapeInfo,
+                    Nd4jLong *xShapeInfo,
                     T *extraParams,
                     T *y,
-                    int *yShapeInfo,
+                    Nd4jLong *yShapeInfo,
                     T *result,
-                    int *resultShapeInfoBuffer,
+                    Nd4jLong *resultShapeInfoBuffer,
                     int *dimension,
-                    int dimensionLength, int *xTadShapeInfo, Nd4jIndex *xOffsets, int *yTadShapeInfo, Nd4jIndex *yOffsets) {
+                    int dimensionLength, Nd4jLong *xTadShapeInfo, Nd4jLong *xOffsets, Nd4jLong *yTadShapeInfo, Nd4jLong *yOffsets) {
 
-                int xTadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
-                int yTadLength = shape::tadLength(yShapeInfo, dimension, dimensionLength);
+                auto xTadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
+                auto yTadLength = shape::tadLength(yShapeInfo, dimension, dimensionLength);
 
-                int xTads = shape::length(xShapeInfo) / xTadLength;
-                int yTads = shape::length(yShapeInfo) / yTadLength;
+                auto xTads = shape::length(xShapeInfo) / xTadLength;
+                auto yTads = shape::length(yShapeInfo) / yTadLength;
 
-                int *xShape = shape::shapeOf(xTadShapeInfo);
-                int *xStride = shape::stride(xTadShapeInfo);
+                auto xShape = shape::shapeOf(xTadShapeInfo);
+                auto xStride = shape::stride(xTadShapeInfo);
                 int xRank = shape::rank(xTadShapeInfo);
 
-                int *yShape = shape::shapeOf(yTadShapeInfo);
-                int *yStride = shape::stride(yTadShapeInfo);
+                auto yShape = shape::shapeOf(yTadShapeInfo);
+                auto yStride = shape::stride(yTadShapeInfo);
                 int yRank = shape::rank(yTadShapeInfo);
 
 
-                int xCoord[MAX_RANK];
-                int yCoord[MAX_RANK];
+                Nd4jLong xCoord[MAX_RANK];
+                Nd4jLong yCoord[MAX_RANK];
 
                 T startingVal = OpType::startingValue(x);
 
 #pragma  omp parallel for proc_bind(AFFINITY) default(shared) private(xCoord, yCoord)
-                for (int r = 0; r < xTads; r++) {
+                for (Nd4jLong r = 0; r < xTads; r++) {
                     Nd4jIndex xOffset = xOffsets[r];
 
                     T *lX = x + xOffset;
 
-                    for (int g = 0; g < yTads; g++) {
-                        int yOffset = yOffsets[g];
+                    for (Nd4jLong g = 0; g < yTads; g++) {
+                        auto yOffset = yOffsets[g];
                         T *lY = y + yOffset;
 
-                        int ri = (r * yTads) + g;
+                        auto ri = (r * yTads) + g;
 
                         T *localExtraParams = nullptr;
                         if (OpType::extraParamsLen > 0)
@@ -997,14 +997,14 @@ template<typename OpType>
             template<typename OpType>
             static void exec(
                     T *x,
-                    int *xShapeInfo,
+                    Nd4jLong *xShapeInfo,
                     T *extraParams,
                     T *y,
-                    int *yShapeInfo,
+                    Nd4jLong *yShapeInfo,
                     T *result,
-                    int *resultShapeInfoBuffer,
+                    Nd4jLong *resultShapeInfoBuffer,
                     int *dimension,
-                    int dimensionLength, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+                    int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 /*
                 nd4j_printf("Xp: [%p]; Yp: [%p]; Zp: [%p];\n", (void *) x, (void *) y, (void *) result);
                 nd4j_printf("XSp: [%p]; YSp: [%p]; ZSp: [%p];\n", (void *) xShapeInfo, (void *) yShapeInfo, (void *) resultShapeInfoBuffer);
@@ -1027,15 +1027,15 @@ template<typename OpType>
 */
                 T startingVal = OpType::startingValue(x);
 
-                int tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
-                int tads = (int) (shape::length(xShapeInfo) / tadLength);
+                auto tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
+                auto tads = shape::length(xShapeInfo) / tadLength;
 
-                int *xShape = shape::shapeOf(tadShapeInfo);
-                int *xStride = shape::stride(tadShapeInfo);
+                auto *xShape = shape::shapeOf(tadShapeInfo);
+                auto *xStride = shape::stride(tadShapeInfo);
                 int xRank = shape::rank(tadShapeInfo);
 
-                int *yShape = shape::shapeOf(yShapeInfo);
-                int *yStride = shape::stride(yShapeInfo);
+                auto *yShape = shape::shapeOf(yShapeInfo);
+                auto *yStride = shape::stride(yShapeInfo);
                 int yRank = shape::rank(yShapeInfo);
 
                 //shape::printShapeInfoLinear(xShapeInfo);
@@ -1043,11 +1043,11 @@ template<typename OpType>
                 //shape::printShapeInfoLinear(resultShapeInfoBuffer);
                 //shape::printShapeInfoLinear(tadShapeInfo);
 
-                int xCoord[MAX_RANK];
-                int yCoord[MAX_RANK];
+                Nd4jLong xCoord[MAX_RANK];
+                Nd4jLong yCoord[MAX_RANK];
 
 //#pragma  omp parallel for proc_bind(AFFINITY) default(shared)
-                for (int r = 0; r < tads; r++) {
+                for (Nd4jLong r = 0; r < tads; r++) {
                     Nd4jIndex offset = tadOffsets[r];
 
                     T *localExtraParams = nullptr;
@@ -1057,7 +1057,7 @@ template<typename OpType>
                         localExtraParams[extraParamsIdx] = startingVal;
                     }
 
-                    for (int f = 0; f < tadLength; f++) {
+                    for (Nd4jLong f = 0; f < tadLength; f++) {
                         if (shape::order(tadShapeInfo) == 'c') {
                             shape::ind2subC(xRank, xShape, f, xCoord);
                             shape::ind2subC(yRank, yShape, f, yCoord);
@@ -1082,12 +1082,12 @@ template<typename OpType>
             template<typename OpType>
             static void exec(
                     T *x,
-                    int *xShapeInfo,
+                    Nd4jLong *xShapeInfo,
                     T *extraParams,
                     T *y,
-                    int *yShapeInfo,
+                    Nd4jLong *yShapeInfo,
                     T *result,
-                    int *resultShapeInfoBuffer,
+                    Nd4jLong *resultShapeInfoBuffer,
                     int *dimension,
                     int dimensionLength) {
 /*
@@ -1126,16 +1126,16 @@ template<typename OpType>
                 char xOrder = shape::order(xShapeInfo);
                 char yOrder = shape::order(yShapeInfo);
                 if(xOrder != yOrder) {
-                    int shapeIter[MAX_RANK];
-                    int coord[MAX_RANK];
+                    Nd4jLong shapeIter[MAX_RANK];
+                    Nd4jLong coord[MAX_RANK];
                     int dim;
-                    int xStridesIter[MAX_RANK];
-                    int yStridesIter[MAX_RANK];
+                    Nd4jLong xStridesIter[MAX_RANK];
+                    Nd4jLong yStridesIter[MAX_RANK];
 
-                    int *xShape = shape::shapeOf(xShapeInfo);
+                    auto xShape = shape::shapeOf(xShapeInfo);
 
-                    int *xStride = shape::stride(xShapeInfo);
-                    int *yStride = shape::stride(yShapeInfo);
+                    auto xStride = shape::stride(xShapeInfo);
+                    auto yStride = shape::stride(yShapeInfo);
 
                     int rank = shape::rank(xShapeInfo);
                     if(PrepareTwoRawArrayIter<T>(rank,
@@ -1155,7 +1155,7 @@ template<typename OpType>
                         Nd4jIndex tadLength = shape::tadLength(xShapeInfo,dimension,dimensionLength);
                         ND4J_RAW_ITER_START(dim, rank, coord, shapeIter); {
                                 Nd4jIndex xOffset = shape::getOffset(0,xShape,xStride,coord,rank);
-                                int reductionIndex = xOffset / resultLength;
+                                auto reductionIndex = xOffset / resultLength;
                                 result[reductionIndex] = OpType::update(result[reductionIndex], OpType::op(x[0],y[0], extraParamsVals), extraParamsVals);
                             } ND4J_RAW_ITER_TWO_NEXT(dim,
                                                      rank,
@@ -1201,12 +1201,12 @@ template<typename OpType>
                      */
                     int largerElementWiseStride;
                     int smallerElementWiseStride;
-                    int xElementWiseStride = shape::elementWiseStride(xTad.tadOnlyShapeInfo);
-                    int yElementWiseStride = shape::elementWiseStride(yTad.tadOnlyShapeInfo);
+                    auto xElementWiseStride = shape::elementWiseStride(xTad.tadOnlyShapeInfo);
+                    auto yElementWiseStride = shape::elementWiseStride(yTad.tadOnlyShapeInfo);
                     int tadLength;
-                    int xModLength;
-                    int yModLength;
-                    int *iterationTadInfo;
+                    Nd4jLong xModLength;
+                    Nd4jLong yModLength;
+                    Nd4jLong *iterationTadInfo;
                     bool xTadBigger;
                     if(shape::length(xShapeInfo) > shape::length(yShapeInfo)) {
                         tadLength = shape::length(xTad.tadOnlyShapeInfo);
@@ -1269,14 +1269,14 @@ template<typename OpType>
                             for (int i = 0; i < resultLength; i++) {
                                 Nd4jIndex xOffset = xTadBigger ? xTad.tadOffsets[i] : 0;
                                 Nd4jIndex yOffset = !xTadBigger ? yTad.tadOffsets[i] : 0;
-                                int *xShape = xTadBigger ? xTad.tadShape : shape::shapeOf(xShapeInfo);
-                                int *yShape = !xTadBigger ? yTad.tadShape : shape::shapeOf(yShapeInfo);
-                                int *xStride = xTadBigger ? xTad.tadStride : shape::stride(xShapeInfo);
-                                int *yStride = !xTadBigger ? yTad.tadStride : shape::stride(yShapeInfo);
+                                auto xShape = xTadBigger ? xTad.tadShape : shape::shapeOf(xShapeInfo);
+                                auto yShape = !xTadBigger ? yTad.tadShape : shape::shapeOf(yShapeInfo);
+                                auto xStride = xTadBigger ? xTad.tadStride : shape::stride(xShapeInfo);
+                                auto yStride = !xTadBigger ? yTad.tadStride : shape::stride(yShapeInfo);
                                 int xRank = xTadBigger ? shape::rank(xTad.tadOnlyShapeInfo) : shape::rank(xShapeInfo);
                                 int yRank = !xTadBigger ? shape::rank(yTad.tadOnlyShapeInfo) : shape::rank(yShapeInfo);
-                                int coord[MAX_RANK];
-                                int yCoord[MAX_RANK];
+                                Nd4jLong coord[MAX_RANK];
+                                Nd4jLong yCoord[MAX_RANK];
                                 T start = 0.0;
 
                                 for (int j = 0; j < tadLength; j++) {
@@ -1316,7 +1316,7 @@ template<typename OpType>
                         int num_threads = nd4j::math::nd4j_max<int>(1, tadsPerThread);
                         num_threads = nd4j::math::nd4j_min<int>(num_threads, omp_get_max_threads());
 
-                        int coord[MAX_RANK];
+                        Nd4jLong coord[MAX_RANK];
 
 //#pragma omp  parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared) private(coord)
                         for (int i = 0; i < resultLength; i++) {

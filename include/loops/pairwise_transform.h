@@ -133,11 +133,11 @@ namespace functions {
 			template<typename OpType>
 			static void exec(
                     T *dx,
-                    int *xShapeBuffer,
+                    Nd4jLong* xShapeBuffer,
                     T *y,
-                    int *yShapeBuffer,
+                    Nd4jLong* yShapeBuffer,
                     T *result,
-                    int *resultShapeBuffer,
+                    Nd4jLong* resultShapeBuffer,
                     T *extraParams,
                     int *indexes,
                     int *yIndexes,
@@ -154,11 +154,11 @@ namespace functions {
 			template<typename OpType>
 			static void exec(
                     T *dx,
-                    int *xShapeBuffer,
+                    Nd4jLong* xShapeBuffer,
                     T *y,
-                    int *yShapeBuffer,
+                    Nd4jLong* yShapeBuffer,
                     T *result,
-                    int *resultShapeBuffer,
+                    Nd4jLong* resultShapeBuffer,
                     T *extraParams) {
                 Nd4jIndex n = shape::length(xShapeBuffer);
                 int xElementWiseStride = shape::elementWiseStride(xShapeBuffer);
@@ -171,17 +171,17 @@ namespace functions {
                             result[e] = OpType::op(dx[e], y[0], extraParams);
                         }
                     } else {
-                        int xCoord[MAX_RANK];
-                        int resultCoord[MAX_RANK];
+                        Nd4jLong xCoord[MAX_RANK];
+                        Nd4jLong resultCoord[MAX_RANK];
 
                         int xRank = shape::rank(xShapeBuffer);
                         int resultRank = shape::rank(resultShapeBuffer);
 
-                        int *xShape = shape::shapeOf(xShapeBuffer);
-                        int *xStride = shape::stride(xShapeBuffer);
+                        Nd4jLong *xShape = shape::shapeOf(xShapeBuffer);
+                        Nd4jLong *xStride = shape::stride(xShapeBuffer);
 
-                        int *resultShape = shape::shapeOf(resultShapeBuffer);
-                        int *resultStride = shape::stride(resultShapeBuffer);
+                        Nd4jLong *resultShape = shape::shapeOf(resultShapeBuffer);
+                        Nd4jLong *resultStride = shape::stride(resultShapeBuffer);
 
                         int elementsPerThread = n / ELEMENT_THRESHOLD;
                         int num_threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
@@ -240,11 +240,11 @@ namespace functions {
 
                 else if (sameShape) {
                     int rank = shape::rank(xShapeBuffer);
-                    int *xShape = shape::shapeOf(xShapeBuffer);
+                    Nd4jLong *xShape = shape::shapeOf(xShapeBuffer);
 
-                    int *xStride = shape::stride(xShapeBuffer);
-                    int *yStride = shape::stride(yShapeBuffer);
-                    int *resultStride = shape::stride(resultShapeBuffer);
+                    Nd4jLong *xStride = shape::stride(xShapeBuffer);
+                    Nd4jLong *yStride = shape::stride(yShapeBuffer);
+                    Nd4jLong *resultStride = shape::stride(resultShapeBuffer);
 
                     // tad-oriented rotation technically
 
@@ -259,17 +259,17 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                     T *resultLocal = result + resultStride[0] * i;
 
                     int rankLocal = rank - 1;
-                    int *xShapeLocal = xShape + 1;
+                    Nd4jLong *xShapeLocal = xShape + 1;
 
-                    int *xStrideLocal = xStride + 1;
-                    int *yStrideLocal = yStride + 1;
-                    int *resultStrideLocal = resultStride + 1;
+                    Nd4jLong *xStrideLocal = xStride + 1;
+                    Nd4jLong *yStrideLocal = yStride + 1;
+                    Nd4jLong *resultStrideLocal = resultStride + 1;
 
                     int shapeIter[MAX_RANK];
                     int coord[MAX_RANK];
                     int dim;
-                    int xStridesIter[MAX_RANK];
-                    int yStridesIter[MAX_RANK];
+                    Nd4jLong xStridesIter[MAX_RANK];
+                    Nd4jLong yStridesIter[MAX_RANK];
                     int resultStridesIter[MAX_RANK];
                     if (PrepareThreeRawArrayIter<T>(rankLocal,
                                                     xShapeLocal,
@@ -318,21 +318,21 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                     int yRank = shape::rank(yShapeBuffer);
                     int resultRank = shape::rank(resultShapeBuffer);
 
-                    int *xShape = shape::shapeOf(xShapeBuffer);
-                    int *xStride = shape::stride(xShapeBuffer);
+                    Nd4jLong *xShape = shape::shapeOf(xShapeBuffer);
+                    Nd4jLong *xStride = shape::stride(xShapeBuffer);
 
-                    int *yShape = shape::shapeOf(yShapeBuffer);
-                    int *yStride = shape::stride(yShapeBuffer);
+                    Nd4jLong *yShape = shape::shapeOf(yShapeBuffer);
+                    Nd4jLong *yStride = shape::stride(yShapeBuffer);
 
-                    int *resultShape = shape::shapeOf(resultShapeBuffer);
-                    int *resultStride = shape::stride(resultShapeBuffer);
+                    Nd4jLong *resultShape = shape::shapeOf(resultShapeBuffer);
+                    Nd4jLong *resultStride = shape::stride(resultShapeBuffer);
 
                     int elementsPerThread = n / ELEMENT_THRESHOLD;
                     int num_threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
                     num_threads = nd4j::math::nd4j_min<int>(num_threads, omp_get_max_threads());
 
-                    int xCoord[MAX_RANK];
-                    int yCoord[MAX_RANK];
+                    Nd4jLong xCoord[MAX_RANK];
+                    Nd4jLong yCoord[MAX_RANK];
 
                     if(dx == result) {
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared) private(xCoord, yCoord)
@@ -347,7 +347,7 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                         }
                     }
                     else {
-                        int resultCoord[MAX_RANK];
+                        Nd4jLong resultCoord[MAX_RANK];
 
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared) private(xCoord, yCoord, resultCoord)
                         for (Nd4jIndex i = 0; i < len; i++) {

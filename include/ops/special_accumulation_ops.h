@@ -132,17 +132,17 @@ namespace simdOps {
 #endif
 
         static void execSpecial(T *x,
-                         int *xShapeInfo,
+                         Nd4jLong *xShapeInfo,
                          T *extraParams,
                          T *result,
-                         int *resultShapeInfoBuffer,
+                         Nd4jLong *resultShapeInfoBuffer,
                          int *dimension,
                          int dimensionLength,
-                         int *tadShapeInfo,
-                         Nd4jIndex *tadOffset) {
-            int resultLength = shape::length(resultShapeInfoBuffer);
+                         Nd4jLong *tadShapeInfo,
+                         Nd4jLong *tadOffset) {
+            Nd4jLong resultLength = shape::length(resultShapeInfoBuffer);
 
-            int *tadOnlyShapeInfo = tadShapeInfo;
+            Nd4jLong *tadOnlyShapeInfo = tadShapeInfo;
             Nd4jIndex *tadOffsets = tadOffset;
             shape::TAD *tad = nullptr;
 
@@ -161,9 +161,9 @@ namespace simdOps {
             }
 
 
-            const int tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
-            int numTads = shape::length(xShapeInfo) / tadLength;
-            int tadEWS = shape::elementWiseStride(tadOnlyShapeInfo);
+            const Nd4jLong tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
+            Nd4jLong numTads = shape::length(xShapeInfo) / tadLength;
+            Nd4jLong tadEWS = shape::elementWiseStride(tadOnlyShapeInfo);
 
             int tadsPerThread = resultLength / TAD_THRESHOLD;
             int num_threads = nd4j::math::nd4j_max<int>(1, tadsPerThread);
@@ -191,15 +191,15 @@ namespace simdOps {
                 }
             }
             else {
-                int *tadShape = shape::shapeOf(tadOnlyShapeInfo);
-                int *tadStride = shape::stride(tadOnlyShapeInfo);
+                Nd4jLong *tadShape = shape::shapeOf(tadOnlyShapeInfo);
+                Nd4jLong *tadStride = shape::stride(tadOnlyShapeInfo);
                 int tadRank = shape::rank(tadOnlyShapeInfo);
 
 #pragma omp  parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared)
                 for (int i = 0; i < resultLength; i++) {
 
                     Nd4jIndex offset = tadOffsets[i];
-                    int xCoord[MAX_RANK];
+                    Nd4jLong xCoord[MAX_RANK];
 
                     T start = startingValue(x + offset);
 

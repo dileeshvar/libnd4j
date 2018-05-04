@@ -45,7 +45,8 @@ namespace nd4j {
         tad->createTadOnlyShapeInfo();
         tad->createOffsets();
 
-        int* shapeInfo = new int[shape::shapeInfoLength(tad->tadOnlyShapeInfo[0])];
+        // FIXME: why we're not using workspaces here?
+        auto shapeInfo = new Nd4jLong[shape::shapeInfoLength(tad->tadOnlyShapeInfo[0])];
         std::memcpy(shapeInfo, tad->tadOnlyShapeInfo, shape::shapeInfoByteLength(tad->tadOnlyShapeInfo));
 
         for (auto idx: indices) {
@@ -129,8 +130,9 @@ namespace nd4j {
     template<typename T>
     nd4j::NDArray<T>* nd4j::NDArrayFactory<T>::tensorDot(const nd4j::NDArray<T>* a, const nd4j::NDArray<T>* b, const std::vector<int>& axes_0, const std::vector<int>& axes_1) {
 
-        std::vector<int> permutAt, permutBt, shapeAt, shapeBt;        
-        std::vector<int> outShape = ShapeUtils<T>::evalShapeForTensorDot(a, b, axes_0, axes_1, permutAt, permutBt, shapeAt, shapeBt);
+        std::vector<int> permutAt, permutBt;
+        std::vector<Nd4jLong> shapeAt, shapeBt;        
+        auto outShape = ShapeUtils<T>::evalShapeForTensorDot(a, b, axes_0, axes_1, permutAt, permutBt, shapeAt, shapeBt);
 
         NDArray<T>* aPR(const_cast<NDArray<T>*>(a)), *bPR(const_cast<NDArray<T>*>(b));
 
@@ -325,7 +327,7 @@ namespace nd4j {
                     throw "Numbers of rows/columns should match";
                 }
 
-                std::vector<int> newShape;
+                std::vector<Nd4jLong> newShape;
                 if (A->rankOf() > B->rankOf())
                     for (int e = 0; e < A->rankOf() - 2; e++)
                         newShape.emplace_back(A->sizeAt(e));
@@ -380,7 +382,7 @@ namespace nd4j {
             } else {
                 //int dims = A->rankOf();
 
-                std::vector<int> newShape;
+                std::vector<Nd4jLong> newShape;
                 for (int e = 0; e < A->rankOf() - 2; e++)
                     if (A->sizeAt(e) != B->sizeAt(e)) {
                         nd4j_printf("Dimension [%i] differs for A and B: %i vs %i", e, A->sizeAt(e), B->sizeAt(e));
@@ -462,9 +464,9 @@ namespace nd4j {
             result = new NDArray<T>('f', {A->rows(), B->columns()});
         }
             
-        int *aShape = A->shapeOf();
-        int *bShape = B->shapeOf();
-        int *cShape = result->shapeOf();
+        auto aShape = A->shapeOf();
+        auto bShape = B->shapeOf();
+        auto cShape = result->shapeOf();
 
         char rOrder;
 
@@ -670,7 +672,7 @@ namespace nd4j {
     template<typename T>
     void NDArrayFactory<T>::linspace(T from, NDArray<T>& arr, T step) {
         
-        int size = arr.lengthOf();
+        Nd4jLong size = arr.lengthOf();
         for (Nd4jIndex i = 0; i < size; ++i)
             arr(i) = from + (step * i);
     }
@@ -679,8 +681,8 @@ namespace nd4j {
     NDArray<T>* NDArrayFactory<T>::createUninitialized(NDArray<T>* other) {
         auto workspace = other->getWorkspace();
 
-        int* newShape;
-        ALLOCATE(newShape, workspace, shape::shapeInfoLength(other->getShapeInfo()), int);
+        Nd4jLong* newShape;
+        ALLOCATE(newShape, workspace, shape::shapeInfoLength(other->getShapeInfo()), Nd4jLong);
         memcpy(newShape, other->getShapeInfo(), shape::shapeInfoByteLength(other->getShapeInfo()));
 
         T* buffer;

@@ -157,7 +157,7 @@ namespace randomOps {
         }
 #endif
 
-        static inline void specialOp(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        static inline void specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             /**
              * X holds data,
              * Y holds probabilities
@@ -196,44 +196,46 @@ namespace randomOps {
                     }
                 }
             } else {
-                int xCoord[MAX_RANK];
-                int yCoord[MAX_RANK];
-                int zCoord[MAX_RANK];
+                Nd4jLong xCoord[MAX_RANK];
+                Nd4jLong yCoord[MAX_RANK];
+                Nd4jLong zCoord[MAX_RANK];
 
                 int xRank = shape::rank(xShapeBuffer);
                 int yRank = shape::rank(yShapeBuffer);
                 int zRank = shape::rank(zShapeBuffer);
 
-                int *xShape = shape::shapeOf(xShapeBuffer);
-                int *yShape = shape::shapeOf(yShapeBuffer);
-                int *zShape = shape::shapeOf(zShapeBuffer);
+                auto xShape = shape::shapeOf(xShapeBuffer);
+                auto yShape = shape::shapeOf(yShapeBuffer);
+                auto zShape = shape::shapeOf(zShapeBuffer);
 
-                int *xStride = shape::stride(xShapeBuffer);
-                int *yStride = shape::stride(yShapeBuffer);
-                int *zStride = shape::stride(zShapeBuffer);
+                auto xStride = shape::stride(xShapeBuffer);
+                auto yStride = shape::stride(yShapeBuffer);
+                auto zStride = shape::stride(zShapeBuffer);
 
-                int xOffset = shape::offset(xShapeBuffer);
-                int yOffset = shape::offset(yShapeBuffer);
-                int zOffset = shape::offset(zShapeBuffer);
+/*
+                auto xOffset = shape::offset(xShapeBuffer);
+                auto yOffset = shape::offset(yShapeBuffer);
+                auto zOffset = shape::offset(zShapeBuffer);
+                */
 
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
                 for (Nd4jIndex i = 0; i < zLength; i++) {
                     shape::ind2sub(zRank, zShape, i, zCoord);
 
-                    Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                    Nd4jIndex zOffset2 = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
                     T prob = buffer->relativeT<T>(i);
                     T cumProb = (T) 0.0f;
                     for (Nd4jIndex f = 0; f < yLength; f++) {
                         shape::ind2sub(yRank, yShape, i, yCoord);
-                        Nd4jIndex yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
+                        Nd4jIndex yOffset2 = shape::getOffset(0, yShape, yStride, yCoord, yRank);
 
                         T relProb = y[yOffset2];
                         cumProb += relProb;
 
                         if (prob <= cumProb || f == yLength - 1) {
                             shape::ind2sub(xRank, xShape, f, xCoord);
-                            Nd4jIndex xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                            Nd4jIndex xOffset2 = shape::getOffset(0, xShape, xStride, xCoord, xRank);
 
                             z[zOffset2] = x[xOffset2];
                             f += yLength;
@@ -341,12 +343,12 @@ namespace randomOps {
 
 
         static inline void
-        specialOp(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             const T two_pi = (T) 2.0 * 3.14159265358979323846;
 
-            Nd4jIndex zLength = shape::length(zShapeBuffer);
-            int yEWS = shape::elementWiseStride(yShapeBuffer);
-            int zEWS = shape::elementWiseStride(zShapeBuffer);
+            auto zLength = shape::length(zShapeBuffer);
+            auto yEWS = shape::elementWiseStride(yShapeBuffer);
+            auto zEWS = shape::elementWiseStride(zShapeBuffer);
 
             int elementsPerThread = zLength / TAD_THRESHOLD;
             int _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
@@ -482,13 +484,13 @@ namespace randomOps {
         }
 #endif
 
-        static inline void specialOp(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        static inline void specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             int trials = (int) extraArguments[0];
 
             Nd4jIndex zLength = shape::length(zShapeBuffer);
 
-            int yEWS = shape::elementWiseStride(yShapeBuffer);
-            int zEWS = shape::elementWiseStride(zShapeBuffer);
+            auto yEWS = shape::elementWiseStride(yShapeBuffer);
+            auto zEWS = shape::elementWiseStride(zShapeBuffer);
 
             int elementsPerThread = zLength / TAD_THRESHOLD;
             int _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
@@ -608,7 +610,7 @@ namespace randomOps {
         }
 #endif
 
-        static inline void specialOp(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        static inline void specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             int trials = (int) extraArguments[0];
 
             Nd4jIndex zLength = shape::length(zShapeBuffer);
@@ -754,14 +756,14 @@ namespace randomOps {
 #endif
 
         static inline void
-        specialOp(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             const T two_pi = (T) 2.0 * 3.14159265358979323846;
 
             Nd4jIndex zLength = shape::length(zShapeBuffer);
-            int yEWS = shape::elementWiseStride(yShapeBuffer);
-            int zEWS = shape::elementWiseStride(zShapeBuffer);
+            auto yEWS = shape::elementWiseStride(yShapeBuffer);
+            auto zEWS = shape::elementWiseStride(zShapeBuffer);
 
-            int middle = zLength % 2 == 0 ? zLength / 2 : zLength / 2 + 1;
+            auto middle = zLength % 2 == 0 ? zLength / 2 : zLength / 2 + 1;
 
             int elementsPerThread = middle / TAD_THRESHOLD;
             int _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
@@ -913,12 +915,12 @@ namespace randomOps {
 #endif
 
         static inline void
-        specialOp(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             const T two_pi = (T) 2.0 * 3.14159265358979323846;
 
             Nd4jIndex zLength = shape::length(zShapeBuffer);
-            int yEWS = shape::elementWiseStride(yShapeBuffer);
-            int zEWS = shape::elementWiseStride(zShapeBuffer);
+            auto yEWS = shape::elementWiseStride(yShapeBuffer);
+            auto zEWS = shape::elementWiseStride(zShapeBuffer);
 
             int elementsPerThread = zLength / TAD_THRESHOLD;
             int _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
