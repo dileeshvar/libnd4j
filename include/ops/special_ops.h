@@ -985,7 +985,7 @@ namespace simdOps {
 					i_f += (i_c % outShape[dim])  * outStride[dim];
 					i_c = i_c / outShape[dim];
 				}
-				result[i_f] += val;
+				result[i_f] = val;
 			}
 		}
 #endif
