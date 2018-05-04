@@ -45,11 +45,11 @@ namespace functions {
 
 #ifdef __CUDACC__
 
-            static __host__ void execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, int xStride, T *y, int yStride, T *result, int resultStride, T *extraParams, Nd4jIndex n);
+            static __host__ void execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, int xStride, T *y, int yStride, T *result, int resultStride, T *extraParams, Nd4jLong n);
 
             static __host__ void execudaCudaShaped(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, T *dx, int *xShapeInfo, T *y, int *yShapeInfo, T *result, int *resultShapeInfo, T *extraParams);
 
-            static __device__ void transformCuda(const int opNum, Nd4jIndex n, T *dx, T *y, int incx, int incy, T *extraParams, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+            static __device__ void transformCuda(const int opNum, Nd4jLong n, T *dx, T *y, int incx, int incy, T *extraParams, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
 
             static __device__ void transformCuda(const int opNum, T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
 
@@ -60,7 +60,7 @@ namespace functions {
 	        static __device__ void transformCuda(T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
 
             template<typename OpType>
-	        static __device__ void transformCuda(Nd4jIndex n, T *dx, T *dy, int incx, int incy, T *params, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
+	        static __device__ void transformCuda(Nd4jLong n, T *dx, T *dy, int incx, int incy, T *params, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
 
             template<typename OpType>
 	        static __device__ void transform(T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *indexes, int *yIndexes, int *resultIndexes,  int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo);
@@ -113,13 +113,13 @@ namespace functions {
 			static void exec(
 				const int opNum,
 				T *dx,
-				Nd4jIndex xStride,
+				Nd4jLong xStride,
 				T *y,
-				Nd4jIndex yStride,
+				Nd4jLong yStride,
 				T *result,
-				Nd4jIndex resultStride,
+				Nd4jLong resultStride,
 				T *extraParams,
-				Nd4jIndex n) {
+				Nd4jLong n) {
 				DISPATCH_BY_OPNUM(exec, PARAMS(dx,
                                                xStride,
                                                y,
@@ -142,10 +142,10 @@ namespace functions {
                     int *indexes,
                     int *yIndexes,
                     int *resultIndexes) {
-                Nd4jIndex n = shape::length(xShapeBuffer);
+                Nd4jLong n = shape::length(xShapeBuffer);
 
 #pragma omp parallel for simd schedule(guided) proc_bind(AFFINITY) default(shared)
-                for (Nd4jIndex i = 0; i < n; i++) {
+                for (Nd4jLong i = 0; i < n; i++) {
                     result[resultIndexes[i]] = OpType::op(dx[indexes[i]], y[yIndexes[i]], extraParams);
 
                 }
@@ -160,7 +160,7 @@ namespace functions {
                     T *result,
                     Nd4jLong* resultShapeBuffer,
                     T *extraParams) {
-                Nd4jIndex n = shape::length(xShapeBuffer);
+                Nd4jLong n = shape::length(xShapeBuffer);
                 int xElementWiseStride = shape::elementWiseStride(xShapeBuffer);
                 int yElementWiseStride = shape::elementWiseStride(yShapeBuffer);
                 int resultElementWiseStride = shape::elementWiseStride(resultShapeBuffer);
@@ -188,12 +188,12 @@ namespace functions {
                         num_threads = nd4j::math::nd4j_min<int>(num_threads, omp_get_max_threads());
 
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared) private(xCoord, resultCoord)
-                        for (Nd4jIndex i = 0; i < n; i++) {
+                        for (Nd4jLong i = 0; i < n; i++) {
                             shape::ind2subC(xRank,xShape, i, xCoord);
                             shape::ind2subC(resultRank,resultShape, i, resultCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                            Nd4jIndex resultOffset = shape::getOffset(0, resultShape, resultStride, resultCoord, resultRank);
+                            Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                            Nd4jLong resultOffset = shape::getOffset(0, resultShape, resultStride, resultCoord, resultRank);
                             result[resultOffset] = OpType::op(dx[xOffset], y[0], extraParams);
                         }
                     }
@@ -253,7 +253,7 @@ namespace functions {
                     num_threads = nd4j::math::nd4j_min<int>(num_threads, omp_get_max_threads());
 
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads>1) proc_bind(AFFINITY) default(shared)
-for (Nd4jIndex i = 0; i < xShape[0]; i++) {
+for (Nd4jLong i = 0; i < xShape[0]; i++) {
                     T *dxLocal = dx + xStride[0] * i;
                     T *yLocal = y + yStride[0] * i;
                     T *resultLocal = result + resultStride[0] * i;
@@ -265,12 +265,12 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                     Nd4jLong *yStrideLocal = yStride + 1;
                     Nd4jLong *resultStrideLocal = resultStride + 1;
 
-                    int shapeIter[MAX_RANK];
-                    int coord[MAX_RANK];
+                    Nd4jLong shapeIter[MAX_RANK];
+                    Nd4jLong coord[MAX_RANK];
                     int dim;
                     Nd4jLong xStridesIter[MAX_RANK];
                     Nd4jLong yStridesIter[MAX_RANK];
-                    int resultStridesIter[MAX_RANK];
+                    Nd4jLong resultStridesIter[MAX_RANK];
                     if (PrepareThreeRawArrayIter<T>(rankLocal,
                                                     xShapeLocal,
                                                     dxLocal,
@@ -313,7 +313,7 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                 }
 
                 else {
-                    Nd4jIndex len = n;
+                    Nd4jLong len = n;
                     int xRank = shape::rank(xShapeBuffer);
                     int yRank = shape::rank(yShapeBuffer);
                     int resultRank = shape::rank(resultShapeBuffer);
@@ -336,12 +336,12 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
 
                     if(dx == result) {
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared) private(xCoord, yCoord)
-                        for (Nd4jIndex i = 0; i < len; i++) {
+                        for (Nd4jLong i = 0; i < len; i++) {
                             shape::ind2subC(xRank,xShape, i, xCoord);
                             shape::ind2subC(yRank,yShape, i, yCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                            Nd4jIndex yOffset = shape::getOffset(0, yShape, yStride, yCoord, yRank);
+                            Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                            Nd4jLong yOffset = shape::getOffset(0, yShape, yStride, yCoord, yRank);
                             result[xOffset] = OpType::op(dx[xOffset], y[yOffset], extraParams);
 
                         }
@@ -350,14 +350,14 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                         Nd4jLong resultCoord[MAX_RANK];
 
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared) private(xCoord, yCoord, resultCoord)
-                        for (Nd4jIndex i = 0; i < len; i++) {
+                        for (Nd4jLong i = 0; i < len; i++) {
                             shape::ind2subC(xRank,xShape, i, xCoord);
                             shape::ind2subC(yRank,yShape, i, yCoord);
                             shape::ind2subC(resultRank,resultShape, i, resultCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                            Nd4jIndex yOffset = shape::getOffset(0, yShape, yStride, yCoord, yRank);
-                            Nd4jIndex resultOffset = shape::getOffset(0, resultShape, resultStride, resultCoord, resultRank);
+                            Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                            Nd4jLong yOffset = shape::getOffset(0, yShape, yStride, yCoord, yRank);
+                            Nd4jLong resultOffset = shape::getOffset(0, resultShape, resultStride, resultCoord, resultRank);
                             result[resultOffset] = OpType::op(dx[xOffset], y[yOffset], extraParams);
 
                         }
@@ -367,13 +367,13 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
 
             template<typename OpType>
             static void exec(T *dx,
-                             Nd4jIndex xStride,
+                             Nd4jLong xStride,
                              T *y,
-                             Nd4jIndex yStride,
+                             Nd4jLong yStride,
                              T *result,
-                             Nd4jIndex resultStride,
+                             Nd4jLong resultStride,
                              T *extraParams,
-                             const Nd4jIndex n) {
+                             const Nd4jLong n) {
                 int elementsPerThread = n / ELEMENT_THRESHOLD;
                 int _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
                 _threads = nd4j::math::nd4j_min<int>(_threads, omp_get_max_threads());
@@ -384,18 +384,18 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                     if (_threads > 1) {
 #pragma omp parallel num_threads(_threads) if (_threads>1) proc_bind(AFFINITY) default(shared)
                         {
-                            Nd4jIndex tid = omp_get_thread_num();
-                            Nd4jIndex start = span * tid;
-                            Nd4jIndex end = span * (tid + 1);
+                            Nd4jLong tid = omp_get_thread_num();
+                            Nd4jLong start = span * tid;
+                            Nd4jLong end = span * (tid + 1);
                             if (end > n) end = n;
 #pragma omp simd
-                            for (Nd4jIndex i = start; i < end; i++) {
+                            for (Nd4jLong i = start; i < end; i++) {
                                 result[i] = OpType::op(dx[i], y[i], extraParams);
                             }
                         }
                     } else {
 #pragma omp simd
-                        for (Nd4jIndex i = 0; i < n; i++) {
+                        for (Nd4jLong i = 0; i < n; i++) {
                             result[i] = OpType::op(dx[i], y[i], extraParams);
                         }
                     }
@@ -404,19 +404,19 @@ for (Nd4jIndex i = 0; i < xShape[0]; i++) {
                     if (_threads > 1) {
 #pragma omp parallel num_threads(_threads) if (_threads>1) proc_bind(AFFINITY) default(shared)
                         {
-                            Nd4jIndex tid = omp_get_thread_num();
-                            Nd4jIndex start = span * tid;
-                            Nd4jIndex end = span * (tid + 1);
+                            Nd4jLong tid = omp_get_thread_num();
+                            Nd4jLong start = span * tid;
+                            Nd4jLong end = span * (tid + 1);
                             if (end > n) end = n;
 
 #pragma omp simd
-                            for (Nd4jIndex i = start; i < end; i++) {
+                            for (Nd4jLong i = start; i < end; i++) {
                                 result[i * resultStride] = OpType::op(dx[i * xStride], y[i * yStride], extraParams);
                             }
                         }
                     } else {
 #pragma omp simd
-                        for (Nd4jIndex i = 0; i < n; i++) {
+                        for (Nd4jLong i = 0; i < n; i++) {
                             result[i * resultStride] = OpType::op(dx[i * xStride], y[i * yStride], extraParams);
                         }
                     }

@@ -239,6 +239,10 @@ namespace nd4j {
         bool permutei(const std::vector<int>& dimensions);
         bool permutei(const int* dimensions, const int rank);
 
+        bool permutei(const std::initializer_list<Nd4jLong>& dimensions);
+        bool permutei(const std::vector<Nd4jLong>& dimensions);
+        bool permutei(const Nd4jLong* dimensions, const int rank);
+
         /**
         *  permutes the dimensions in array according to "dimensions" array, new array points on _buffer of this array
         */
@@ -246,16 +250,21 @@ namespace nd4j {
         NDArray<T>* permute(const std::vector<int>& dimensions) const;
         NDArray<T>* permute(const int* dimensions, const int rank) const;
 
+        void permute(const int* dimensions, const int rank, NDArray<T>& target) const;
+        void permute(const std::vector<int>& dimensions, NDArray<T>& target) const;
+
+        NDArray<T>* permute(const std::initializer_list<Nd4jLong>& dimensions) const;
+        NDArray<T>* permute(const std::vector<Nd4jLong>& dimensions) const;
+        NDArray<T>* permute(const Nd4jLong* dimensions, const int rank) const;
+        void permute(const Nd4jLong* dimensions, const int rank, NDArray<T>& target) const;
+        void permute(const std::vector<Nd4jLong>& dimensions, NDArray<T>& target) const;
+
         /**
          * This method streamlines given view or permuted array, and reallocates buffer
          */
         void streamline(char order = 'a');
 
-        /**
-        *  permutes the dimensions in target according to "dimensions" array
-        */
-        void permute(const int* dimensions, const int rank, NDArray<T>& target) const;
-        void permute(const std::vector<int>& dimensions, NDArray<T>& target) const;
+        
 
         /**
         *  check whether array is contiguous in memory
@@ -370,13 +379,13 @@ namespace nd4j {
         *  extraParams - extra parameters for operation
         */ 
         template<typename OpName>
-        Nd4jIndex indexReduceNumber(T *extraParams = nullptr);
+        Nd4jLong indexReduceNumber(T *extraParams = nullptr);
 
         /**
         *  returns index of max element in a given array (optionally: along given dimension(s))
         *  dimensions - optional vector with dimensions
         */          
-        Nd4jIndex argMax(std::initializer_list<int> dimensions = {});
+        Nd4jLong argMax(std::initializer_list<int> dimensions = {});
 
         /**
         *  apply OpName transformation directly to array
@@ -476,7 +485,7 @@ namespace nd4j {
         */
         void applyLambda(const std::function<T(T)>& func, NDArray<T>* target = nullptr);
 
-        void applyIndexedLambda(const std::function<T(Nd4jIndex, T)>& func, NDArray<T>* target = nullptr);
+        void applyIndexedLambda(const std::function<T(Nd4jLong, T)>& func, NDArray<T>* target = nullptr);
 
         /** 
         *  apply pairwise operation "func" to an array
@@ -486,7 +495,7 @@ namespace nd4j {
         */ 
         void applyPairwiseLambda(NDArray<T>* other, const std::function<T(T, T)>& func, NDArray<T>* target = nullptr);
 
-        void applyIndexedPairwiseLambda(NDArray<T>* other, const std::function<T(Nd4jIndex, T, T)>& func, NDArray<T>* target = nullptr);
+        void applyIndexedPairwiseLambda(NDArray<T>* other, const std::function<T(Nd4jLong, T, T)>& func, NDArray<T>* target = nullptr);
 
         void applyTriplewiseLambda(NDArray<T>* second, NDArray<T> *third, const std::function<T(T, T, T)>& func, NDArray<T>* target = nullptr);
 #endif
@@ -529,8 +538,8 @@ namespace nd4j {
         *  returns the number of arrays pointing on specified dimension(s)
         *  dimensions - array of dimensions to point on
         */
-        Nd4jIndex tensorsAlongDimension(const std::initializer_list<int> dimensions) const ;
-        Nd4jIndex tensorsAlongDimension(const std::vector<int>& dimensions) const ;
+        Nd4jLong tensorsAlongDimension(const std::initializer_list<int> dimensions) const ;
+        Nd4jLong tensorsAlongDimension(const std::vector<int>& dimensions) const ;
 
         /**
         *  returns true if elements of two arrays are equal to within given epsilon value
@@ -1311,7 +1320,7 @@ template<typename T>
 
 // accessing operator for matrix, i - absolute index
 template<typename T>
- T NDArray<T>::operator()(const Nd4jIndex i) const {
+ T NDArray<T>::operator()(const Nd4jLong i) const {
 
     if (i >= shape::length(_shapeInfo))
             throw std::invalid_argument("NDArray::operator(i): dinput index is out of array length !");
@@ -1326,7 +1335,7 @@ template<typename T>
     else {
         Nd4jLong idx[MAX_RANK];
         shape::ind2subC(rankOf(), shapeOf(), i, idx);
-        Nd4jIndex offset = shape::getOffset(0, shapeOf(), stridesOf(), idx, rankOf());
+        Nd4jLong offset = shape::getOffset(0, shapeOf(), stridesOf(), idx, rankOf());
         return _buffer[offset];        
     }
 }
@@ -1479,7 +1488,7 @@ template<typename T>
 template<typename T>
 Nd4jLong  NDArray<T>::memoryFootprint() {
 
-    Nd4jIndex size = this->lengthOf() * this->sizeOfT();
+    Nd4jLong size = this->lengthOf() * this->sizeOfT();
     size += (this->rankOf() * 2 + 4) * sizeof(int);
     return size;
 }

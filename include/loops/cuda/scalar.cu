@@ -24,16 +24,16 @@ __device__ void scalarAlongDimensionGeneric(T *x,
                                             int *dimension,
                                             int dimensionLength,
                                             int *tadShapeInfo,
-                                            Nd4jIndex *tadOffsets,
+                                            Nd4jLong *tadOffsets,
                                             int *tadShapeInfoZ,
-                                            Nd4jIndex *tadOffsetsZ) {
+                                            Nd4jLong *tadOffsetsZ) {
 
     functions::scalar::ScalarTransform<T>::template transformCuda<OpType>(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ);
 }
 
 template <typename T, typename OpClass>
 __device__ void scalarSimpleGeneric(
-        Nd4jIndex n,
+        Nd4jLong n,
         T dx,
         T *dy,
         int incy, T *params,
@@ -56,7 +56,7 @@ __device__ void scalarSimpleGeneric(
 template <typename T>
 __device__ void scalarGenericIndexes(
         int opNum,
-        Nd4jIndex n,
+        Nd4jLong n,
         T dx,
         T *dy,
         T *params,
@@ -85,7 +85,7 @@ __device__ void scalarGenericIndexes(
 
 __global__ void scalarDoubleIndexes(
         int opNum,
-        Nd4jIndex n,
+        Nd4jLong n,
         double dx,
         double *dy,
         double *params,
@@ -101,7 +101,7 @@ __global__ void scalarDoubleIndexes(
 
 __global__ void scalarFloatIndexes(
         int opNum,
-        Nd4jIndex n,
+        Nd4jLong n,
         float dx,
         float *dy,
         float *params,
@@ -141,9 +141,9 @@ __device__ void scalarSimpleGeneric(
 
 
 // ScalarOp Along Dimension kernels
-DISPATCH_KERNEL_SIMPLE(scalarAlongDimension_, scalarAlongDimensionGeneric, float, INPUT(float *x, int *xShapeInfo, float *extraParams, float *z, int *zShapeInfo, float *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jIndex *tadOffsets, int *tadShapeInfoZ, Nd4jIndex *tadOffsetsZ), PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
-DISPATCH_KERNEL_SIMPLE(scalarAlongDimension_, scalarAlongDimensionGeneric, double, INPUT(double *x, int *xShapeInfo, double *extraParams, double *z, int *zShapeInfo, double *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jIndex *tadOffsets, int *tadShapeInfoZ, Nd4jIndex *tadOffsetsZ), PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
-DISPATCH_KERNEL_SIMPLE(scalarAlongDimension_, scalarAlongDimensionGeneric, float16, INPUT(float16 *x, int *xShapeInfo, float16 *extraParams, float16 *z, int *zShapeInfo, float16 *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jIndex *tadOffsets, int *tadShapeInfoZ, Nd4jIndex *tadOffsetsZ), PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
+DISPATCH_KERNEL_SIMPLE(scalarAlongDimension_, scalarAlongDimensionGeneric, float, INPUT(float *x, int *xShapeInfo, float *extraParams, float *z, int *zShapeInfo, float *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, int *tadShapeInfoZ, Nd4jLong *tadOffsetsZ), PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
+DISPATCH_KERNEL_SIMPLE(scalarAlongDimension_, scalarAlongDimensionGeneric, double, INPUT(double *x, int *xShapeInfo, double *extraParams, double *z, int *zShapeInfo, double *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, int *tadShapeInfoZ, Nd4jLong *tadOffsetsZ), PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
+DISPATCH_KERNEL_SIMPLE(scalarAlongDimension_, scalarAlongDimensionGeneric, float16, INPUT(float16 *x, int *xShapeInfo, float16 *extraParams, float16 *z, int *zShapeInfo, float16 *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, int *tadShapeInfoZ, Nd4jLong *tadOffsetsZ), PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
 
 // scalar shape
 DISPATCH_KERNEL_SIMPLE(scalarSimpleShaped_, scalarSimpleGeneric, float, INPUT(float dx, float *dy, int *xShapeInfo, float *params, float *result, int *resultShapeInfo, int *allocationBuffer), PARAMS(dx, dy, xShapeInfo, params, result, resultShapeInfo, allocationBuffer), OPS_A(SCALAR_OPS))
@@ -151,16 +151,16 @@ DISPATCH_KERNEL_SIMPLE(scalarSimpleShaped_, scalarSimpleGeneric, double, INPUT(d
 DISPATCH_KERNEL_SIMPLE(scalarSimpleShaped_, scalarSimpleGeneric, float16, INPUT(float16 dx, float16 *dy, int *xShapeInfo, float16 *params, float16 *result, int *resultShapeInfo, int *allocationBuffer), PARAMS(dx, dy, xShapeInfo, params, result, resultShapeInfo, allocationBuffer), OPS_A(SCALAR_OPS))
 
 // scalar strided
-DISPATCH_KERNEL_SIMPLE(scalarSimpleStrided_, scalarSimpleGeneric, float, INPUT(Nd4jIndex n, float dx, float *dy, int incy, float *params, float *result,int resultStride, int *allocationBuffer), PARAMS(n, dx, dy, incy, params, result, resultStride, allocationBuffer), OPS_A(SCALAR_OPS))
-DISPATCH_KERNEL_SIMPLE(scalarSimpleStrided_, scalarSimpleGeneric, double, INPUT(Nd4jIndex n, double dx, double *dy, int incy, double *params, double *result,int resultStride, int *allocationBuffer), PARAMS(n, dx, dy, incy, params, result, resultStride, allocationBuffer), OPS_A(SCALAR_OPS))
-DISPATCH_KERNEL_SIMPLE(scalarSimpleStrided_, scalarSimpleGeneric, float16, INPUT(Nd4jIndex n, float16 dx, float16 *dy, int incy, float16 *params, float16 *result,int resultStride, int *allocationBuffer), PARAMS(n, dx, dy, incy, params, result, resultStride, allocationBuffer), OPS_A(SCALAR_OPS))
+DISPATCH_KERNEL_SIMPLE(scalarSimpleStrided_, scalarSimpleGeneric, float, INPUT(Nd4jLong n, float dx, float *dy, int incy, float *params, float *result,int resultStride, int *allocationBuffer), PARAMS(n, dx, dy, incy, params, result, resultStride, allocationBuffer), OPS_A(SCALAR_OPS))
+DISPATCH_KERNEL_SIMPLE(scalarSimpleStrided_, scalarSimpleGeneric, double, INPUT(Nd4jLong n, double dx, double *dy, int incy, double *params, double *result,int resultStride, int *allocationBuffer), PARAMS(n, dx, dy, incy, params, result, resultStride, allocationBuffer), OPS_A(SCALAR_OPS))
+DISPATCH_KERNEL_SIMPLE(scalarSimpleStrided_, scalarSimpleGeneric, float16, INPUT(Nd4jLong n, float16 dx, float16 *dy, int incy, float16 *params, float16 *result,int resultStride, int *allocationBuffer), PARAMS(n, dx, dy, incy, params, result, resultStride, allocationBuffer), OPS_A(SCALAR_OPS))
 
 
 namespace functions {
     namespace scalar {
 
     template<>
-    void ScalarTransform<float>::executeCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float *x, int xStride, float *result, int resultStride, float scalar, float *extraParams, Nd4jIndex n) {
+    void ScalarTransform<float>::executeCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float *x, int xStride, float *result, int resultStride, float scalar, float *extraParams, Nd4jLong n) {
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	    if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -174,7 +174,7 @@ namespace functions {
 
 
     template<>
-    void ScalarTransform<float16>::executeCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float16 *x, int xStride, float16 *result, int resultStride, float16 scalar, float16 *extraParams, Nd4jIndex n) {
+    void ScalarTransform<float16>::executeCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float16 *x, int xStride, float16 *result, int resultStride, float16 scalar, float16 *extraParams, Nd4jLong n) {
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	    if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -188,7 +188,7 @@ namespace functions {
 
 
     template<>
-    void ScalarTransform<double>::executeCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, double *x, int xStride, double *result, int resultStride, double scalar, double *extraParams, Nd4jIndex n) {
+    void ScalarTransform<double>::executeCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, double *x, int xStride, double *result, int resultStride, double scalar, double *extraParams, Nd4jLong n) {
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	    if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -242,9 +242,9 @@ namespace functions {
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
         int *tadShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-        Nd4jIndex *tadOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+        Nd4jLong *tadOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
         int *tadShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-        Nd4jIndex *tadOffsetsZ = reinterpret_cast<Nd4jIndex *>(extraPointers[13]);
+        Nd4jLong *tadOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
         DISPATCH_SIMPLE(scalarAlongDimension, double, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
     }
@@ -254,9 +254,9 @@ namespace functions {
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
         int *tadShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-        Nd4jIndex *tadOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+        Nd4jLong *tadOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
         int *tadShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-        Nd4jIndex *tadOffsetsZ = reinterpret_cast<Nd4jIndex *>(extraPointers[13]);
+        Nd4jLong *tadOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
         DISPATCH_SIMPLE(scalarAlongDimension, float, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
     }
@@ -266,9 +266,9 @@ namespace functions {
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
         int *tadShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-        Nd4jIndex *tadOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+        Nd4jLong *tadOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
         int *tadShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-        Nd4jIndex *tadOffsetsZ = reinterpret_cast<Nd4jIndex *>(extraPointers[13]);
+        Nd4jLong *tadOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
         DISPATCH_SIMPLE(scalarAlongDimension, float16, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
     }
@@ -286,7 +286,7 @@ namespace functions {
     template<typename T>
     template<typename OpType>
     __device__ void ScalarTransform<T>::transform(
-            Nd4jIndex n,
+            Nd4jLong n,
             T scalar,
             T *dy,
             T *params,
@@ -296,7 +296,7 @@ namespace functions {
             UnifiedSharedMemory *manager) {
         int totalThreads = gridDim.x * blockDim.x;
         int tid = threadIdx.x;
-        Nd4jIndex i = blockIdx.x * blockDim.x + tid;
+        Nd4jLong i = blockIdx.x * blockDim.x + tid;
 
         /* equal, positive, non-unit increments. */
         for (; i < n; i+= totalThreads) {
@@ -358,7 +358,7 @@ namespace functions {
         else {
             int xIdx[MAX_RANK];
 
-            for (Nd4jIndex i = tid; i < length; i+= totalThreads) {
+            for (Nd4jLong i = tid; i < length; i+= totalThreads) {
                 shape::ind2sub(xRank, xShape, i,xIdx);
                 int xOffset2 = shape::getOffset(0, xShape, xStride, xIdx, xRank);
                 int resultOffset = shape::getOffset(0, zShape, zStride, xIdx, zRank);
@@ -380,9 +380,9 @@ namespace functions {
                                   int *dimension,
                                   int dimensionLength,
                                   int *tadShapeInfo,
-                                  Nd4jIndex *tadOffsets,
+                                  Nd4jLong *tadOffsets,
                                   int *tadShapeInfoZ,
-                                  Nd4jIndex *tadOffsetsZ) {
+                                  Nd4jLong *tadOffsetsZ) {
 
 
                 if (tadShapeInfoZ == nullptr) {
@@ -399,8 +399,8 @@ namespace functions {
 
                 // main loop, rolling over tads
                 for (int r = blockIdx.x; r < numTads; r+=gridDim.x) {
-                    Nd4jIndex offset = tadOffsets[r];
-                    Nd4jIndex offsetZ = tadOffsetsZ[r];
+                    Nd4jLong offset = tadOffsets[r];
+                    Nd4jLong offsetZ = tadOffsetsZ[r];
                     T scalar = scalars[r];
 
                     if (tadEWS >= 1 && zEWS >= 1) {
@@ -430,7 +430,7 @@ namespace functions {
         template<typename T>
         template<typename OpType>
         __device__ void ScalarTransform<T>::transformCuda(
-            Nd4jIndex n,
+            Nd4jLong n,
             T dx,
             T *dy,
             int incy,
@@ -443,7 +443,7 @@ namespace functions {
         int totalThreads = gridDim.x * blockDim.x;
         int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-        Nd4jIndex i = tid;
+        Nd4jLong i = tid;
         if(incy == 1 && resultStride == 1) {
             for (; i < n; i += totalThreads) {
                 result[i] = OpType::op(dy[i],dx, params);
@@ -473,7 +473,7 @@ namespace functions {
 
         static inline __device__ void transform(
             const int opNum,
-            Nd4jIndex n,
+            Nd4jLong n,
             T scalar,
             T *dy,
             T *params,
@@ -487,7 +487,7 @@ namespace functions {
 
         static inline __device__ void transformCuda(
             const int opNum,
-            Nd4jIndex n,
+            Nd4jLong n,
             T dx,
             T *dy,
             int incy,

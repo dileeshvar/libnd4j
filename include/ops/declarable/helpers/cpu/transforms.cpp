@@ -531,13 +531,13 @@ void scatterUpdate(NDArray<T>& operand, NDArray<T>& updates, const std::vector<i
 template<typename T>
 void mergeMaxIndex(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
 
-    const Nd4jIndex numArgs = inArrs.size();
+    const Nd4jLong numArgs = inArrs.size();
     NDArray<T>* x = inArrs[0];    
 
 #pragma omp parallel for if(x->lengthOf() > Environment::getInstance()->elementwiseThreshold()) schedule(guided)
-    for (Nd4jIndex e = 0; e < x->lengthOf(); e++) {
+    for (Nd4jLong e = 0; e < x->lengthOf(); e++) {
         T max = -MAX_FLOAT;
-        Nd4jIndex idx = 0;
+        Nd4jLong idx = 0;
             
         for (int i = 0; i < numArgs; i++){
             
@@ -556,11 +556,11 @@ void mergeMaxIndex(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
 template<typename T>
 void mergeMax(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
     
-    const Nd4jIndex numArgs = inArrs.size();
+    const Nd4jLong numArgs = inArrs.size();
     NDArray<T> *x = inArrs[0];    
 
 #pragma omp parallel for if(x->lengthOf() > Environment::getInstance()->elementwiseThreshold()) schedule(guided) proc_bind(close)
-     for (Nd4jIndex e = 0; e < x->lengthOf(); e++) {
+     for (Nd4jLong e = 0; e < x->lengthOf(); e++) {
         T max = -MAX_FLOAT;
         for (int i = 0; i < numArgs; i++) { 
             T v = (*inArrs[i])(e);
@@ -575,12 +575,12 @@ void mergeMax(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
 template<typename T>
 void mergeAvg(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
     
-    const Nd4jIndex numArgs = inArrs.size();
+    const Nd4jLong numArgs = inArrs.size();
     const T factor = 1. / numArgs;
     NDArray<T> *x = inArrs[0];    
         
 #pragma omp parallel for if(x->lengthOf() > Environment::getInstance()->elementwiseThreshold()) schedule(guided) proc_bind(close)
-    for (Nd4jIndex e = 0; e < x->lengthOf(); e++) {
+    for (Nd4jLong e = 0; e < x->lengthOf(); e++) {
         T sum = 0.;
         for (int i = 0; i < numArgs; i++) { 
             T v = (*inArrs[i])(e);
@@ -595,11 +595,11 @@ void mergeAvg(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
 template<typename T>
 void mergeAdd(const std::vector<NDArray<T>*>& inArrs, NDArray<T>& output) {
     
-    const Nd4jIndex numArgs = inArrs.size();
+    const Nd4jLong numArgs = inArrs.size();
     NDArray<T> *x = inArrs[0];    
         
 #pragma omp parallel for if(x->lengthOf() > Environment::getInstance()->elementwiseThreshold()) schedule(guided) proc_bind(close)
-    for (Nd4jIndex e = 0; e < x->lengthOf(); e++) {
+    for (Nd4jLong e = 0; e < x->lengthOf(); e++) {
         
         T sum = 0.;
         

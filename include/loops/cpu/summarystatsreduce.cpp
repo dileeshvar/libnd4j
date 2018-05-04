@@ -26,10 +26,10 @@ namespace functions {
         T SummaryStatsReduce<T>::execScalar(const bool biasCorrected, T *x, int *xShapeInfo, T *extraParams) {
             SummaryStatsData<T> startingIndex;
             startingIndex.initialize();
-            Nd4jIndex length = shape::length(xShapeInfo);
+            Nd4jLong length = shape::length(xShapeInfo);
             int xElementWiseStride = shape::elementWiseStride(xShapeInfo);
             if (xElementWiseStride == 1) {
-                for (Nd4jIndex i = 0; i < length; i++) {
+                for (Nd4jLong i = 0; i < length; i++) {
                     SummaryStatsData<T> curr;
                     curr.initWithValue(x[i]);
                     startingIndex = update(startingIndex, curr,
@@ -47,9 +47,9 @@ namespace functions {
                 int xRank = shape::rank(xShapeInfo);
 
 
-                for (Nd4jIndex i = 0; i < length; i++) {
+                for (Nd4jLong i = 0; i < length; i++) {
                     shape::ind2subC(xRank, xShape, i, xCoords);
-                    Nd4jIndex xOffset = shape::getOffset(0, xShape, xStride, xCoords, xRank);
+                    Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoords, xRank);
 
                     SummaryStatsData<T> curr;
                     curr.initWithValue(x[xOffset]);
@@ -108,7 +108,7 @@ namespace functions {
                 int rank = shape::rank(tadShapeShapeInfo);
 #pragma omp parallel for schedule(guided) default(shared)
                 for (int i = 0; i < resultLength; i++) {
-                    Nd4jIndex offset = tad.tadOffsets[i];
+                    Nd4jLong offset = tad.tadOffsets[i];
                     int shapeIter[MAX_RANK];
                     int coord[MAX_RANK];
                     int dim;
@@ -151,7 +151,7 @@ namespace functions {
 
 #pragma omp parallel for schedule(guided) default(shared)
                     for (int i = 0; i < resultLength; i++) {
-                        Nd4jIndex baseOffset = tad.tadOffsets[i];
+                        Nd4jLong baseOffset = tad.tadOffsets[i];
                         SummaryStatsData<T> comp;
                         comp.initWithValue(x[baseOffset]);
 // FIXME: reduction to be used here
@@ -174,7 +174,7 @@ namespace functions {
 #pragma omp parallel for schedule(guided) default(shared)
                     for (int r = 0; r < resultLength; r++) {
                         int xCoord[MAX_RANK];
-                        Nd4jIndex tadOffsetForBlock = tad.tadOffsets[r];
+                        Nd4jLong tadOffsetForBlock = tad.tadOffsets[r];
 
                         SummaryStatsData<T> comp;
                         comp.initWithValue(x[tadOffsetForBlock]);
@@ -182,7 +182,7 @@ namespace functions {
 // FIXME: reduction should be fixed
                         for (int i = 1; i < tadLength; i ++) {
                             shape::ind2subC(tadRank, tadShape, i, xCoord);
-                            Nd4jIndex xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
+                            Nd4jLong xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
 
                             SummaryStatsData <T> indexVal2;
                             indexVal2.initWithValue(x[xOffset]);

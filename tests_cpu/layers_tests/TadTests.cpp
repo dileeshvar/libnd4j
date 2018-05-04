@@ -53,11 +53,11 @@ TEST_F(TadTests, TestNumTads1) {
 
     std::vector<int> dim({0});
 
-    Nd4jIndex tadLengthX = shape::tadLength(x.getShapeInfo(), dim.data(), dim.size());
-    Nd4jIndex numTadsX = x.lengthOf() / tadLengthX;
+    Nd4jLong tadLengthX = shape::tadLength(x.getShapeInfo(), dim.data(), dim.size());
+    Nd4jLong numTadsX = x.lengthOf() / tadLengthX;
 
-    Nd4jIndex tadLengthY = shape::tadLength(y.getShapeInfo(), dim.data(), dim.size());
-    Nd4jIndex numTadsY = y.lengthOf() / tadLengthY;
+    Nd4jLong tadLengthY = shape::tadLength(y.getShapeInfo(), dim.data(), dim.size());
+    Nd4jLong numTadsY = y.lengthOf() / tadLengthY;
 
     ASSERT_EQ(2, tadLengthX);
     ASSERT_EQ(3, numTadsX);
@@ -74,8 +74,8 @@ TEST_F(TadTests, TestShapeTad_1) {
     NDArray<float> input(buff, shapeInfo);
     
     std::vector<int> dimensions = {0,1,2};
-    Nd4jIndex tadLength = shape::tadLength(input.getShapeInfo(), dimensions.data(), dimensions.size());
-    Nd4jIndex numTads = input.lengthOf() / tadLength;
+    Nd4jLong tadLength = shape::tadLength(input.getShapeInfo(), dimensions.data(), dimensions.size());
+    Nd4jLong numTads = input.lengthOf() / tadLength;
     
     shape::TAD tad(input.getShapeInfo(), dimensions.data(), dimensions.size());
     tad.createTadOnlyShapeInfo();
@@ -155,8 +155,8 @@ TEST_F(TadTests, Tad_1D_1) {
 //     NDArray<float> expected('c', {4,1});    
 
 //     std::vector<int> copy = {2,3};
-//     Nd4jIndex tadLength = shape::tadLength(input.getShapeInfo(), copy.data(), copy.size());
-//     Nd4jIndex numTads = input.lengthOf() / tadLength;
+//     Nd4jLong tadLength = shape::tadLength(input.getShapeInfo(), copy.data(), copy.size());
+//     Nd4jLong numTads = input.lengthOf() / tadLength;
 //     shape::TAD tad(input.getShapeInfo(), copy.data(), copy.size());
 //     tad.createTadOnlyShapeInfo();    
     

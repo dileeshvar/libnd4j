@@ -738,7 +738,7 @@ ShapeUtils<T>::matrixProductShape(int* theFirstShape, int* theSecondShape,
         (shape::isScalar(tmpA) && shape::isVector(tmpB))) {
         // element-wise
         shape[0] = 1;
-        shape[1] = (int) nd4j::math::nd4j_max<Nd4jIndex>(shape::length(tmpA), shape::length(tmpB));
+        shape[1] = (int) nd4j::math::nd4j_max<Nd4jLong>(shape::length(tmpA), shape::length(tmpB));
     } else if (shape::isRowVector(tmpA) && shape::isRowVector(tmpB)) {
         // dot case
         shape[0] = 1;

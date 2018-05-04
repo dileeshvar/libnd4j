@@ -21,7 +21,7 @@ namespace functions {
 				int *xShapeInfo,
 				T *result,
 				int *resultShapeInfo,
-				T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+				T *extraParams, int *tadShapeInfo, Nd4jLong *tadOffsets) {
                     DISPATCH_BY_OPNUM(exec, PARAMS(dx, xShapeInfo, result, resultShapeInfo, extraParams, tadShapeInfo, tadOffsets), TRANSFORM_OPS);
 		}
 
@@ -32,7 +32,7 @@ namespace functions {
                     int *xShapeInfo,
                     T *result,
                     int *resultShapeInfo,
-                    T *extraParams, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+                    T *extraParams, int *tadShapeInfo, Nd4jLong *tadOffsets) {
 
                 if(OpType::requiresSpecial) {
                     OpType::execSpecial(dx,xShapeInfo,result,resultShapeInfo,extraParams, tadShapeInfo, tadOffsets);
@@ -113,7 +113,7 @@ namespace functions {
                         if (end > n) end = n;
 
 #pragma omp simd
-                        for (Nd4jIndex i = start; i < end; i++) {
+                        for (Nd4jLong i = start; i < end; i++) {
                             result[i] = OpType::op(dx[i], extraParams);
                         }
                     }
@@ -127,7 +127,7 @@ namespace functions {
                         if (end > n) end = n;
 
 #pragma omp simd
-                        for (Nd4jIndex i = start; i < end; i++) {
+                        for (Nd4jLong i = start; i < end; i++) {
                             result[i*resultStride] = OpType::op(dx[i * xStride], extraParams);
                     }
                 }
@@ -139,9 +139,9 @@ namespace functions {
         template class ND4J_EXPORT Transform<double>;
 
 
-        BUILD_CALL_1(template void Transform<float>::exec, float, (float*, int*, float*, int*, float*, int*, Nd4jIndex*), TRANSFORM_OPS)
-        BUILD_CALL_1(template void Transform<float16>::exec, float16, (float16*, int*, float16*, int*, float16*, int*, Nd4jIndex*), TRANSFORM_OPS)
-        BUILD_CALL_1(template void Transform<double>::exec, double, (double*, int*, double*, int*, double*, int*, Nd4jIndex*), TRANSFORM_OPS)
+        BUILD_CALL_1(template void Transform<float>::exec, float, (float*, int*, float*, int*, float*, int*, Nd4jLong*), TRANSFORM_OPS)
+        BUILD_CALL_1(template void Transform<float16>::exec, float16, (float16*, int*, float16*, int*, float16*, int*, Nd4jLong*), TRANSFORM_OPS)
+        BUILD_CALL_1(template void Transform<double>::exec, double, (double*, int*, double*, int*, double*, int*, Nd4jLong*), TRANSFORM_OPS)
 
         BUILD_CALL_1(template void Transform<float>::exec, float, (float*, int, float*, int, float*, const int), TRANSFORM_OPS)
         BUILD_CALL_1(template void Transform<float16>::exec, float16, (float16*, int, float16*, int, float16*, const int), TRANSFORM_OPS)

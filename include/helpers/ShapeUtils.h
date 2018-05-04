@@ -16,12 +16,12 @@ namespace nd4j {
         public:
        
         // evaluate shape for array resulting from tensorDot operation, also evaluate shapes and permutation dimensions for transposition of two input arrays 
-        static std::vector<int> evalShapeForTensorDot(const int* aShapeInfo, const int* bShapeInfo, std::vector<int> axesA, std::vector<int> axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
-        static std::vector<int> evalShapeForTensorDot(const NDArray<T>* a,   const NDArray<T>* b,   const std::vector<int>& axesA, const std::vector<int>& axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
+        static std::vector<Nd4jLong> evalShapeForTensorDot(const int* aShapeInfo, const int* bShapeInfo, std::vector<int> axesA, std::vector<int> axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
+        static std::vector<Nd4jLong> evalShapeForTensorDot(const NDArray<T>* a,   const NDArray<T>* b,   const std::vector<int>& axesA, const std::vector<int>& axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
 
         // evaluate resulting shape after reduce operation
-        static int* evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const NDArray<T>& arr, const bool keepDims = false, const bool supportOldShapes = false, nd4j::memory::Workspace* workspace = nullptr);
-        static int* evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const int* shape, const bool keepDims = false, const bool supportOldShapes = false, nd4j::memory::Workspace* workspace = nullptr);
+        static Nd4jLong* evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const NDArray<T>& arr, const bool keepDims = false, const bool supportOldShapes = false, nd4j::memory::Workspace* workspace = nullptr);
+        static Nd4jLong* evalReduceShapeInfo(const char order, std::vector<int>& dimensions, const Nd4jLong* shape, const bool keepDims = false, const bool supportOldShapes = false, nd4j::memory::Workspace* workspace = nullptr);
 
 		// evaluate shape for array which is result of repeat operation applied to arr
     	static std::vector<Nd4jLong> evalRepeatShape(int dimension, const std::vector<Nd4jLong>& repeats, const NDArray<T>& arr);
@@ -52,11 +52,11 @@ namespace nd4j {
 
         // check the possibility of broadcast operation, if true then return shapeInfo of resulting array
         // if evalMinMax == false then array with larger rank has to be passed as first argument
-        static bool evalBroadcastShapeInfo(const NDArray<T>& max, const NDArray<T>& min, const bool evalMinMax, int*& resultShapeInfo, nd4j::memory::Workspace* workspace);
-        static bool evalBroadcastShapeInfo(int *max, int *min, const bool evalMinMax, int*& resultShapeInfo, nd4j::memory::Workspace* workspace);
+        static bool evalBroadcastShapeInfo(const NDArray<T>& max, const NDArray<T>& min, const bool evalMinMax, Nd4jLong*& resultShapeInfo, nd4j::memory::Workspace* workspace);
+        static bool evalBroadcastShapeInfo(Nd4jLong *max, Nd4jLong *min, const bool evalMinMax, Nd4jLong*& resultShapeInfo, nd4j::memory::Workspace* workspace);
 
         // check the possibility of broadcast operation for set of arrays, if true then return resulting broadcasted shapeInfo
-        static bool evalCommonBroadcastShapeInfo(const std::vector<const NDArray<T>*>& arrays, int*& resultShapeInfo, memory::Workspace* workspace = nullptr);
+        static bool evalCommonBroadcastShapeInfo(const std::vector<const NDArray<T>*>& arrays, Nd4jLong*& resultShapeInfo, memory::Workspace* workspace = nullptr);
         
         // return sorted vector of dimensions of array with larger dimensions along which two input arrays have same shape
         static std::vector<int> getDimsWithSameShape(const NDArray<T>& max, const NDArray<T>& min);

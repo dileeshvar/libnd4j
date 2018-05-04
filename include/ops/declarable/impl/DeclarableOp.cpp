@@ -72,7 +72,7 @@ namespace nd4j {
         }
 
         template<typename T>
-        Nd4jIndex DeclarableOp<T>::getOpHash() {
+        Nd4jLong DeclarableOp<T>::getOpHash() {
             return _descriptor->getHash();
         }
 
@@ -235,7 +235,7 @@ namespace nd4j {
 
             auto workspace = block.getWorkspace();
 
-            Nd4jIndex len = shape::length(shape);
+            Nd4jLong len = shape::length(shape);
             int* __shape;
             ALLOCATE(__shape, workspace, shape::shapeInfoLength(shape[0]), int); //new int[shape[0] * 2 + 4];
 
@@ -268,7 +268,7 @@ namespace nd4j {
             auto var = block.variable(block.getNodeId(), 0);
             auto workspace = block.getWorkspace();
 
-            Nd4jIndex len = shape::length(shape);
+            Nd4jLong len = shape::length(shape);
             // if that's first run - we probably have nothing here
             if (var->getNDArray() == nullptr) {
                 var->setNDArray(new NDArray<T>(order, shape, workspace));
@@ -288,9 +288,9 @@ namespace nd4j {
             nd4j_debug("Executing op: [%s]\n", this->getOpName()->c_str());
 
             std::chrono::time_point<std::chrono::system_clock> timeEnter, timeStart, timeEnd;
-            Nd4jIndex prepTime, outerTime;
+            Nd4jLong prepTime, outerTime;
 
-            Nd4jIndex memoryBefore = block->workspace() == nullptr ? 0L : block->workspace()->getSpilledSize() + block->workspace()->getUsedSize();
+            Nd4jLong memoryBefore = block->workspace() == nullptr ? 0L : block->workspace()->getSpilledSize() + block->workspace()->getUsedSize();
             if (Environment::getInstance()->isProfiling())
                 timeEnter = std::chrono::system_clock::now();
 
@@ -322,8 +322,8 @@ namespace nd4j {
                 if (fp != nullptr) {
                     auto p = fp->profile();
                     if (p != nullptr) {
-                        Nd4jIndex memoryAfter = block->workspace() == nullptr ? 0L : block->workspace()->getSpilledSize() + block->workspace()->getUsedSize(); 
-                        Nd4jIndex memoryUsed = memoryAfter - memoryBefore;
+                        Nd4jLong memoryAfter = block->workspace() == nullptr ? 0L : block->workspace()->getSpilledSize() + block->workspace()->getUsedSize(); 
+                        Nd4jLong memoryUsed = memoryAfter - memoryBefore;
                         p->nodeById(block->nodeId())->setPreparationTime(prepTime);
                         p->nodeById(block->nodeId())->setExecutionTime(outerTime);
                         p->nodeById(block->nodeId())->setTotalSize(memoryUsed);
@@ -636,7 +636,7 @@ namespace nd4j {
                 return ND4J_STATUS_OK;
 
 
-            Nd4jIndex l0 = block.variable(0)->getNDArray()->lengthOf();
+            Nd4jLong l0 = block.variable(0)->getNDArray()->lengthOf();
             for (uint32_t e = 0; e < block.width(); e++) {
                 if (l0 != block.variable(e)->getNDArray()->lengthOf())
                     return ND4J_STATUS_BAD_LENGTH;

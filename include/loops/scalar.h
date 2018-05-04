@@ -60,12 +60,12 @@ namespace functions {
 
             template<typename OpType>
             __device__
-            static void transform(Nd4jIndex n, T scalar, T *dy, T *params, T *result, Nd4jLong *indexes, int *allocationBuffer, UnifiedSharedMemory *manager);
+            static void transform(Nd4jLong n, T scalar, T *dy, T *params, T *result, Nd4jLong *indexes, int *allocationBuffer, UnifiedSharedMemory *manager);
 
 
             template<typename OpType>
             __device__
-	        static void transformCuda(Nd4jIndex n, T dx, T *dy, Nd4jLong incy, T *params, T *result, Nd4jLong resultStride, int *allocationBuffer, UnifiedSharedMemory *manager);
+	        static void transformCuda(Nd4jLong n, T dx, T *dy, Nd4jLong incy, T *params, T *result, Nd4jLong resultStride, int *allocationBuffer, UnifiedSharedMemory *manager);
 
 /*
 #include "cuda/scalar_temp.cu"

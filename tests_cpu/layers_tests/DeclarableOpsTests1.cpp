@@ -457,7 +457,7 @@ TEST_F(DeclarableOpsTests1, SubtractMatrices1) {
 }
 
 TEST_F(DeclarableOpsTests1, TestRng1) {
-    Nd4jIndex *buffer = new Nd4jIndex[100000];
+    Nd4jLong *buffer = new Nd4jLong[100000];
 
     NativeOps nativeOps;
 

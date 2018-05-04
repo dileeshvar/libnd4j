@@ -323,7 +323,7 @@ template<typename T>
 		}
 
 		template<>
-		math_def inline Nd4jIndex nd4j_abs<Nd4jIndex>(Nd4jIndex value) {
+		math_def inline Nd4jLong nd4j_abs<Nd4jLong>(Nd4jLong value) {
 			return value < 0 ? -value : value;
 		}
 
@@ -350,7 +350,7 @@ template<typename T>
 		}
 
 		template<>
-		math_def inline Nd4jIndex nd4j_rint<Nd4jIndex>(Nd4jIndex value) {
+		math_def inline Nd4jLong nd4j_rint<Nd4jLong>(Nd4jLong value) {
 			return value;
 		}
 
@@ -375,7 +375,7 @@ template<typename T>
 		}
 
 		template<>
-		math_def inline bool nd4j_isnan<Nd4jIndex>(Nd4jIndex value) {
+		math_def inline bool nd4j_isnan<Nd4jLong>(Nd4jLong value) {
 			return false;
 		}
 
@@ -410,7 +410,7 @@ template<typename T>
 		}
 
 		template<>
-		math_def inline bool nd4j_isinf<Nd4jIndex>(Nd4jIndex value) {
+		math_def inline bool nd4j_isinf<Nd4jLong>(Nd4jLong value) {
 			return false;
 		}
 
@@ -441,9 +441,9 @@ template<typename T>
 		}
 
 		template<>
-		math_def inline Nd4jIndex nd4j_copysign<Nd4jIndex>(Nd4jIndex val1, Nd4jIndex val2) {
-			if (val2 < 0) return -(nd4j_abs<Nd4jIndex>(val1));
-			else return nd4j_abs<Nd4jIndex>(val1);
+		math_def inline Nd4jLong nd4j_copysign<Nd4jLong>(Nd4jLong val1, Nd4jLong val2) {
+			if (val2 < 0) return -(nd4j_abs<Nd4jLong>(val1));
+			else return nd4j_abs<Nd4jLong>(val1);
 		}
 
 		template<>
@@ -468,12 +468,12 @@ template<typename T>
 		}
 
 		template<>
-		math_def inline Nd4jIndex nd4j_max<Nd4jIndex>(Nd4jIndex val1, Nd4jIndex val2) {
+		math_def inline Nd4jLong nd4j_max<Nd4jLong>(Nd4jLong val1, Nd4jLong val2) {
 			return val1 > val2 ? val1 : val2;
 		}
 
 		template<>
-		math_def inline Nd4jIndex nd4j_min<Nd4jIndex>(Nd4jIndex val1, Nd4jIndex val2) {
+		math_def inline Nd4jLong nd4j_min<Nd4jLong>(Nd4jLong val1, Nd4jLong val2) {
 			return val1 < val2 ? val1 : val2;
 		}
 

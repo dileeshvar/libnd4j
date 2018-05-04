@@ -18,19 +18,19 @@ namespace helpers {
 template<typename T>
 void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, int numOfElemsToReverse) {
             
-            Nd4jIndex inLength = shape::length(inShapeBuffer);
+            Nd4jLong inLength = shape::length(inShapeBuffer);
             if(numOfElemsToReverse == 0)
                 numOfElemsToReverse = inLength;
             int inEWS = shape::elementWiseStride(inShapeBuffer);
             char inOrder = shape::order(inShapeBuffer);
-            Nd4jIndex sLength = numOfElemsToReverse - 1;
+            Nd4jLong sLength = numOfElemsToReverse - 1;
 
             // two step phase here
             if (inArr == outArr) {
                 if (inEWS == 1) {
 #pragma omp parallel for schedule(guided)
-                    for (Nd4jIndex e = 0; e < numOfElemsToReverse / 2; e++) {
-                        Nd4jIndex idx = sLength - e;
+                    for (Nd4jLong e = 0; e < numOfElemsToReverse / 2; e++) {
+                        Nd4jLong idx = sLength - e;
                         T tmp = inArr[e];
                         inArr[e] = inArr[idx];
                         inArr[idx] = tmp;
@@ -38,9 +38,9 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                 } 
                 else if (inEWS > 1) {
 #pragma omp parallel for schedule(guided)
-                    for (Nd4jIndex e = 0; e < numOfElemsToReverse / 2; e++) {
-                        Nd4jIndex idx1 = (sLength - e) * inEWS;
-                        Nd4jIndex idx2 =  e * inEWS;
+                    for (Nd4jLong e = 0; e < numOfElemsToReverse / 2; e++) {
+                        Nd4jLong idx1 = (sLength - e) * inEWS;
+                        Nd4jLong idx2 =  e * inEWS;
                         T tmp = inArr[idx2];
                         inArr[idx2] = inArr[idx1];
                         inArr[idx1] = tmp;
@@ -55,7 +55,7 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                     int outCoord[MAX_RANK];
 
 #pragma omp parallel for private(inCoord, outCoord) schedule(guided)
-                    for (Nd4jIndex e = 0; e < numOfElemsToReverse / 2; e++) {
+                    for (Nd4jLong e = 0; e < numOfElemsToReverse / 2; e++) {
                         if (inOrder == 'c') {
                             shape::ind2subC(inRank, inShape, e, inCoord);
                             shape::ind2subC(inRank, inShape, sLength - e, outCoord);
@@ -64,8 +64,8 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                             shape::ind2sub(inRank, inShape, sLength - e, outCoord);
                         }
 
-                        Nd4jIndex inOffset  = shape::getOffset(0, inShape, inStride, inCoord, inRank);
-                        Nd4jIndex outOffset = shape::getOffset(0, inShape, inStride, outCoord, inRank);
+                        Nd4jLong inOffset  = shape::getOffset(0, inShape, inStride, inCoord, inRank);
+                        Nd4jLong outOffset = shape::getOffset(0, inShape, inStride, outCoord, inRank);
 
                         outArr[outOffset] = inArr[inOffset];
                     }
@@ -79,24 +79,24 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                 if (inEWS == 1 && outEWS == 1 && inOrder == outOrder) {
 
 #pragma omp parallel for schedule(guided)
-                    for (Nd4jIndex e = 0; e < numOfElemsToReverse; e++) 
+                    for (Nd4jLong e = 0; e < numOfElemsToReverse; e++) 
                         outArr[sLength - e] = inArr[e];                    
 
                     if(inLength != numOfElemsToReverse) {
 #pragma omp parallel for schedule(guided)
-                        for (Nd4jIndex e = numOfElemsToReverse; e < inLength; e++)
+                        for (Nd4jLong e = numOfElemsToReverse; e < inLength; e++)
                             outArr[e] = inArr[e];
                     }
                 } 
                 else if (inEWS >= 1 && outEWS >= 1 && inOrder == outOrder) {
 
 #pragma omp parallel for schedule(guided)
-                    for (Nd4jIndex e = 0; e < numOfElemsToReverse; e++)
+                    for (Nd4jLong e = 0; e < numOfElemsToReverse; e++)
                         outArr[(sLength - e) * outEWS] = inArr[e * inEWS];
 
                     if(inLength != numOfElemsToReverse) {
 #pragma omp parallel for schedule(guided)
-                        for (Nd4jIndex e = numOfElemsToReverse; e < inLength; e++)
+                        for (Nd4jLong e = numOfElemsToReverse; e < inLength; e++)
                             outArr[e * outEWS] = inArr[e * inEWS];
                     }
                 } 
@@ -114,7 +114,7 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                     int outCoord[MAX_RANK];
 
 #pragma omp parallel for private(inCoord, outCoord) schedule(guided)
-                    for (Nd4jIndex e = 0; e < numOfElemsToReverse; e++) {
+                    for (Nd4jLong e = 0; e < numOfElemsToReverse; e++) {
 
                         if (inOrder == 'c')
                             shape::ind2subC(inRank, inShape, e, inCoord);
@@ -126,8 +126,8 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                         else
                             shape::ind2sub(outRank, outShape, (sLength - e), outCoord);
 
-                        Nd4jIndex inOffset = shape::getOffset(0, inShape, inStride, inCoord, inRank);
-                        Nd4jIndex outOffset = shape::getOffset(0, outShape, outStride, outCoord, outRank);
+                        Nd4jLong inOffset = shape::getOffset(0, inShape, inStride, inCoord, inRank);
+                        Nd4jLong outOffset = shape::getOffset(0, outShape, outStride, outCoord, outRank);
 
                         outArr[outOffset] = inArr[inOffset];
                     }
@@ -135,7 +135,7 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                     if(inLength != numOfElemsToReverse) {
 
 #pragma omp parallel for private(inCoord, outCoord) schedule(guided)
-                        for (Nd4jIndex e = numOfElemsToReverse; e < inLength; e++) {
+                        for (Nd4jLong e = numOfElemsToReverse; e < inLength; e++) {
                              
                              if (inOrder == 'c')
                                 shape::ind2subC(inRank, inShape, e, inCoord);
@@ -147,8 +147,8 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                             else
                                 shape::ind2sub(outRank, outShape, e, outCoord);
 
-                            Nd4jIndex inOffset = shape::getOffset(0, inShape, inStride, inCoord, inRank);
-                            Nd4jIndex outOffset = shape::getOffset(0, outShape, outStride, outCoord, outRank);
+                            Nd4jLong inOffset = shape::getOffset(0, inShape, inStride, inCoord, inRank);
+                            Nd4jLong outOffset = shape::getOffset(0, outShape, outStride, outCoord, outRank);
 
                             outArr[outOffset] = inArr[inOffset];        
                         }

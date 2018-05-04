@@ -14,8 +14,8 @@ namespace nd4j {
             return std::pair<int, int>(pair->first(), pair->second());
         }
 
-        std::pair<Nd4jIndex, Nd4jIndex> FlatUtils::fromLongPair(LongPair *pair) {
-            return std::pair<Nd4jIndex, Nd4jIndex>(pair->first(), pair->second());
+        std::pair<Nd4jLong, Nd4jLong> FlatUtils::fromLongPair(LongPair *pair) {
+            return std::pair<Nd4jLong, Nd4jLong>(pair->first(), pair->second());
         }
 
         template<typename T>

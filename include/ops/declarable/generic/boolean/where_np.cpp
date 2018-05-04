@@ -82,7 +82,7 @@ namespace nd4j {
                 for (int e = 0; e < condition->lengthOf(); e++) {
                     shape::ind2subC(condition->rankOf(), condition->shapeOf(), e, idx);
 
-                    Nd4jIndex offset = shape::getOffset(0, condition->shapeOf(), condition->stridesOf(), idx, condition->rankOf());
+                    Nd4jLong offset = shape::getOffset(0, condition->shapeOf(), condition->stridesOf(), idx, condition->rankOf());
                     T v = condition->buffer()[offset];
                     if (v != (T) 0.0f) {
                         auto array = new NDArray<T>('c', {1, condition->rankOf()});

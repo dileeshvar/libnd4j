@@ -95,7 +95,7 @@ namespace functions {
                     return;
                 } else {
 
-                __shared__ Nd4jIndex length;
+                __shared__ Nd4jLong length;
                 __shared__ int xEWS;
                 __shared__ int yEWS;
                 __shared__ int zEWS;
@@ -128,7 +128,7 @@ namespace functions {
                 int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
                 if (xEWS >= 1 && yEWS >= 1 && zEWS >= 1) {
-                    for (Nd4jIndex e = tid; e < length; e += blockDim.x * gridDim.x) {
+                    for (Nd4jLong e = tid; e < length; e += blockDim.x * gridDim.x) {
                         z[e * zEWS] = OpClass::op(x[e * xEWS], y[e * yEWS], e, length, buffer, extraArguments);
                     }
                 } else {
@@ -153,14 +153,14 @@ namespace functions {
                     int yOffset = shape::offset(yShapeBuffer);
                     int zOffset = shape::offset(zShapeBuffer);
 
-                    for (Nd4jIndex i = tid; i < length; i += blockDim.x * gridDim.x) {
+                    for (Nd4jLong i = tid; i < length; i += blockDim.x * gridDim.x) {
                         shape::ind2sub(xRank, xShape, i, xCoord);
                         shape::ind2sub(yRank, yShape, i, yCoord);
                         shape::ind2sub(zRank, zShape, i, zCoord);
 
-                        Nd4jIndex xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
-                        Nd4jIndex yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
-                        Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                        Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                        Nd4jLong yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
+                        Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
 
 
                         z[zOffset2] = OpClass::op(x[xOffset2], y[yOffset2], i, length, buffer, extraArguments);
@@ -176,7 +176,7 @@ namespace functions {
             template<typename T>
             template<typename OpClass>
             void _CUDA_D RandomFunction<T>::execTransformCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
-                __shared__ Nd4jIndex length;
+                __shared__ Nd4jLong length;
                 __shared__ int xEWS;
                 __shared__ int zEWS;
 
@@ -205,7 +205,7 @@ namespace functions {
 
 
                 if (xEWS >= 1 && zEWS >= 1) {
-                    for (Nd4jIndex e = blockIdx.x * blockDim.x + threadIdx.x; e < length; e += blockDim.x * gridDim.x) {
+                    for (Nd4jLong e = blockIdx.x * blockDim.x + threadIdx.x; e < length; e += blockDim.x * gridDim.x) {
                         z[e * zEWS] = OpClass::op(x[e * xEWS], e, length, buffer, extraArguments);
                     }
                 } else {
@@ -225,12 +225,12 @@ namespace functions {
                     int xOffset = shape::offset(xShapeBuffer);
                     int zOffset = shape::offset(zShapeBuffer);
 
-                    for (Nd4jIndex i = blockIdx.x * blockDim.x + threadIdx.x; i < length; i += blockDim.x * gridDim.x) {
+                    for (Nd4jLong i = blockIdx.x * blockDim.x + threadIdx.x; i < length; i += blockDim.x * gridDim.x) {
                         shape::ind2sub(xRank, xShape, i, xCoord);
                         shape::ind2sub(zRank, zShape, i, zCoord);
 
-                        Nd4jIndex xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
-                        Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                        Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                        Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
 
                         z[zOffset2] = OpClass::op(x[xOffset2], i, length, buffer, extraArguments);
                     }
@@ -244,7 +244,7 @@ namespace functions {
             template<typename T>
             template<typename OpClass>
             void _CUDA_D RandomFunction<T>::execTransformCuda(Nd4jPointer state, T *z, int *zShapeBuffer, T *extraArguments) {
-                Nd4jIndex length = shape::length(zShapeBuffer);
+                Nd4jLong length = shape::length(zShapeBuffer);
                 int ews = shape::elementWiseStride(zShapeBuffer);
 
                 __shared__ nd4j::random::RandomBuffer *buffer;
@@ -269,7 +269,7 @@ namespace functions {
                 int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
                 if (ews >= 1) {
-                    for (Nd4jIndex x = tid; x < length; x += blockDim.x * gridDim.x) {
+                    for (Nd4jLong x = tid; x < length; x += blockDim.x * gridDim.x) {
                         z[x * ews] = OpClass::op(x, length, buffer, extraArguments);
                     }
                 } else {
@@ -281,9 +281,9 @@ namespace functions {
                     int *zStride = shape::stride(zShapeBuffer);
                     int zOffset = shape::offset(zShapeBuffer);
 
-                    for (Nd4jIndex i = tid; i < length; i += blockDim.x * gridDim.x) {
+                    for (Nd4jLong i = tid; i < length; i += blockDim.x * gridDim.x) {
                         shape::ind2sub(zRank, zShape, i, zCoord);
-                        Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                        Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
                         z[zOffset2] = OpClass::op(i, length, buffer,  extraArguments);
                     }
                 }

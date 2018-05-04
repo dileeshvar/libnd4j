@@ -49,8 +49,8 @@ namespace nd4j {
                             shape::ind2subC(xRank, xShape, e, xCoord);
                             shape::ind2subC(zRank, zShape, e, zCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                            Nd4jIndex zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
+                            Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                            Nd4jLong zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
                             sum = OpName::op(sum, x[xOffset]);
                             if (!exclusive)
@@ -96,8 +96,8 @@ namespace nd4j {
                             shape::ind2subC(xRank, xShape, e, xCoord);
                             shape::ind2subC(zRank, zShape, e, zCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                            Nd4jIndex zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
+                            Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                            Nd4jLong zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
                             sum = OpName::op(sum, x[xOffset]);
 

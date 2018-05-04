@@ -571,7 +571,7 @@ namespace shape {
     }
 
 
-    INLINEDEF Nd4jIndex TAD::tadOffset(Nd4jLong index) {
+    INLINEDEF Nd4jLong TAD::tadOffset(Nd4jLong index) {
         if(tadOnlyShapeInfo == nullptr) {
             this->createTadOnlyShapeInfo();
         }
@@ -582,7 +582,7 @@ namespace shape {
         if(dimensionLength > 1) {
             Nd4jLong *tad2Sub = this->tad2Sub(index, ptrManager);
 
-            Nd4jIndex ret = shape::getOffset(0,shape::shapeOf(shapeInfo),shape::stride(shapeInfo),tad2Sub,shape::rank(shapeInfo));
+            Nd4jLong ret = shape::getOffset(0,shape::shapeOf(shapeInfo),shape::stride(shapeInfo),tad2Sub,shape::rank(shapeInfo));
 
             if(ret < 0) {
                 if (ptrManager == nullptr)
@@ -598,7 +598,7 @@ namespace shape {
         else {
             Nd4jLong *tad2Sub = this->tad2Sub(index, ptrManager);
 
-            Nd4jIndex ret = shape::getOffset(0,shape::shapeOf(shapeInfo),shape::stride(shapeInfo),tad2Sub,shape::rank(shapeInfo));
+            Nd4jLong ret = shape::getOffset(0,shape::shapeOf(shapeInfo),shape::stride(shapeInfo),tad2Sub,shape::rank(shapeInfo));
 
             if (ptrManager == nullptr)
                 delete[] tad2Sub;
@@ -709,7 +709,7 @@ namespace shape {
     }
 
     INLINEDEF void TAD::createOffsets() {
-        this->tadOffsets = new Nd4jIndex[this->numTads];
+        this->tadOffsets = new Nd4jLong[this->numTads];
 #pragma omp parallel for schedule(static) proc_bind(close) default(shared)
         for(int i = 0; i < this->numTads; i++) {
             this->tadOffsets[i] = this->tadOffset(i);

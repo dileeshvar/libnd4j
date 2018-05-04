@@ -20,9 +20,9 @@ namespace functions {
                              int *dimension,
                              int dimensionLength,
                              int *tadShapeInfo,
-                             Nd4jIndex *tadOffset,
+                             Nd4jLong *tadOffset,
                              int *tadShapeInfoZ,
-                             Nd4jIndex *tadOffsetZ) {
+                             Nd4jLong *tadOffsetZ) {
             DISPATCH_BY_OPNUM(exec, PARAMS(x,
                                                xShapeInfo,
                                                y,
@@ -48,9 +48,9 @@ namespace functions {
                              int *dimension,
                              int dimensionLength,
                              int *tadShapeInfo,
-                             Nd4jIndex *tadOffset,
+                             Nd4jLong *tadOffset,
                              int *tadShapeInfoZ,
-                             Nd4jIndex *tadOffsetZ) {
+                             Nd4jLong *tadOffsetZ) {
 
 
                 //decompose in to several sub tads after
@@ -58,7 +58,7 @@ namespace functions {
                 //to the back.
                 //permuted version of the x shape info for setting up the tad problem
                 int *tadShapeShapeInfo = tadShapeInfo;
-                Nd4jIndex *tadOffsets = tadOffset;
+                Nd4jLong *tadOffsets = tadOffset;
                 shape::TAD *tad = nullptr;
 
                 if (tadShapeInfo == nullptr || tadOffsets == nullptr) {
@@ -89,8 +89,8 @@ namespace functions {
 
 #pragma omp parallel for schedule(guided) num_threads(_threads) if (_threads > 1) proc_bind(AFFINITY) default(shared)
                 for (int i = 0; i < tads; i++) {
-                    Nd4jIndex offset = tadOffsets[i];
-                    Nd4jIndex offsetZ = tadOffsetZ[i];
+                    Nd4jLong offset = tadOffsets[i];
+                    Nd4jLong offsetZ = tadOffsetZ[i];
 //                    printf("Tad: [%i]; Offset: [%lld]; OffsetZ: [%lld];\n", i, offset, offsetZ);
 
 
@@ -144,9 +144,9 @@ namespace functions {
                             else
                                 shape::ind2sub(zRank, zShape, f, zCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(offset, xShape, xStride, xCoord, xRank);
-                            Nd4jIndex zOffset = shape::getOffset(offsetZ, zShape, zStride, zCoord, zRank);
-                            Nd4jIndex yOffset = shape::getOffset(0, yShape, yStride, yCoord, yRank);
+                            Nd4jLong xOffset = shape::getOffset(offset, xShape, xStride, xCoord, xRank);
+                            Nd4jLong zOffset = shape::getOffset(offsetZ, zShape, zStride, zCoord, zRank);
+                            Nd4jLong yOffset = shape::getOffset(0, yShape, yStride, yCoord, yRank);
 
                             result[zOffset] = OpType::op(x[xOffset], y[yOffset]);
                         }
@@ -161,8 +161,8 @@ namespace functions {
         template class ND4J_EXPORT Broadcast<float16>;
         template class ND4J_EXPORT Broadcast<double>;
 
-        BUILD_CALL_1(template void Broadcast<float>::exec, float, (float*, int*, float*, int*, float*, int*, int*, int, int*, long long*, int*, Nd4jIndex*), BROADCAST_OPS)
-        BUILD_CALL_1(template void Broadcast<float16>::exec, float16, (float16*, int*, float16*, int*, float16*, int*, int*, int, int*, long long*, int*, Nd4jIndex*), BROADCAST_OPS)
-        BUILD_CALL_1(template void Broadcast<double>::exec, double, (double*, int*, double*, int*, double*, int*, int*, int, int*, long long*, int*, Nd4jIndex*), BROADCAST_OPS)
+        BUILD_CALL_1(template void Broadcast<float>::exec, float, (float*, int*, float*, int*, float*, int*, int*, int, int*, long long*, int*, Nd4jLong*), BROADCAST_OPS)
+        BUILD_CALL_1(template void Broadcast<float16>::exec, float16, (float16*, int*, float16*, int*, float16*, int*, int*, int, int*, long long*, int*, Nd4jLong*), BROADCAST_OPS)
+        BUILD_CALL_1(template void Broadcast<double>::exec, double, (double*, int*, double*, int*, double*, int*, int*, int, int*, long long*, int*, Nd4jLong*), BROADCAST_OPS)
     }
 }

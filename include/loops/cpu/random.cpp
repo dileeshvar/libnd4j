@@ -17,7 +17,7 @@ namespace functions {
                 return;
             }
 
-            Nd4jIndex length = shape::length(zShapeBuffer);
+            Nd4jLong length = shape::length(zShapeBuffer);
             int xEWS = shape::elementWiseStride(xShapeBuffer);
             int yEWS = shape::elementWiseStride(yShapeBuffer);
             int zEWS = shape::elementWiseStride(zShapeBuffer);
@@ -31,13 +31,13 @@ namespace functions {
             if (xEWS >= 1 && yEWS >= 1 && zEWS >= 1) {
                 if (xEWS == 1 && yEWS == 1 && zEWS == 1) {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                    for (Nd4jIndex e = 0; e < length; e++) {
+                    for (Nd4jLong e = 0; e < length; e++) {
                         z[e] = OpClass::op(x[e], y[e], e, length, buffer, extraArguments);
                     }
 
                 } else {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                    for (Nd4jIndex e = 0; e < length; e++) {
+                    for (Nd4jLong e = 0; e < length; e++) {
                         z[e * zEWS] = OpClass::op(x[e * xEWS], y[e * yEWS], e, length, buffer, extraArguments);
                     }
                 }
@@ -64,14 +64,14 @@ namespace functions {
                 int zOffset = shape::offset(zShapeBuffer);
 
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided) private(xCoord, yCoord, zCoord)
-                for (Nd4jIndex i = 0; i < length; i++) {
+                for (Nd4jLong i = 0; i < length; i++) {
                     shape::ind2sub(xRank, xShape, i, xCoord);
                     shape::ind2sub(yRank, yShape, i, yCoord);
                     shape::ind2sub(zRank, zShape, i, zCoord);
 
-                    Nd4jIndex xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
-                    Nd4jIndex yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
-                    Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                    Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                    Nd4jLong yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
+                    Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
 
 
                     z[zOffset2] = OpClass::op(x[xOffset2], y[yOffset2], i, length, buffer, extraArguments);
@@ -87,26 +87,26 @@ namespace functions {
         template<typename T>
         template<typename OpClass>
         void RandomFunction<T>::execTransform(Nd4jPointer state, T *x, int *xShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
-            Nd4jIndex length = shape::length(zShapeBuffer);
+            Nd4jLong length = shape::length(zShapeBuffer);
             int xEWS = shape::elementWiseStride(xShapeBuffer);
             int zEWS = shape::elementWiseStride(zShapeBuffer);
 
             nd4j::random::RandomBuffer *buffer = reinterpret_cast<nd4j::random::RandomBuffer *> (state);
 
-            Nd4jIndex elementsPerThread = length / ELEMENT_THRESHOLD;
-            Nd4jIndex _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
+            Nd4jLong elementsPerThread = length / ELEMENT_THRESHOLD;
+            Nd4jLong _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
             _threads = nd4j::math::nd4j_min<int>(_threads, omp_get_max_threads());
 
             if (xEWS >= 1 && zEWS >= 1) {
                 if (xEWS == 1 && zEWS == 1) {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                    for (Nd4jIndex e = 0; e < length; e++) {
+                    for (Nd4jLong e = 0; e < length; e++) {
                         z[e] = OpClass::op(x[e], e, length,  buffer, extraArguments);
                     }
 
                 } else {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                    for (Nd4jIndex e = 0; e < length; e++) {
+                    for (Nd4jLong e = 0; e < length; e++) {
                         z[e * zEWS] = OpClass::op(x[e * xEWS], e, length, buffer, extraArguments);
                     }
                 }
@@ -128,12 +128,12 @@ namespace functions {
                 int zOffset = shape::offset(zShapeBuffer);
 
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided) private(zCoord, xCoord)
-                for (Nd4jIndex i = 0; i < length; i++) {
+                for (Nd4jLong i = 0; i < length; i++) {
                     shape::ind2sub(xRank, xShape, i, xCoord);
                     shape::ind2sub(zRank, zShape, i, zCoord);
 
-                    Nd4jIndex xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
-                    Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                    Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                    Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
 
                     z[zOffset2] = OpClass::op(x[xOffset2], i, length, buffer, extraArguments);
                 }
@@ -147,25 +147,25 @@ namespace functions {
         template<typename T>
         template<typename OpClass>
         void RandomFunction<T>::execTransform(Nd4jPointer state, T *z, int *zShapeBuffer, T *extraArguments) {
-            Nd4jIndex length = shape::length(zShapeBuffer);
+            Nd4jLong length = shape::length(zShapeBuffer);
             int ews = shape::elementWiseStride(zShapeBuffer);
 
             nd4j::random::RandomBuffer *buffer = reinterpret_cast<nd4j::random::RandomBuffer *> (state);
 
-            Nd4jIndex elementsPerThread = length / ELEMENT_THRESHOLD;
-            Nd4jIndex _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
+            Nd4jLong elementsPerThread = length / ELEMENT_THRESHOLD;
+            Nd4jLong _threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);
             _threads = nd4j::math::nd4j_min<int>(_threads, omp_get_max_threads());
 
             if (ews >= 1) {
                 if (ews == 1) {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                    for (Nd4jIndex x = 0; x < length; x++) {
+                    for (Nd4jLong x = 0; x < length; x++) {
                         z[x] = OpClass::op(x, length, buffer, extraArguments);
                     }
 
                 } else {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                    for (Nd4jIndex x = 0; x < length; x++) {
+                    for (Nd4jLong x = 0; x < length; x++) {
                         z[x * ews] = OpClass::op(x, length, buffer, extraArguments);
                     }
                 }
@@ -179,9 +179,9 @@ namespace functions {
                 int zOffset = shape::offset(zShapeBuffer);
 
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided) private(zCoord)
-                for (Nd4jIndex i = 0; i < length; i++) {
+                for (Nd4jLong i = 0; i < length; i++) {
                     shape::ind2sub(zRank, zShape, i, zCoord);
-                    Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                    Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
                     z[zOffset2] = OpClass::op(i, length, buffer,  extraArguments);
                 }
             }

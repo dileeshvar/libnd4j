@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <dll.h>
 
- //Question: Should the indexes here really be int? Isn't size_t or Nd4jIndex more appropriate?
+ //Question: Should the indexes here really be int? Isn't size_t or Nd4jLong more appropriate?
 namespace nd4j {
 	namespace buffer {
 /**

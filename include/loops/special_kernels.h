@@ -61,7 +61,7 @@ extern "C" __global__ void fillIsMaxHalf(float16 *dx, long length, long idx) {
 }
 
 template <typename T>
-__device__ void fillDimensionalIsMaxGeneric(T *dX, int *xShapeInfo, T *dZ, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jIndex *tadOffsets) {
+__device__ void fillDimensionalIsMaxGeneric(T *dX, int *xShapeInfo, T *dZ, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadOffsets) {
 
     __shared__ int tadLength;
     __shared__ int tadEWS;
@@ -97,7 +97,7 @@ __device__ void fillDimensionalIsMaxGeneric(T *dX, int *xShapeInfo, T *dZ, int *
             for (int e = threadIdx.x; e < tadLength; e += blockDim.x) {
                 shape::ind2subC(tadRank,tadShape, e, xCoord);
 
-                Nd4jIndex xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
+                Nd4jLong xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
 
                 dZ[xOffset] = (e == highestElement? (T) 1.0f : (T) 0.0f);
             }
@@ -112,15 +112,15 @@ __device__ void fillDimensionalIsMaxGeneric(T *dX, int *xShapeInfo, T *dZ, int *
     }
 }
 
-extern "C" __global__ void fillDimensionalIsMaxFloat(float *dx, int *xShapeInfo, float *dz, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jIndex *tadOffsets) {
+extern "C" __global__ void fillDimensionalIsMaxFloat(float *dx, int *xShapeInfo, float *dz, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadOffsets) {
     fillDimensionalIsMaxGeneric<float>(dx, xShapeInfo, dz, zShapeInfo, tadOnlyShapeInfo, dimension, dimensionLength, tadOffsets);
 }
 
-extern "C" __global__ void fillDimensionalIsMaxDouble(double *dx, int *xShapeInfo, double *dz, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jIndex *tadOffsets) {
+extern "C" __global__ void fillDimensionalIsMaxDouble(double *dx, int *xShapeInfo, double *dz, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadOffsets) {
     fillDimensionalIsMaxGeneric<double>(dx, xShapeInfo, dz, zShapeInfo, tadOnlyShapeInfo, dimension, dimensionLength, tadOffsets);
 }
 
-extern "C" __global__ void fillDimensionalIsMaxHalf(float16 *dx, int *xShapeInfo, float16 *dz, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jIndex *tadOffsets) {
+extern "C" __global__ void fillDimensionalIsMaxHalf(float16 *dx, int *xShapeInfo, float16 *dz, int *zShapeInfo, int *tadOnlyShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadOffsets) {
     fillDimensionalIsMaxGeneric<float16>(dx, xShapeInfo, dz, zShapeInfo, tadOnlyShapeInfo, dimension, dimensionLength, tadOffsets);
 }
 
@@ -130,7 +130,7 @@ __device__ void concatKernelGeneric(int dimension,
 									Nd4jPointer *data,
 									Nd4jPointer *inputShapeInfos,
 									T *result,
-									int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jIndex *zOffsets) {
+									int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jLong *zOffsets) {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
 	int zRank = shape::rank(resultShapeInfo);
@@ -138,7 +138,7 @@ __device__ void concatKernelGeneric(int dimension,
 	T **dataT = (T **) data;
 	int **shapeInfoPointers = (int **) inputShapeInfos;
 	int **tadShapes = (int **) tadPointers;
-	Nd4jIndex **tadOffsets = (Nd4jIndex **) offsetPointers;
+	Nd4jLong **tadOffsets = (Nd4jLong **) offsetPointers;
 
 	//if (threadIdx.x == 0 && blockIdx.x == 0) {
 	//    shape::printShapeInfoLinear("zTadShape", zTadShape);
@@ -205,7 +205,7 @@ __device__ void concatKernelGeneric(int dimension,
 			int *currentShape = shapeInfoPointers[r];
 			T *currentData = dataT[r];
 			int *currentTad = tadShapes[r];
-			Nd4jIndex *currentOffsets = tadOffsets[r];
+			Nd4jLong *currentOffsets = tadOffsets[r];
 
 
 			if (threadIdx.x == 0) {
@@ -231,8 +231,8 @@ __device__ void concatKernelGeneric(int dimension,
 
                 // edge case, each thread will handle it's own tad then
                 for (int j = tid; j < numTads; j += blockDim.x * gridDim.x) {
-                    Nd4jIndex inputOffset = currentOffsets[j];
-				    Nd4jIndex resultOffset = zOffsets[j];
+                    Nd4jLong inputOffset = currentOffsets[j];
+				    Nd4jLong resultOffset = zOffsets[j];
 
 				    T *dataTAD = currentData + inputOffset;
 				    T *resultTAD = result + resultOffset;
@@ -244,7 +244,7 @@ __device__ void concatKernelGeneric(int dimension,
 				    } else {
 				        shape::ind2subC(shape::rank(zTadShape),shape::shapeOf(zTadShape),arrOffset, sub);
 				    }
-				    Nd4jIndex baseOffset = shape::getOffset(0,shape::shapeOf(zTadShape),shape::stride(zTadShape), sub, shape::rank(zTadShape));
+				    Nd4jLong baseOffset = shape::getOffset(0,shape::shapeOf(zTadShape),shape::stride(zTadShape), sub, shape::rank(zTadShape));
 
 				    resultTAD += baseOffset;
 
@@ -253,7 +253,7 @@ __device__ void concatKernelGeneric(int dimension,
 
 					shape::ind2subC(yRank, shape::shapeOf(currentTad), 0,sub);
 
-					Nd4jIndex yOffset = shape::getOffset(0, shape::shapeOf(currentTad), shape::stride(currentTad), sub, yRank);
+					Nd4jLong yOffset = shape::getOffset(0, shape::shapeOf(currentTad), shape::stride(currentTad), sub, yRank);
 					resultOffset = shape::getOffset(0, shape::shapeOf(zTadShape), shape::stride(zTadShape), sub, tadRank);
 
 					resultTAD[resultOffset] =  dataTAD[yOffset];
@@ -263,8 +263,8 @@ __device__ void concatKernelGeneric(int dimension,
 				//	printf("Branch 1\n");
 
 			    for (int j = blockIdx.x; j < numTads; j += gridDim.x) {
-				    Nd4jIndex inputOffset = currentOffsets[j];
-				    Nd4jIndex resultOffset = zOffsets[j];
+				    Nd4jLong inputOffset = currentOffsets[j];
+				    Nd4jLong resultOffset = zOffsets[j];
 
 				    T *dataTAD = currentData + inputOffset;
 				    T *resultTAD = result + resultOffset;
@@ -272,7 +272,7 @@ __device__ void concatKernelGeneric(int dimension,
                     int sub[MAX_RANK];
 
 				    shape::ind2subC(shape::rank(zTadShape),shape::shapeOf(zTadShape),arrOffset, sub);
-				    Nd4jIndex baseOffset = shape::getOffset(0,shape::shapeOf(zTadShape),shape::stride(zTadShape), sub, shape::rank(zTadShape));
+				    Nd4jLong baseOffset = shape::getOffset(0,shape::shapeOf(zTadShape),shape::stride(zTadShape), sub, shape::rank(zTadShape));
 
 				    resultTAD += baseOffset;
 
@@ -540,7 +540,7 @@ extern "C" __global__ void concatKernelDouble(int dimension,
 											  Nd4jPointer *data,
 											  Nd4jPointer *inputShapeInfo,
 											  double *result,
-											  int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jIndex *zOffsets) {
+											  int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jLong *zOffsets) {
 	concatKernelGeneric<double>(dimension, numArrays, data, inputShapeInfo, result, resultShapeInfo, tadPointers, offsetPointers, zTadShape, zOffsets);
 }
 
@@ -549,7 +549,7 @@ extern "C" __global__ void concatKernelFloat(int dimension,
 											 Nd4jPointer *data,
 											 Nd4jPointer *inputShapeInfo,
 											 float *result,
-											 int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jIndex *zOffsets) {
+											 int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jLong *zOffsets) {
 	concatKernelGeneric<float>(dimension, numArrays, data, inputShapeInfo, result, resultShapeInfo, tadPointers, offsetPointers, zTadShape, zOffsets);
 }
 
@@ -558,7 +558,7 @@ extern "C" __global__ void concatKernelHalf(int dimension,
 											 Nd4jPointer *data,
 											 Nd4jPointer *inputShapeInfo,
 											 float16 *result,
-											 int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jIndex *zOffsets) {
+											 int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers, int *zTadShape, Nd4jLong *zOffsets) {
 	concatKernelGeneric<float16>(dimension, numArrays, data, inputShapeInfo, result, resultShapeInfo, tadPointers, offsetPointers, zTadShape, zOffsets);
 }
 
@@ -571,9 +571,9 @@ __device__ void pullRowsKernelGeneric(T *x,
                                      int n,
                                      int *indexes,
                                      int *tadShapeInfo,
-                                     Nd4jIndex *tadOffsets,
+                                     Nd4jLong *tadOffsets,
                                      int *zTadShapeInfo,
-                                     Nd4jIndex *zTadOffsets) {
+                                     Nd4jLong *zTadOffsets) {
 
 
     int xEWS = shape::elementWiseStride(tadShapeInfo);
@@ -603,8 +603,8 @@ __device__ void pullRowsKernelGeneric(T *x,
                 shape::ind2subC(shape::rank(tadShapeInfo),shape::shapeOf(tadShapeInfo), i, xCoord);
 		    	shape::ind2subC(shape::rank(zTadShapeInfo),shape::shapeOf(zTadShapeInfo), i, zCoord);
 
-		    	Nd4jIndex xOffset = shape::getOffset(0, shape::shapeOf(tadShapeInfo), shape::stride(tadShapeInfo), xCoord, shape::rank(tadShapeInfo));
-	    		Nd4jIndex zOffset = shape::getOffset(0, shape::shapeOf(zTadShapeInfo), shape::stride(zTadShapeInfo), zCoord, shape::rank(zTadShapeInfo));
+		    	Nd4jLong xOffset = shape::getOffset(0, shape::shapeOf(tadShapeInfo), shape::stride(tadShapeInfo), xCoord, shape::rank(tadShapeInfo));
+	    		Nd4jLong zOffset = shape::getOffset(0, shape::shapeOf(zTadShapeInfo), shape::stride(zTadShapeInfo), zCoord, shape::rank(zTadShapeInfo));
 
                 rZ[zOffset] = rX[xOffset];
             }
@@ -620,9 +620,9 @@ extern "C" __global__ void pullRowsKernelHalf(
                                      int n,
                                      int *indexes,
                                      int *tadShapeInfo,
-                                     Nd4jIndex *tadOffsets,
+                                     Nd4jLong *tadOffsets,
                                      int *zTadShapeInfo,
-                                     Nd4jIndex *zTadOffsets) {
+                                     Nd4jLong *zTadOffsets) {
     pullRowsKernelGeneric<float16>(x, xShapeInfo, z, zShapeInfo, n, indexes, tadShapeInfo, tadOffsets, zTadShapeInfo, zTadOffsets);
 }
 
@@ -633,9 +633,9 @@ extern "C" __global__ void pullRowsKernelFloat(float *x,
                                      int n,
                                      int *indexes,
                                      int *tadShapeInfo,
-                                     Nd4jIndex *tadOffsets,
+                                     Nd4jLong *tadOffsets,
                                      int *zTadShapeInfo,
-                                     Nd4jIndex *zTadOffsets) {
+                                     Nd4jLong *zTadOffsets) {
     pullRowsKernelGeneric<float>(x, xShapeInfo, z, zShapeInfo, n, indexes, tadShapeInfo, tadOffsets, zTadShapeInfo, zTadOffsets);
 }
 
@@ -646,9 +646,9 @@ extern "C" __global__ void pullRowsKernelDouble(double *x,
                                      int n,
                                      int *indexes,
                                      int *tadShapeInfo,
-                                     Nd4jIndex *tadOffsets,
+                                     Nd4jLong *tadOffsets,
                                      int *zTadShapeInfo,
-                                     Nd4jIndex *zTadOffsets) {
+                                     Nd4jLong *zTadOffsets) {
     pullRowsKernelGeneric<double>(x, xShapeInfo, z, zShapeInfo, n, indexes, tadShapeInfo, tadOffsets, zTadShapeInfo, zTadOffsets);
 }
 
@@ -656,7 +656,7 @@ template <typename T>
 __device__ void convertToHalfGeneric(T *dx, int n, half *dz) {
     int tid = threadIdx.x + blockIdx.x * gridDim.x;
 
-    for (Nd4jIndex i = tid; i < n; i += blockDim.x * gridDim.x ) {
+    for (Nd4jLong i = tid; i < n; i += blockDim.x * gridDim.x ) {
         dz[i] = __float2half((float) dx[i]);
     }
 }
@@ -673,7 +673,7 @@ template <typename T>
 __device__ void convertHalfsToGeneric(half *dx, int n, T *dz) {
     int tid = threadIdx.x + blockIdx.x * gridDim.x;
 
-    for (Nd4jIndex i = tid; i < n; i += blockDim.x * gridDim.x ) {
+    for (Nd4jLong i = tid; i < n; i += blockDim.x * gridDim.x ) {
         dz[i] = (T) __half2float(dx[i]);
     }
 }
@@ -696,7 +696,7 @@ extern "C" __global__ void kernelHalfsToFloats(half *dx, int n, float *dz) {
  * @param length
  */
 template<typename T>
-__device__ void accumulateKernelGeneric(T **x, T *z, int n, const Nd4jIndex length) {
+__device__ void accumulateKernelGeneric(T **x, T *z, int n, const Nd4jLong length) {
     __shared__ T *shmem;
 
     if (threadIdx.x == 0) {
@@ -708,7 +708,7 @@ __device__ void accumulateKernelGeneric(T **x, T *z, int n, const Nd4jIndex leng
     for (int r = blockDim.x * blockIdx.x; r < length; r += blockDim.x * gridDim.x) {
         shmem[threadIdx.x] = 0.0f;
 
-        Nd4jIndex baseIdx = r;
+        Nd4jLong baseIdx = r;
 
         // aggregation step, we roll over all arrays
         for (int ar = 0; ar < n; ar++) {
@@ -729,21 +729,21 @@ __device__ void accumulateKernelGeneric(T **x, T *z, int n, const Nd4jIndex leng
 }
 
 
-extern "C" __global__ void accumulateKernelHalf(float16 **dx, float16 *dz, int n, Nd4jIndex length) {
+extern "C" __global__ void accumulateKernelHalf(float16 **dx, float16 *dz, int n, Nd4jLong length) {
     accumulateKernelGeneric<float16>(dx, dz, n, length);
 }
 
-extern "C" __global__ void accumulateKernelFloat(float **dx, float *dz, int n, Nd4jIndex length) {
+extern "C" __global__ void accumulateKernelFloat(float **dx, float *dz, int n, Nd4jLong length) {
     accumulateKernelGeneric<float>(dx, dz, n, length);
 }
 
-extern "C" __global__ void accumulateKernelDouble(double **dx, double *dz, int n, Nd4jIndex length) {
+extern "C" __global__ void accumulateKernelDouble(double **dx, double *dz, int n, Nd4jLong length) {
     accumulateKernelGeneric<double>(dx, dz, n, length);
 }
 
 
 template <typename T>
-__device__ void averagingKernelGeneric(T **dx, T *dz, int n, Nd4jIndex length, bool propagate) {
+__device__ void averagingKernelGeneric(T **dx, T *dz, int n, Nd4jLong length, bool propagate) {
 
     __shared__ T *shmem;
 
@@ -758,7 +758,7 @@ __device__ void averagingKernelGeneric(T **dx, T *dz, int n, Nd4jIndex length, b
     for (int r = blockDim.x * blockIdx.x; r < length; r += blockDim.x * gridDim.x) {
         shmem[threadIdx.x] = (T) 0.0f;
 
-        Nd4jIndex baseIdx = r;
+        Nd4jLong baseIdx = r;
 
         // aggregation step, we roll over all arrays
         for (int ar = 0; ar < n; ar++) {
@@ -796,26 +796,26 @@ __device__ void averagingKernelGeneric(T **dx, T *dz, int n, Nd4jIndex length, b
 }
 
 
-extern "C" __global__ void averagingKernelHalf(float16 **dx, float16 *dz, int n, Nd4jIndex length, bool propagate) {
+extern "C" __global__ void averagingKernelHalf(float16 **dx, float16 *dz, int n, Nd4jLong length, bool propagate) {
     averagingKernelGeneric<float16>(dx, dz, n, length, propagate);
 }
 
-extern "C" __global__ void averagingKernelFloat(float **dx, float *dz, int n, Nd4jIndex length, bool propagate) {
+extern "C" __global__ void averagingKernelFloat(float **dx, float *dz, int n, Nd4jLong length, bool propagate) {
     averagingKernelGeneric<float>(dx, dz, n, length, propagate);
 }
 
-extern "C" __global__ void averagingKernelDouble(double **dx, double *dz, int n, Nd4jIndex length, bool propagate) {
+extern "C" __global__ void averagingKernelDouble(double **dx, double *dz, int n, Nd4jLong length, bool propagate) {
     averagingKernelGeneric<double>(dx, dz, n, length, propagate);
 }
 
 template<typename T>
-__device__ void tearKernelGeneric(T *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+__device__ void tearKernelGeneric(T *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
 
-    __shared__ Nd4jIndex tadLength;
+    __shared__ Nd4jLong tadLength;
     __shared__ int tadEWS;
     __shared__ int zEWS;
     __shared__ int tadRank;
-    __shared__ Nd4jIndex numTads;
+    __shared__ Nd4jLong numTads;
     __shared__ int zRank;
     __shared__ int *tadShape;
     __shared__ int *tadStride;
@@ -836,24 +836,24 @@ __device__ void tearKernelGeneric(T *x, int *xShapeInfo, Nd4jPointer *targets, i
     }
     __syncthreads();
 
-    for (Nd4jIndex r = blockIdx.x; r < numTads; r += gridDim.x) {
+    for (Nd4jLong r = blockIdx.x; r < numTads; r += gridDim.x) {
         T *z = (T *) targets[r];
         T *s = x + tadOffsets[r];
 
         if (zEWS > 0 && tadEWS > 0) {
-        for (Nd4jIndex i = threadIdx.x; i < tadLength; i += blockDim.x) {
+        for (Nd4jLong i = threadIdx.x; i < tadLength; i += blockDim.x) {
             z[i * zEWS] = s[i * tadEWS];
         }
         } else {
             int xCoord[MAX_RANK];
             int zCoord[MAX_RANK];
 
-            for (Nd4jIndex j = 0; j < tadLength; j++) {
+            for (Nd4jLong j = 0; j < tadLength; j++) {
                 shape::ind2sub(tadRank,tadShape, j, xCoord);
                 shape::ind2sub(zRank, zShape, j, zCoord);
 
-                Nd4jIndex xOffset = shape::getOffset(0, tadShape, tadStride, xCoord, tadRank);
-                Nd4jIndex zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
+                Nd4jLong xOffset = shape::getOffset(0, tadShape, tadStride, xCoord, tadRank);
+                Nd4jLong zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
                 z[zOffset] = s[xOffset];
             }
@@ -861,21 +861,21 @@ __device__ void tearKernelGeneric(T *x, int *xShapeInfo, Nd4jPointer *targets, i
     }
 }
 
-extern "C" __global__ void tearKernelDouble(double *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+extern "C" __global__ void tearKernelDouble(double *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
     tearKernelGeneric<double>(x, xShapeInfo, targets, zShapeInfo, tadShapeInfo, tadOffsets);
 }
 
-extern "C" __global__ void tearKernelFloat(float *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+extern "C" __global__ void tearKernelFloat(float *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
     tearKernelGeneric<float>(x, xShapeInfo, targets, zShapeInfo, tadShapeInfo, tadOffsets);
 }
 
-extern "C" __global__ void tearKernelHalf(float16 *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jIndex *tadOffsets) {
+extern "C" __global__ void tearKernelHalf(float16 *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
     tearKernelGeneric<float16>(x, xShapeInfo, targets, zShapeInfo, tadShapeInfo, tadOffsets);
 }
 
 
 template<typename T>
-__device__ void shuffleKernelGeneric(T **dX, int **xShapeInfo, T **dZ, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jIndex **tadOffsets) {
+__device__ void shuffleKernelGeneric(T **dX, int **xShapeInfo, T **dZ, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jLong **tadOffsets) {
 
             // we assume that shuffle map for each X contains pair TAD Y
 
@@ -909,12 +909,12 @@ __device__ void shuffleKernelGeneric(T **dX, int **xShapeInfo, T **dZ, int **zSh
 
 
             // we roll over the pairs of TADs, thus limit is numTads / 2
-            for (Nd4jIndex r = blockIdx.x; r < numTads; r += blockDim.x) {
+            for (Nd4jLong r = blockIdx.x; r < numTads; r += blockDim.x) {
                 if (shuffleMap[r] < 0)
                     continue;
 
-                Nd4jIndex oldOffset = tadOffsets[f][r];
-                Nd4jIndex newOffset = tadOffsets[f][shuffleMap[r]];
+                Nd4jLong oldOffset = tadOffsets[f][r];
+                Nd4jLong newOffset = tadOffsets[f][shuffleMap[r]];
 
 
 
@@ -926,7 +926,7 @@ __device__ void shuffleKernelGeneric(T **dX, int **xShapeInfo, T **dZ, int **zSh
 
                 // so we're going to change TAD[oldOffset] with TAD[newOffset]
                 if (tadEWS == 1) {
-                    for (Nd4jIndex i = threadIdx.x; i < tadLength; i += blockDim.x) {
+                    for (Nd4jLong i = threadIdx.x; i < tadLength; i += blockDim.x) {
                         T oldX = rX[i];
 
                         rX[i] = rY[i];
@@ -937,12 +937,12 @@ __device__ void shuffleKernelGeneric(T **dX, int **xShapeInfo, T **dZ, int **zSh
                     // well have to iterate using ind2sub
                         int xCoord[MAX_RANK];
                         int yCoord[MAX_RANK];
-                        for (Nd4jIndex i = threadIdx.x; i < tadLength; i+= blockDim.x) {
+                        for (Nd4jLong i = threadIdx.x; i < tadLength; i+= blockDim.x) {
                             shape::ind2subC(tadRank,tadShape, i, xCoord);
                             shape::ind2subC(tadRank,tadShape, i, yCoord);
 
-                            Nd4jIndex xOffset = shape::getOffset(oldOffset, tadShape, tadStride, xCoord, tadRank);
-                            Nd4jIndex yOffset = shape::getOffset(newOffset, tadShape, tadStride, yCoord, tadRank);
+                            Nd4jLong xOffset = shape::getOffset(oldOffset, tadShape, tadStride, xCoord, tadRank);
+                            Nd4jLong yOffset = shape::getOffset(newOffset, tadShape, tadStride, yCoord, tadRank);
 
                             T oldX = x[xOffset];
                             z[xOffset] = x[yOffset];
@@ -953,14 +953,14 @@ __device__ void shuffleKernelGeneric(T **dX, int **xShapeInfo, T **dZ, int **zSh
         }
 }
 
-extern "C" __global__ void shuffleKernelDouble(double **x, int **xShapeInfo, double **z, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jIndex **tadOffsets) {
+extern "C" __global__ void shuffleKernelDouble(double **x, int **xShapeInfo, double **z, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jLong **tadOffsets) {
     shuffleKernelGeneric<double>(x, xShapeInfo, z, zShapeInfo, N, shuffleMap, tadOnlyShapeInfo, tadOffsets);
 }
 
-extern "C" __global__ void shuffleKernelFloat(float **x, int **xShapeInfo, float **z, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jIndex **tadOffsets) {
+extern "C" __global__ void shuffleKernelFloat(float **x, int **xShapeInfo, float **z, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jLong **tadOffsets) {
     shuffleKernelGeneric<float>(x, xShapeInfo, z, zShapeInfo, N, shuffleMap, tadOnlyShapeInfo, tadOffsets);
 }
 
-extern "C" __global__ void shuffleKernelHalf(float16 **x, int **xShapeInfo, float16 **z, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jIndex **tadOffsets) {
+extern "C" __global__ void shuffleKernelHalf(float16 **x, int **xShapeInfo, float16 **z, int **zShapeInfo, int N, int *shuffleMap, int **tadOnlyShapeInfo, Nd4jLong **tadOffsets) {
     shuffleKernelGeneric<float16>(x, xShapeInfo, z, zShapeInfo, N, shuffleMap, tadOnlyShapeInfo, tadOffsets);
 }

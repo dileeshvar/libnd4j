@@ -113,7 +113,7 @@ namespace nd4j {
                 tad.createOffsets();
 
                 int *tadShapeShapeInfo = tad.tadOnlyShapeInfo;
-                Nd4jIndex* tadOffsets = tad.tadOffsets;
+                Nd4jLong* tadOffsets = tad.tadOffsets;
 
                 int tadLength = shape::tadLength(x->getShapeInfo(), dimensions.data(), dimensionsLength);
                 int tads = x->lengthOf() / tadLength;

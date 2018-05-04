@@ -15,8 +15,8 @@ using namespace nd4j;
 class RNGTests : public testing::Test {
 private:
     NativeOps nativeOps;
-    Nd4jIndex *_bufferA;
-    Nd4jIndex *_bufferB;
+    Nd4jLong *_bufferA;
+    Nd4jLong *_bufferB;
 
 public:
     long _seed = 119L;
@@ -28,8 +28,8 @@ public:
     NDArray<float>* nexp2 = new NDArray<float>('c', {10, 10});
 
     RNGTests() {
-        _bufferA = new Nd4jIndex[100000];
-        _bufferB = new Nd4jIndex[100000];
+        _bufferA = new Nd4jLong[100000];
+        _bufferB = new Nd4jLong[100000];
         _rngA = (nd4j::random::RandomBuffer *) nativeOps.initRandom(nullptr, _seed, 100000, (Nd4jPointer) _bufferA);
         _rngB = (nd4j::random::RandomBuffer *) nativeOps.initRandom(nullptr, _seed, 100000, (Nd4jPointer) _bufferB);
 

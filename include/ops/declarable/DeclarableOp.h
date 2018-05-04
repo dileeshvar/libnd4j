@@ -122,7 +122,7 @@ namespace nd4j {
             /**
              * Returns opHash
              */
-            Nd4jIndex getOpHash();
+            Nd4jLong getOpHash();
 
             /**
              * This method sets arguments for op

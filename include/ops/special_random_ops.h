@@ -32,9 +32,9 @@ namespace randomOps {
             // TODO: we probably might want to skip this sum, and state that probabilities array should be real probabilities, i.e. should sum to 1.0
             //T probSum = extraArguments[0];
 
-            __shared__ Nd4jIndex xLength;
-            __shared__ Nd4jIndex yLength;
-            __shared__ Nd4jIndex zLength;
+            __shared__ Nd4jLong xLength;
+            __shared__ Nd4jLong yLength;
+            __shared__ Nd4jLong zLength;
 
             __shared__ int xEWS;
             __shared__ int yEWS;
@@ -70,10 +70,10 @@ namespace randomOps {
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
             if (zEWS >= 1 && xEWS >= 1 && yEWS >= 1) {
-                for (Nd4jIndex e = tid; e < zLength; e+=blockDim.x * gridDim.x) {
+                for (Nd4jLong e = tid; e < zLength; e+=blockDim.x * gridDim.x) {
                     T prob = buffer->relativeT<T>(e);
                     T cumProb = (T) 0.0f;
-                    for (Nd4jIndex f = 0; f < yLength; f++) {
+                    for (Nd4jLong f = 0; f < yLength; f++) {
                         T relProb = y[f * yEWS];
                         cumProb += relProb;
 
@@ -125,23 +125,23 @@ namespace randomOps {
                 }
                 __syncthreads();
 
-                for (Nd4jIndex i = tid; i < zLength; i+=blockDim.x * gridDim.x) {
+                for (Nd4jLong i = tid; i < zLength; i+=blockDim.x * gridDim.x) {
                     shape::ind2sub(zRank, zShape, i, zCoord);
 
-                    Nd4jIndex zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                    Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
 
                     T prob = buffer->relativeT<T>(i);
                     T cumProb = (T) 0.0f;
-                    for (Nd4jIndex f = 0; f < yLength; f++) {
+                    for (Nd4jLong f = 0; f < yLength; f++) {
                         shape::ind2sub(yRank, yShape, i, yCoord);
-                        Nd4jIndex yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
+                        Nd4jLong yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
 
                         T relProb = y[yOffset2];
                         cumProb += relProb;
 
                         if (prob <= cumProb || f == yLength - 1) {
                             shape::ind2sub(xRank, xShape, f, xCoord);
-                            Nd4jIndex xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                            Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
 
                             z[zOffset2] = x[xOffset2];
                             f += yLength;
@@ -169,8 +169,8 @@ namespace randomOps {
             // TODO: we probably might want to skip this sum, and state that probabilities array should be real probabilities, i.e. should sum to 1.0
             //T probSum = extraArguments[0];
 
-            Nd4jIndex yLength = shape::length(yShapeBuffer);
-            Nd4jIndex zLength = shape::length(zShapeBuffer);
+            Nd4jLong yLength = shape::length(yShapeBuffer);
+            Nd4jLong zLength = shape::length(zShapeBuffer);
 
             int xEWS = shape::elementWiseStride(xShapeBuffer);
             int yEWS = shape::elementWiseStride(yShapeBuffer);
@@ -182,10 +182,10 @@ namespace randomOps {
 
             if (zEWS >= 1 && xEWS >= 1 && yEWS >= 1) {
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                for (Nd4jIndex e = 0; e < zLength; e++) {
+                for (Nd4jLong e = 0; e < zLength; e++) {
                     T prob = buffer->relativeT<T>(e);
                     T cumProb = (T) 0.0f;
-                    for (Nd4jIndex f = 0; f < yLength; f++) {
+                    for (Nd4jLong f = 0; f < yLength; f++) {
                         T relProb = y[f * yEWS];
                         cumProb += relProb;
 
@@ -219,23 +219,23 @@ namespace randomOps {
                 */
 
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
-                for (Nd4jIndex i = 0; i < zLength; i++) {
+                for (Nd4jLong i = 0; i < zLength; i++) {
                     shape::ind2sub(zRank, zShape, i, zCoord);
 
-                    Nd4jIndex zOffset2 = shape::getOffset(0, zShape, zStride, zCoord, zRank);
+                    Nd4jLong zOffset2 = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
                     T prob = buffer->relativeT<T>(i);
                     T cumProb = (T) 0.0f;
-                    for (Nd4jIndex f = 0; f < yLength; f++) {
+                    for (Nd4jLong f = 0; f < yLength; f++) {
                         shape::ind2sub(yRank, yShape, i, yCoord);
-                        Nd4jIndex yOffset2 = shape::getOffset(0, yShape, yStride, yCoord, yRank);
+                        Nd4jLong yOffset2 = shape::getOffset(0, yShape, yStride, yCoord, yRank);
 
                         T relProb = y[yOffset2];
                         cumProb += relProb;
 
                         if (prob <= cumProb || f == yLength - 1) {
                             shape::ind2sub(xRank, xShape, f, xCoord);
-                            Nd4jIndex xOffset2 = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                            Nd4jLong xOffset2 = shape::getOffset(0, xShape, xStride, xCoord, xRank);
 
                             z[zOffset2] = x[xOffset2];
                             f += yLength;
@@ -269,7 +269,7 @@ namespace randomOps {
             __shared__ T epsilon;
             __shared__ T two_pi;
 
-            __shared__ Nd4jIndex zLength;
+            __shared__ Nd4jLong zLength;
             __shared__ int zEWS;
             __shared__ int yEWS;
             __shared__ T mean;
@@ -315,7 +315,7 @@ namespace randomOps {
 
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-            for (Nd4jIndex e = tid; e < zLength; e += step) {
+            for (Nd4jLong e = tid; e < zLength; e += step) {
                 // we need to get random values
 
                 tZ[threadIdx.x] = buffer->relativeT<T>(e, epsilon, (T) 1.0f);
@@ -367,8 +367,8 @@ namespace randomOps {
 #pragma omp parallel num_threads(_threads) if (_threads > 1) proc_bind(spread)
             {
                 int tid = omp_get_thread_num();
-                Nd4jIndex start = span * tid;
-                Nd4jIndex end = span * (tid + 1);
+                Nd4jLong start = span * tid;
+                Nd4jLong end = span * (tid + 1);
                 if (end > zLength) end = zLength;
 
                 T z0, z1;
@@ -376,7 +376,7 @@ namespace randomOps {
                 T lnU0;
                 bool generated = false;
 
-                for (Nd4jIndex e = start; e < end; e++) {
+                for (Nd4jLong e = start; e < end; e++) {
                     if (!generated) {
                         /*
                          * Since box-muller transform expects non-zero u0 value, we'll just use rng with boundaries
@@ -429,7 +429,7 @@ namespace randomOps {
             int trials = (int) extraArguments[0];
             T prob = extraArguments[1];
 
-            __shared__ Nd4jIndex zLength;
+            __shared__ Nd4jLong zLength;
             __shared__ int yEWS;
             __shared__ int zEWS;
 
@@ -458,7 +458,7 @@ namespace randomOps {
 
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-            for (Nd4jIndex e = tid; e < zLength; e += blockDim.x * gridDim.x) {
+            for (Nd4jLong e = tid; e < zLength; e += blockDim.x * gridDim.x) {
                 int success = 0;
                 for (int t = 1; t <= trials; t++) {
                     T randVal = buffer->relativeT<T>((e+1) * t);
@@ -487,7 +487,7 @@ namespace randomOps {
         static inline void specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             int trials = (int) extraArguments[0];
 
-            Nd4jIndex zLength = shape::length(zShapeBuffer);
+            Nd4jLong zLength = shape::length(zShapeBuffer);
 
             auto yEWS = shape::elementWiseStride(yShapeBuffer);
             auto zEWS = shape::elementWiseStride(zShapeBuffer);
@@ -503,13 +503,13 @@ namespace randomOps {
 #pragma omp parallel num_threads(_threads) if (_threads > 1) proc_bind(spread)
             {
                 int tid = omp_get_thread_num();
-                Nd4jIndex start = span * tid;
-                Nd4jIndex end = span * (tid + 1);
+                Nd4jLong start = span * tid;
+                Nd4jLong end = span * (tid + 1);
                 if (end > zLength) end = zLength;
 
                 T prob = extraArguments[1];
 
-                for (Nd4jIndex e = start; e < end; e++) {
+                for (Nd4jLong e = start; e < end; e++) {
 
                     int success = 0;
                     for (int t = 1; t <= trials; t++) {
@@ -555,7 +555,7 @@ namespace randomOps {
             int trials = (int) extraArguments[0];
             T prob = extraArguments[1];
 
-            __shared__ Nd4jIndex zLength;
+            __shared__ Nd4jLong zLength;
             __shared__ int yEWS;
             __shared__ int zEWS;
 
@@ -584,7 +584,7 @@ namespace randomOps {
 
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-            for (Nd4jIndex e = tid; e < zLength; e += blockDim.x * gridDim.x) {
+            for (Nd4jLong e = tid; e < zLength; e += blockDim.x * gridDim.x) {
                 int success = 0;
                 for (int t = 1; t <= trials; t++) {
                     T randVal = buffer->relativeT<T>((e+1) * t);
@@ -613,7 +613,7 @@ namespace randomOps {
         static inline void specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             int trials = (int) extraArguments[0];
 
-            Nd4jIndex zLength = shape::length(zShapeBuffer);
+            Nd4jLong zLength = shape::length(zShapeBuffer);
 
             int yEWS = shape::elementWiseStride(yShapeBuffer);
             int zEWS = shape::elementWiseStride(zShapeBuffer);
@@ -629,13 +629,13 @@ namespace randomOps {
 #pragma omp parallel num_threads(_threads) if (_threads > 1) proc_bind(spread)
             {
                 int tid = omp_get_thread_num();
-                Nd4jIndex start = span * tid;
-                Nd4jIndex end = span * (tid + 1);
+                Nd4jLong start = span * tid;
+                Nd4jLong end = span * (tid + 1);
                 if (end > zLength) end = zLength;
 
                 T prob = extraArguments[1];
 
-                for (Nd4jIndex e = start; e < end; e++) {
+                for (Nd4jLong e = start; e < end; e++) {
 
                     int success = 0;
                     for (int t = 1; t <= trials; t++) {
@@ -678,7 +678,7 @@ namespace randomOps {
             __shared__ T epsilon;
             __shared__ T two_pi;
 
-            __shared__ Nd4jIndex zLength;
+            __shared__ Nd4jLong zLength;
             __shared__ int zEWS;
             __shared__ int yEWS;
             __shared__ T mean;
@@ -727,10 +727,10 @@ namespace randomOps {
             T result0, result1, u0, u1, z0, z1;
 
             T ds = nd4j::math::nd4j_abs<T>(stddev) * (T) 2.0f;
-            for (Nd4jIndex e = tid; e < middle; e += step) {
+            for (Nd4jLong e = tid; e < middle; e += step) {
                 // we need to get random values
 
-                Nd4jIndex generation0 = 0;
+                Nd4jLong generation0 = 0;
                 T realMean0 = y == z ? mean : y[e * yEWS];
                 T realMean1 = y == z ? mean : y[(e + middle) * yEWS];
                 do {
@@ -759,7 +759,7 @@ namespace randomOps {
         specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             const T two_pi = (T) 2.0 * 3.14159265358979323846;
 
-            Nd4jIndex zLength = shape::length(zShapeBuffer);
+            Nd4jLong zLength = shape::length(zShapeBuffer);
             auto yEWS = shape::elementWiseStride(yShapeBuffer);
             auto zEWS = shape::elementWiseStride(zShapeBuffer);
 
@@ -781,8 +781,8 @@ namespace randomOps {
 #pragma omp parallel num_threads(_threads) if (_threads > 1) proc_bind(spread)
             {
                 int tid = omp_get_thread_num();
-                Nd4jIndex start = span * tid; 
-                Nd4jIndex end = span * (tid + 1);
+                Nd4jLong start = span * tid; 
+                Nd4jLong end = span * (tid + 1);
                 if (end >  middle) {
                     end = middle;
                 }
@@ -793,12 +793,12 @@ namespace randomOps {
 
                 T ds = nd4j::math::nd4j_abs<T>(stddev) * (T) 2.0f;
 
-                for (Nd4jIndex e = start; e < end; e++) {
+                for (Nd4jLong e = start; e < end; e++) {
                    
                     /*
                     * Since box-muller transform expects non-zero u0 value, we'll just use rng with boundaries
                     */
-                    Nd4jIndex generation0 = 0;
+                    Nd4jLong generation0 = 0;
                     T realMean0 = y == z ? mean : y[e * yEWS];
                     T realMean1 = y == z ? mean : y[(e + middle) * yEWS];
                     do {
@@ -842,7 +842,7 @@ namespace randomOps {
             __shared__ T epsilon;
             __shared__ T two_pi;
 
-            __shared__ Nd4jIndex zLength;
+            __shared__ Nd4jLong zLength;
             __shared__ int zEWS;
             __shared__ int yEWS;
             __shared__ T mean;
@@ -888,7 +888,7 @@ namespace randomOps {
 
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-            for (Nd4jIndex e = tid; e < zLength; e += step) {
+            for (Nd4jLong e = tid; e < zLength; e += step) {
                 // we need to get random values
 
                 tZ[threadIdx.x] = buffer->relativeT<T>(e, epsilon, (T) 1.0f);
@@ -918,7 +918,7 @@ namespace randomOps {
         specialOp(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             const T two_pi = (T) 2.0 * 3.14159265358979323846;
 
-            Nd4jIndex zLength = shape::length(zShapeBuffer);
+            Nd4jLong zLength = shape::length(zShapeBuffer);
             auto yEWS = shape::elementWiseStride(yShapeBuffer);
             auto zEWS = shape::elementWiseStride(zShapeBuffer);
 
@@ -939,8 +939,8 @@ namespace randomOps {
 #pragma omp parallel num_threads(_threads) if (_threads > 1) proc_bind(spread)
             {
                 int tid = omp_get_thread_num();
-                Nd4jIndex start = span * tid;
-                Nd4jIndex end = span * (tid + 1);
+                Nd4jLong start = span * tid;
+                Nd4jLong end = span * (tid + 1);
                 if (end > zLength) end = zLength;
 
                 T z0, z1;
@@ -948,7 +948,7 @@ namespace randomOps {
                 T lnU0;
                 bool generated = false;
 
-                for (Nd4jIndex e = start; e < end; e++) {
+                for (Nd4jLong e = start; e < end; e++) {
                     if (!generated) {
                         /*
                          * Since box-muller transform expects non-zero u0 value, we'll just use rng with boundaries

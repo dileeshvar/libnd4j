@@ -38,7 +38,7 @@ namespace simdOps {
             return nd4j::math::nd4j_exp<T>(d1 - extraParams[0]);
         }
 
-        op_def static T postProcess(T reduction, Nd4jIndex n, T *extraParams) {
+        op_def static T postProcess(T reduction, Nd4jLong n, T *extraParams) {
             return extraParams[0] + nd4j::math::nd4j_log<T>(reduction);
         }
 
@@ -80,7 +80,7 @@ namespace simdOps {
 				T *reductionBuffer,
 				UnifiedSharedMemory *manager,
 				int *tadOnlyShapeInfo,
-				Nd4jIndex *tadOffsets) {
+				Nd4jLong *tadOffsets) {
 
 				// we assume that RESULT already holds max values
 
@@ -108,13 +108,13 @@ namespace simdOps {
 				int xCoord[MAX_RANK];
 
 				for (int r = blockIdx.x; r < numTads; r += gridDim.x) {
-					Nd4jIndex tadOffsetForBlock = tadOffsets[r];
+					Nd4jLong tadOffsetForBlock = tadOffsets[r];
 
 					sPartials[threadIdx.x] = startingValue(dx + tadOffsetForBlock);
 
 					for (int i = threadIdx.x; i < tadLength; i += blockDim.x) {
 						shape::ind2subC(tadRank, tadShape, i, xCoord);
-						Nd4jIndex xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
+						Nd4jLong xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
 
 						sPartials[threadIdx.x] = update(sPartials[threadIdx.x], op(dx[xOffset], result[r]), extraParams);
 					}
@@ -143,7 +143,7 @@ namespace simdOps {
             Nd4jLong resultLength = shape::length(resultShapeInfoBuffer);
 
             Nd4jLong *tadOnlyShapeInfo = tadShapeInfo;
-            Nd4jIndex *tadOffsets = tadOffset;
+            Nd4jLong *tadOffsets = tadOffset;
             shape::TAD *tad = nullptr;
 
             if (tadOnlyShapeInfo == nullptr || tadOffsets == nullptr) {
@@ -198,14 +198,14 @@ namespace simdOps {
 #pragma omp  parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared)
                 for (int i = 0; i < resultLength; i++) {
 
-                    Nd4jIndex offset = tadOffsets[i];
+                    Nd4jLong offset = tadOffsets[i];
                     Nd4jLong xCoord[MAX_RANK];
 
                     T start = startingValue(x + offset);
 
                     for (int j = 0; j < tadLength; j++) {
                         shape::ind2subC(tadRank, tadShape, j, xCoord);
-                        Nd4jIndex xOffset = shape::getOffset(offset, tadShape, tadStride, xCoord, tadRank);
+                        Nd4jLong xOffset = shape::getOffset(offset, tadShape, tadStride, xCoord, tadRank);
 
                         //printf("C I: %i; V: %f; op: %f\n", i, x[xOffset], op(x[xOffset], (float) result[i]));
 

@@ -35,7 +35,7 @@ public:
      * @param result
      * @param resultShapeInfo
      */
-    static T execIndexReduceScalar(int opNum, T *x, int *xShapeInfo, T *extraParams);
+    static T execIndexReduceScalar(int opNum, T *x, Nd4jLong *xShapeInfo, T *extraParams);
 
     /**
      *
@@ -50,14 +50,14 @@ public:
      */
     static void execIndexReduce(int opNum,
                                 T *x,
-                                int *xShapeInfo,
+                                Nd4jLong *xShapeInfo,
                                 T *extraParams,
                                 T *result,
-                                int *resultShapeInfoBuffer,
+                                Nd4jLong *resultShapeInfoBuffer,
                                 int *dimension,
                                 int dimensionLength,
-                                int *tadShapeInfo,
-                                Nd4jIndex *tadOffsets);
+                                Nd4jLong *tadShapeInfo,
+                                Nd4jLong *tadOffsets);
 
     /**
      *
@@ -99,12 +99,12 @@ public:
      */
     static void execPairwiseTransform(int opNum,
                                       T *dx,
-                                      int xStride,
+                                      Nd4jLong xStride,
                                       T *y,
-                                      int yStride,
+                                      Nd4jLong yStride,
                                       T *result,
-                                      int resultStride,
-                                      T *extraParams, Nd4jIndex n);
+                                      Nd4jLong resultStride,
+                                      T *extraParams, Nd4jLong n);
 
   /**
   *
@@ -508,7 +508,7 @@ public:
     }
 
 
-    inline static Nd4jIndex encodeBitmap(T *dx, Nd4jLong N, int *dz, float threshold) {
+    inline static Nd4jLong encodeBitmap(T *dx, Nd4jLong N, int *dz, float threshold) {
         return nd4j::SpecialMethods<T>::encodeBitmapGeneric(dx, N, dz, threshold);
     }
 

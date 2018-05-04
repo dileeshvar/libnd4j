@@ -36,7 +36,7 @@ namespace functions {
  * @param postProcessOrNot whether to post process or not
  */
         template <typename T>
-        _CUDA_D void SummaryStatsReduce<T>::summaryStatsReduceGeneric(const int op, T *dx, int *xShapeInfo, int xRank, T *extraParams, T *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected, int *allocationBuffer, T *reductionBuffer, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        _CUDA_D void SummaryStatsReduce<T>::summaryStatsReduceGeneric(const int op, T *dx, int *xShapeInfo, int xRank, T *extraParams, T *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected, int *allocationBuffer, T *reductionBuffer, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
 
             __shared__ UnifiedSharedMemory *manager;
 
@@ -64,7 +64,7 @@ namespace functions {
                     tadOffsets);
         }
 
-        _CUDA_G void summaryStatsReduceDouble(int op, double *dx, int *xShapeInfo, int xRank, double *extraParams, double *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot, bool biasCorrected, int *allocationBuffer, double *reductionBuffer, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        _CUDA_G void summaryStatsReduceDouble(int op, double *dx, int *xShapeInfo, int xRank, double *extraParams, double *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot, bool biasCorrected, int *allocationBuffer, double *reductionBuffer, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
             SummaryStatsReduce<double>::summaryStatsReduceGeneric(
                     op,
                     dx,
@@ -78,7 +78,7 @@ namespace functions {
 
         }
 
-        _CUDA_G void summaryStatsReduceFloat(int op, float *dx, int *xShapeInfo, int xRank, float *extraParams, float *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected,int *allocationBuffer, float *reductionBuffer, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        _CUDA_G void summaryStatsReduceFloat(int op, float *dx, int *xShapeInfo, int xRank, float *extraParams, float *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected,int *allocationBuffer, float *reductionBuffer, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
             SummaryStatsReduce<float>::summaryStatsReduceGeneric(
                     op,
                     dx,
@@ -92,7 +92,7 @@ namespace functions {
 
         }
 
-        _CUDA_G void summaryStatsReduceHalf(int op, float16 *dx, int *xShapeInfo, int xRank, float16 *extraParams, float16 *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected,int *allocationBuffer, float16 *reductionBuffer, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        _CUDA_G void summaryStatsReduceHalf(int op, float16 *dx, int *xShapeInfo, int xRank, float16 *extraParams, float16 *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected,int *allocationBuffer, float16 *reductionBuffer, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
             SummaryStatsReduce<float16>::summaryStatsReduceGeneric(
                     op,
                     dx,
@@ -108,7 +108,7 @@ namespace functions {
 
         /*
         template <typename T>
-        void __global__ SummaryStatsReduce<T>::summaryStatsReduceT(int op, T *dx, int *xShapeInfo, int xRank, T *extraParams, T *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected,int *allocationBuffer, T *reductionBuffer, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        void __global__ SummaryStatsReduce<T>::summaryStatsReduceT(int op, T *dx, int *xShapeInfo, int xRank, T *extraParams, T *result, int *resultShapeInfo, int zRank, int *dimension, int dimensionLength, int postProcessOrNot,bool biasCorrected,int *allocationBuffer, T *reductionBuffer, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
             summaryStatsReduceGeneric<T>(
                     op,
                     dx,
@@ -182,7 +182,7 @@ namespace functions {
 			 */
         template<typename T>
         template<typename OpType>
-        _CUDA_D void SummaryStatsReduce<T>::transform(T *dx, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfo, int *dimension, int dimensionLength, int postProcessOrNot, int *allocationBuffer, T *reductionBuffer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        _CUDA_D void SummaryStatsReduce<T>::transform(T *dx, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfo, int *dimension, int dimensionLength, int postProcessOrNot, int *allocationBuffer, T *reductionBuffer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
 
             /**
              * Gpu information for the problem
@@ -272,7 +272,7 @@ namespace functions {
                     int xCoord[MAX_RANK];
 
                     for (int r = blockIdx.x; r < numTads; r += gridDim.x) {
-                        Nd4jIndex tadOffsetForBlock = tadOffsets[r];
+                        Nd4jLong tadOffsetForBlock = tadOffsets[r];
 
                         val.initWithValue(startingVal);
                         val.n = 0;
@@ -280,7 +280,7 @@ namespace functions {
 
                         for (int i = threadIdx.x; i < tadLength; i += blockDim.x) {
                             shape::ind2subC(tadRank, tadShape, i, xCoord);
-                            Nd4jIndex xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
+                            Nd4jLong xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
 
                             SummaryStatsData <T> indexVal2;
                             indexVal2.initWithValue(dx[xOffset]);
@@ -307,7 +307,7 @@ namespace functions {
                         val.n = 0;
                         sPartials[threadIdx.x] = val;
 
-                        Nd4jIndex indexX = tadOffsetForBlock + (xElementWiseStride * threadIdx.x);
+                        Nd4jLong indexX = tadOffsetForBlock + (xElementWiseStride * threadIdx.x);
 
                         if (threadIdx.x < tadLength) {
                             SummaryStatsData <T> indexVal;
@@ -341,7 +341,7 @@ namespace functions {
                 __syncthreads();
 
                 if (xElementWiseStride >= 1) {
-                    for (Nd4jIndex i = tid; i < n; i += (blockDim.x * gridDim.x)) {
+                    for (Nd4jLong i = tid; i < n; i += (blockDim.x * gridDim.x)) {
                         SummaryStatsData <T> indexVal2;
                         indexVal2.initWithValue(dx[i * xElementWiseStride]);
                         reduction = update(reduction, indexVal2, extraParams);
@@ -360,9 +360,9 @@ namespace functions {
 
                     int ind2sub[MAX_RANK];
 #pragma unroll
-                    for (Nd4jIndex i = tid; i < n; i += blockDim.x * gridDim.x) {
+                    for (Nd4jLong i = tid; i < n; i += blockDim.x * gridDim.x) {
                         shape::ind2sub(rank, shape::shapeOf(xShapeInfo), i, ind2sub);
-                        Nd4jIndex offset = shape::getOffset(0, xShape, xStride, ind2sub, rank);
+                        Nd4jLong offset = shape::getOffset(0, xShape, xStride, ind2sub, rank);
                         SummaryStatsData <T> indexVal2;
                         indexVal2.initWithValue(dx[offset]);
                         reduction = update(reduction, indexVal2, extraParams);
@@ -431,7 +431,7 @@ namespace functions {
 
 
         template <typename T>
-        _CUDA_D void SummaryStatsReduce<T>::transform(const int opNum, T *dx, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfo, int *dimension, int dimensionLength, int postProcessOrNot, int *allocationBuffer, T *reductionBuffer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo, Nd4jIndex *tadOffsets) {
+        _CUDA_D void SummaryStatsReduce<T>::transform(const int opNum, T *dx, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfo, int *dimension, int dimensionLength, int postProcessOrNot, int *allocationBuffer, T *reductionBuffer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
             DISPATCH_BY_OPNUM(transform, PARAMS(dx, xShapeInfo, extraParams, result, resultShapeInfo, dimension, dimensionLength, postProcessOrNot, allocationBuffer, reductionBuffer, manager, tadOnlyShapeInfo, tadOffsets), SUMMARY_STATS_OPS);
         };
 
@@ -444,7 +444,7 @@ namespace functions {
 
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("D16 opNum:[%i]\n", opNum);
@@ -481,7 +481,7 @@ namespace functions {
 
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("F16 opNum:[%i]\n", opNum);
@@ -519,7 +519,7 @@ namespace functions {
 
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("H16 opNum:[%i]\n", opNum);
@@ -558,7 +558,7 @@ namespace functions {
 
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("F17 opNum:[%i]\n", opNum);
@@ -593,7 +593,7 @@ namespace functions {
 
         int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
         int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-        Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+        Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
         if (nd4j::Environment::getInstance()->isDebugAndVerbose())
             printf("H17 opNum:[%i]\n", opNum);
@@ -627,7 +627,7 @@ namespace functions {
 
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("D17 opNum:[%i]\n", opNum);
@@ -665,7 +665,7 @@ namespace functions {
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
 
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("D18 opNum:[%i]\n", opNum);
@@ -698,7 +698,7 @@ namespace functions {
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
 
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("F18 opNum:[%i]\n", opNum);
@@ -731,7 +731,7 @@ namespace functions {
             int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
             int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
 
-            Nd4jIndex *deviceTADOffsets = reinterpret_cast<Nd4jIndex *>(extraPointers[11]);
+            Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
             if (nd4j::Environment::getInstance()->isDebugAndVerbose())
                 printf("H18 opNum:[%i]\n", opNum);

@@ -29,10 +29,10 @@ namespace nd4j {
         };
 
         template <typename T>
-        Nd4jIndex Graph<T>::estimateRequiredMemory() {
+        Nd4jLong Graph<T>::estimateRequiredMemory() {
 
-            Nd4jIndex result = 0L;
-            Nd4jIndex lastStep = 0L;
+            Nd4jLong result = 0L;
+            Nd4jLong lastStep = 0L;
 
             std::vector<int *> shapes;
             std::map<std::pair<int,int>, int*> shapesMap;
@@ -166,7 +166,7 @@ namespace nd4j {
                             }
 
                             //shape::TAD tad(oldShape, node->getDimensions()->data(), node->getDimensions()->size());
-                            Nd4jIndex numTads = shape::tadLength(oldShape, node->getDimensions()->data(), node->getDimensions()->size());
+                            Nd4jLong numTads = shape::tadLength(oldShape, node->getDimensions()->data(), node->getDimensions()->size());
                             int *shape = new int[2]{1, (int) numTads};
                             newShape = shape::shapeBuffer(2, shape);
                         }
@@ -1285,11 +1285,11 @@ namespace nd4j {
         }
 
         template <typename T>
-        Nd4jIndex Graph<T>::hashCode() {
+        Nd4jLong Graph<T>::hashCode() {
             if (!_built.load())
                 this->buildGraph();
 
-            Nd4jIndex hash = 0L;
+            Nd4jLong hash = 0L;
             std::string localStamp;
             /**
              * Plan is:

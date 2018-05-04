@@ -46,7 +46,7 @@ TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR_LARGE) {
 
 TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR_ZERO) {
     std::vector<double> data;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
     }
 
@@ -70,7 +70,7 @@ TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR_ZERO) {
 
 TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR) {
     std::vector<double> data;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
     }
 
@@ -94,7 +94,7 @@ TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR) {
 
 TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR_LEFT) {
     std::vector<double> data;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
     }
 
@@ -118,7 +118,7 @@ TEST_F(DeclarableOpsTests7, Test_CHOOSE_SCALAR_LEFT) {
 
 TEST_F(DeclarableOpsTests7, Test_CHOOSE_ONLY_SCALAR) {
     std::vector<double> data;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
     }
 
@@ -141,7 +141,7 @@ TEST_F(DeclarableOpsTests7, Test_CHOOSE_ONLY_SCALAR) {
 
 TEST_F(DeclarableOpsTests7, Test_CHOOSE_ONLY_SCALAR_GTE) {
     std::vector<double> data;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
     }
 
@@ -168,7 +168,7 @@ TEST_F(DeclarableOpsTests7, TEST_WHERE) {
     std::vector<double> put;
     std::vector<double> resultData;
     std::vector<double> assertion;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
         if(i >  1) {
             assertion.push_back(5.0);
@@ -235,7 +235,7 @@ TEST_F(DeclarableOpsTests7, TEST_WHERE_SCALAR) {
     std::vector<double> put;
     std::vector<double> resultData;
     std::vector<double> assertion;
-    for(Nd4jIndex i = 0; i < 4; i++) {
+    for(Nd4jLong i = 0; i < 4; i++) {
         data.push_back(i);
         if(i >  1) {
             assertion.push_back(5.0);

@@ -196,7 +196,7 @@ Nd4jStatus GraphExecutioner<T>::execute(Graph<T> *graph, VariableSpace<T>* varia
     }
     auto flowPath = __variableSpace->flowPath();
 
-    Nd4jIndex tb0 = Environment::getInstance()->isProfiling() ? GraphProfile::currentTime() : 0L;
+    Nd4jLong tb0 = Environment::getInstance()->isProfiling() ? GraphProfile::currentTime() : 0L;
     graph->buildGraph();
 
     auto footprintForward = nd4j::memory::MemoryRegistrator::getInstance()->getGraphMemoryFootprint(graph->hashCode());
@@ -212,20 +212,20 @@ Nd4jStatus GraphExecutioner<T>::execute(Graph<T> *graph, VariableSpace<T>* varia
     if (Environment::getInstance()->isProfiling())
         flowPath->profile()->setBuildTime(GraphProfile::relativeTime(tb0));
 
-    Nd4jIndex timeStart = Environment::getInstance()->isProfiling() ? GraphProfile::currentTime() : 0L;
+    Nd4jLong timeStart = Environment::getInstance()->isProfiling() ? GraphProfile::currentTime() : 0L;
 
     bool pe = graph->getExecutorConfiguration()->_executionMode == ExecutionMode_AUTO;
 
 
     // basically if at some point code diverges, code branch might be _DISABLED_, and all nodes within that branch will be disabled as well
 
-    std::deque<Nd4jIndex> frames;
+    std::deque<Nd4jLong> frames;
     bool inFrame =  false;
     bool leftFrame = false;
 
     auto nodeTime = GraphProfile::currentTime();
     int lastId = -10000000;
-    Nd4jIndex exec_counter = 0;
+    Nd4jLong exec_counter = 0;
     // we loop through op layers here
     for (int l = 0; l < (int) graph->getOnion()->size(); l++) {
         int layerSize = graph->getOnion()->count(l) == 1 ? graph->getOnion()->at(l)->size() : 0;
@@ -688,7 +688,7 @@ Graph<T>* GraphExecutioner<T>::importFromTensorFlow(const char *fileName) {
                 if (attr.tensor().dtype() == ::tensorflow::DataType::DT_INT32) {
                     nd4j_verbose("Int size: %i\n", attr.tensor().int_val_size());
 
-                    Nd4jIndex __length = 0;
+                    Nd4jLong __length = 0;
 
                     nd4j_verbose("Tensor has shape: %i\n", attr.tensor().has_tensor_shape());
                     if (attr.tensor().has_tensor_shape()) {

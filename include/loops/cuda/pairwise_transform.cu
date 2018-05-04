@@ -312,7 +312,7 @@ extern "C" __global__ void pairWiseTransformHalfIndex(
  */
 template<typename T, typename opType>
 __device__ void pairWiseTransformStridedGeneric(
-		Nd4jIndex n,
+		Nd4jLong n,
 		T *dx,
 		T *dy,
 		int incx,
@@ -356,7 +356,7 @@ __device__ void pairWiseTransformStridedGeneric(
 /*
 extern "C" __global__ void pairWiseTransformStridedDouble(
 		int opNum,
-		Nd4jIndex n,
+		Nd4jLong n,
 		double *dx,
 		double *dy,
 		int incx,
@@ -378,7 +378,7 @@ extern "C" __global__ void pairWiseTransformStridedDouble(
 
 extern "C" __global__ void pairWiseTransformStridedFloat(
 		int opNum,
-		Nd4jIndex n,
+		Nd4jLong n,
 		float *dx,
 		float *dy,
 		int incx,
@@ -401,7 +401,7 @@ extern "C" __global__ void pairWiseTransformStridedFloat(
 
 extern "C" __global__ void pairWiseTransformStridedHalf(
 		int opNum,
-		Nd4jIndex n,
+		Nd4jLong n,
 		float16 *dx,
 		float16 *dy,
 		int incx,
@@ -429,9 +429,9 @@ DISPATCH_KERNEL_SIMPLE(pwtSimpleShaped_, pairWiseTransformGeneric, double, INPUT
 DISPATCH_KERNEL_SIMPLE(pwtSimpleShaped_, pairWiseTransformGeneric, float16, INPUT(float16 *dx, float16 *dy, float16 *params, float16 *result, int *xShapeInfo, int xRank, int *yShapeInfo, int yRank, int *resultShapeInfo, int zRank, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(dx, dy, params, result, xShapeInfo, xRank, yShapeInfo, yRank, resultShapeInfo, zRank, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
 
 // pwt strided
-DISPATCH_KERNEL_SIMPLE(pwtSimpleStrided_, pairWiseTransformStridedGeneric, float, INPUT(Nd4jIndex n, float *dx, float *dy, int incx, int incy, float *params, float *result, int incz, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(n, dx, dy, incx, incy, params, result, incz, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
-DISPATCH_KERNEL_SIMPLE(pwtSimpleStrided_, pairWiseTransformStridedGeneric, double, INPUT(Nd4jIndex n, double *dx, double *dy, int incx, int incy, double *params, double *result, int incz, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(n, dx, dy, incx, incy, params, result, incz, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
-DISPATCH_KERNEL_SIMPLE(pwtSimpleStrided_, pairWiseTransformStridedGeneric, float16, INPUT(Nd4jIndex n, float16 *dx, float16 *dy, int incx, int incy, float16 *params, float16 *result, int incz, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(n, dx, dy, incx, incy, params, result, incz, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
+DISPATCH_KERNEL_SIMPLE(pwtSimpleStrided_, pairWiseTransformStridedGeneric, float, INPUT(Nd4jLong n, float *dx, float *dy, int incx, int incy, float *params, float *result, int incz, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(n, dx, dy, incx, incy, params, result, incz, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
+DISPATCH_KERNEL_SIMPLE(pwtSimpleStrided_, pairWiseTransformStridedGeneric, double, INPUT(Nd4jLong n, double *dx, double *dy, int incx, int incy, double *params, double *result, int incz, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(n, dx, dy, incx, incy, params, result, incz, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
+DISPATCH_KERNEL_SIMPLE(pwtSimpleStrided_, pairWiseTransformStridedGeneric, float16, INPUT(Nd4jLong n, float16 *dx, float16 *dy, int incx, int incy, float16 *params, float16 *result, int incz, int *allocationPointer, int *tadOnlyShapeInfo), PARAMS(n, dx, dy, incx, incy, params, result, incz, allocationPointer, tadOnlyShapeInfo), OPS_A(PAIRWISE_TRANSFORM_OPS))
 
 
 
@@ -440,7 +440,7 @@ namespace functions {
     namespace pairwise_transforms {
 
             template<>
-            __host__ void PairWiseTransform<float>::execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float *dx, int xStride, float *y, int yStride, float *result, int resultStride, float *extraParams, Nd4jIndex n) {
+            __host__ void PairWiseTransform<float>::execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float *dx, int xStride, float *y, int yStride, float *result, int resultStride, float *extraParams, Nd4jLong n) {
                 cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	            int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
@@ -460,7 +460,7 @@ namespace functions {
             }
 
             template<>
-            __host__ void PairWiseTransform<float16>::execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float16 *dx, int xStride, float16 *y, int yStride, float16 *result, int resultStride, float16 *extraParams, Nd4jIndex n) {
+            __host__ void PairWiseTransform<float16>::execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, float16 *dx, int xStride, float16 *y, int yStride, float16 *result, int resultStride, float16 *extraParams, Nd4jLong n) {
                 cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	            int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
@@ -480,7 +480,7 @@ namespace functions {
 
 
            template<>
-            __host__ void PairWiseTransform<double>::execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, double *dx, int xStride, double *y, int yStride, double *result, int resultStride, double *extraParams, Nd4jIndex n) {
+            __host__ void PairWiseTransform<double>::execudaCudaStrided(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, double *dx, int xStride, double *y, int yStride, double *result, int resultStride, double *extraParams, Nd4jLong n) {
                 cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	            int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
@@ -566,7 +566,7 @@ namespace functions {
 
             /*
             template<typename T>
-            __device__ void PairWiseTransform<T>::transformCuda(const int opNum, Nd4jIndex n, T *dx, T *y, int incx, int incy, T *extraParams, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo) {
+            __device__ void PairWiseTransform<T>::transformCuda(const int opNum, Nd4jLong n, T *dx, T *y, int incx, int incy, T *extraParams, T *result, int incz, int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo) {
                     DISPATCH_BY_OPNUM(transformCuda, PARAMS(n, dx, y, incx, incy, extraParams, result, incz, allocationPointer, manager, tadOnlyShapeInfo), PAIRWISE_TRANSFORM_OPS);
 			}
 
@@ -590,9 +590,9 @@ namespace functions {
 			template<typename OpType>
 	        __device__ void PairWiseTransform<T>::transform(T *dx, int *xShapeBuffer, T *y, int *yShapeBuffer, T *result, int *resultShapeBuffer, T *extraParams, int *indexes, int *yIndexes, int *resultIndexes,  int *allocationPointer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo) {
 	        	int tid = blockIdx.x * blockDim.x + threadIdx.x;
-		        Nd4jIndex n = shape::length(xShapeBuffer);
+		        Nd4jLong n = shape::length(xShapeBuffer);
 
-		        for (Nd4jIndex i = tid; i < n; i += gridDim.x * blockDim.x) {
+		        for (Nd4jLong i = tid; i < n; i += gridDim.x * blockDim.x) {
 			        result[resultIndexes[i]] = OpType::op(dx[indexes[i]],y[yIndexes[i]], extraParams);
 		        }
 	        }
@@ -642,7 +642,7 @@ namespace functions {
 		    }
 		    __syncthreads();
 
-		    Nd4jIndex n = shape::length(xShapeBuffer);
+		    Nd4jLong n = shape::length(xShapeBuffer);
 		    if((xEWS >= 1 && yEWS == xEWS && zEWS == xEWS &&  xOrder == yOrder && zOrder == xOrder) || (xEWS >= 1 && yEWS == xEWS && zEWS == xEWS && xRow && yRow && zRow)) {
 			    // TODO: this is wrong, and should be moved to host side
 			    transformCuda<OpType>(
@@ -661,25 +661,25 @@ namespace functions {
 			    int yCoord[MAX_RANK];
 
     			if (dx == result) {
-	    			for (Nd4jIndex i = tid; i < n; i += gridDim.x * blockDim.x) {
+	    			for (Nd4jLong i = tid; i < n; i += gridDim.x * blockDim.x) {
 		    			shape::ind2subC(xRank,shape::shapeOf(xShapeBuffer), i, xCoord);
 			    		shape::ind2subC(yRank,shape::shapeOf(yShapeBuffer), i, yCoord);
 
-				    	Nd4jIndex xOffset = shape::getOffset(0, shape::shapeOf(xShapeBuffer), shape::stride(xShapeBuffer), xCoord, xRank);
-					    Nd4jIndex yOffset = shape::getOffset(0, shape::shapeOf(yShapeBuffer), shape::stride(yShapeBuffer), yCoord, yRank);
+				    	Nd4jLong xOffset = shape::getOffset(0, shape::shapeOf(xShapeBuffer), shape::stride(xShapeBuffer), xCoord, xRank);
+					    Nd4jLong yOffset = shape::getOffset(0, shape::shapeOf(yShapeBuffer), shape::stride(yShapeBuffer), yCoord, yRank);
     					result[xOffset] = OpType::op(dx[xOffset], y[yOffset], extraParams);
 	    			}
 		    	} else {
     		    	int resultCoord[MAX_RANK];
 
-    				for (Nd4jIndex i = tid; i < n; i += gridDim.x * blockDim.x) {
+    				for (Nd4jLong i = tid; i < n; i += gridDim.x * blockDim.x) {
 	    				shape::ind2subC(xRank,shape::shapeOf(xShapeBuffer), i, xCoord);
 		    			shape::ind2subC(yRank,shape::shapeOf(yShapeBuffer), i, yCoord);
 			    		shape::ind2subC(resultRank,shape::shapeOf(resultShapeBuffer), i, resultCoord);
 
-    					Nd4jIndex xOffset = shape::getOffset(0, shape::shapeOf(xShapeBuffer), shape::stride(xShapeBuffer), xCoord, xRank);
-	    				Nd4jIndex yOffset = shape::getOffset(0, shape::shapeOf(yShapeBuffer), shape::stride(yShapeBuffer), yCoord, yRank);
-		    			Nd4jIndex resultOffset = shape::getOffset(0, shape::shapeOf(resultShapeBuffer), shape::stride(resultShapeBuffer), resultCoord, resultRank);
+    					Nd4jLong xOffset = shape::getOffset(0, shape::shapeOf(xShapeBuffer), shape::stride(xShapeBuffer), xCoord, xRank);
+	    				Nd4jLong yOffset = shape::getOffset(0, shape::shapeOf(yShapeBuffer), shape::stride(yShapeBuffer), yCoord, yRank);
+		    			Nd4jLong resultOffset = shape::getOffset(0, shape::shapeOf(resultShapeBuffer), shape::stride(resultShapeBuffer), resultCoord, resultRank);
 			    		result[resultOffset] = OpType::op(dx[xOffset], y[yOffset], extraParams);
     				}
     			}
@@ -697,7 +697,7 @@ namespace functions {
 			T *result,
 			int *resultShapeBuffer,
 			T *extraParams,
-			Nd4jIndex n,
+			Nd4jLong n,
 			int *indexes,
 			int *allocationPointer,
 			UnifiedSharedMemory *manager,
@@ -760,7 +760,7 @@ namespace functions {
     template<typename T>
     template<typename OpType>
 	__device__ void PairWiseTransform<T>::transformCuda(
-			Nd4jIndex n,
+			Nd4jLong n,
 			T *dx,
 			T *dy,
 			int incx,
@@ -777,7 +777,7 @@ namespace functions {
 				result[i] = OpType::op(dx[i], dy[i], params);
 			}
 		} else {
-			for (Nd4jIndex i = tid; i < n; i += gridDim.x * blockDim.x) {
+			for (Nd4jLong i = tid; i < n; i += gridDim.x * blockDim.x) {
 				result[i * incz] = OpType::op(dx[i * incx], dy[i * incy], params);
 			}
 		}

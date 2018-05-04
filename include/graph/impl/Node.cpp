@@ -19,13 +19,13 @@ namespace nd4j {
     namespace graph {
 
         template <typename T>
-        void nd4j::graph::Node<T>::setOuterTime(Nd4jIndex time){
+        void nd4j::graph::Node<T>::setOuterTime(Nd4jLong time){
 //            if (hasBlockAttached())
 //                _block->setOuterTime(time);
         }
 
         template <typename T>
-        void nd4j::graph::Node<T>::setInnerTime(Nd4jIndex time){
+        void nd4j::graph::Node<T>::setInnerTime(Nd4jLong time){
 //            if (hasBlockAttached())
 //                _block->setInnerTime(time);
         }
@@ -91,12 +91,12 @@ namespace nd4j {
         }
 
         template<typename T>
-        Nd4jIndex Node<T>::getFrameId() {
+        Nd4jLong Node<T>::getFrameId() {
             return _frameId;
         }
 
         template<typename T>
-        void Node<T>::setFrameId(Nd4jIndex frameId) {
+        void Node<T>::setFrameId(Nd4jLong frameId) {
             _frameId = frameId;
         }
 
@@ -298,7 +298,7 @@ namespace nd4j {
         }
 
         template <typename T>
-        Nd4jIndex nd4j::graph::Node<T>::opNum() {
+        Nd4jLong nd4j::graph::Node<T>::opNum() {
             return _opNum;
         }
 

@@ -12,7 +12,7 @@ namespace functions {
         template <typename T>
         template <typename OpType>
             T _CUDA_H ReduceFunction<T>::execScalar(T *x, int *xShapeInfo, T *extraParams) {
-                const Nd4jIndex length = shape::length(xShapeInfo);
+                const Nd4jLong length = shape::length(xShapeInfo);
                 int xElementWiseStride = shape::elementWiseStride(xShapeInfo);
                 if (xElementWiseStride >= 1) {
                     return execScalar<OpType>(x, xElementWiseStride, length, extraParams);
@@ -73,7 +73,7 @@ namespace functions {
                              int *dimension,
                              int dimensionLength,
                              int *tadShapeInfo,
-                             Nd4jIndex *tadOffset) {
+                             Nd4jLong *tadOffset) {
                 DISPATCH_BY_OPNUM(exec, PARAMS(x,
                                                xShapeInfo,
                                                extraParams,
@@ -96,7 +96,7 @@ namespace functions {
                              int *dimension,
                              int dimensionLength,
                              int *tadShapeInfo,
-                             Nd4jIndex *tadOffset) {
+                             Nd4jLong *tadOffset) {
 
                 int resultLength = shape::length(resultShapeInfoBuffer);
 
@@ -116,7 +116,7 @@ namespace functions {
                 }
 
                 int *tadOnlyShapeInfo = tadShapeInfo;
-                Nd4jIndex *tadOffsets = tadOffset;
+                Nd4jLong *tadOffsets = tadOffset;
                 shape::TAD *tad = nullptr;
 
                 if (tadOnlyShapeInfo == nullptr || tadOffsets == nullptr) {
@@ -172,14 +172,14 @@ namespace functions {
 
 #pragma omp  parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared)
                     for (int i = 0; i < resultLength; i++) {
-                        Nd4jIndex offset = tadOffsets[i];
+                        Nd4jLong offset = tadOffsets[i];
                         int xCoord[MAX_RANK];
 
                         T start = OpType::startingValue(x + offset);
 
                         for (int j = 0; j < tadLength; j++) {
                             shape::ind2subC(tadRank, tadShape, j, xCoord);
-                            Nd4jIndex xOffset = shape::getOffset(offset, tadShape, tadStride, xCoord, tadRank);
+                            Nd4jLong xOffset = shape::getOffset(offset, tadShape, tadStride, xCoord, tadRank);
 
                             start = OpType::update(start, OpType::op(x[xOffset], extraParams), extraParams);
                         }
@@ -205,14 +205,14 @@ namespace functions {
 
         template <typename T>
         template <typename OpType>
-        T _CUDA_H ReduceFunction<T>::execScalar(const T *x, int xElementWiseStride, Nd4jIndex length, T *extraParams) {
+        T _CUDA_H ReduceFunction<T>::execScalar(const T *x, int xElementWiseStride, Nd4jLong length, T *extraParams) {
                 T startingVal = OpType::startingValue(x);
                 if (xElementWiseStride == 1) {
                     if (length < ELEMENT_THRESHOLD) {
                         T local = OpType::startingValue(x);
 
 // FIXME: proper reduction to be used here
-                        for (Nd4jIndex i = 0; i < length; i++) {
+                        for (Nd4jLong i = 0; i < length; i++) {
                             T curr = OpType::op(x[i], extraParams);
                             local = OpType::update(local, curr, extraParams);
 
@@ -231,9 +231,9 @@ namespace functions {
                         {
                             T local = OpType::startingValue(x);
                             for (int i = omp_get_thread_num(); i < info.chunks; i += info.threads) {
-                                Nd4jIndex newOffset = (i * info.items);
+                                Nd4jLong newOffset = (i * info.items);
                                 const T *chunk = x + newOffset;
-                                Nd4jIndex itemsToLoop = info.items;
+                                Nd4jLong itemsToLoop = info.items;
                                 if (i * info.items >= length) {
                                     break;
                                 }
@@ -244,7 +244,7 @@ namespace functions {
                                 }
 
 // FIXME: proper reduction should be used here
-                                for (Nd4jIndex j = 0; j < itemsToLoop && i * info.items + j < length; j++) {
+                                for (Nd4jLong j = 0; j < itemsToLoop && i * info.items + j < length; j++) {
                                     T curr = OpType::op(chunk[j], extraParams);
                                     local = OpType::update(local, curr, extraParams);
                                 }
@@ -273,7 +273,7 @@ namespace functions {
                         T local = OpType::startingValue(x);
 
 // FIXME: proper reduction should be used here
-                        for (Nd4jIndex i = 0; i < length; i++) {
+                        for (Nd4jLong i = 0; i < length; i++) {
                             T curr = OpType::op(x[i * xElementWiseStride], extraParams);
                             local = OpType::update(local, curr, extraParams);
 
@@ -293,14 +293,14 @@ namespace functions {
                     {
                         T local = OpType::startingValue(x);
                         for (int i = omp_get_thread_num(); i < info.chunks; i += info.threads) {
-                            Nd4jIndex newOffset = (i * info.items) * xElementWiseStride;
+                            Nd4jLong newOffset = (i * info.items) * xElementWiseStride;
                             const T *chunk = x + newOffset;
-                            Nd4jIndex itemsToLoop = info.items;
+                            Nd4jLong itemsToLoop = info.items;
                             if (i * info.items >= length)
                                 break;
 
 // FIXME: proper reduction should be used here
-                            for (Nd4jIndex j = 0; j < itemsToLoop && i * info.items + j < length; j++) {
+                            for (Nd4jLong j = 0; j < itemsToLoop && i * info.items + j < length; j++) {
                                 T curr = OpType::op(chunk[j * xElementWiseStride], extraParams);
                                 local = OpType::update(local, curr, extraParams);
                             }
@@ -327,13 +327,13 @@ namespace functions {
         template class ND4J_EXPORT ReduceFunction<float16>;
         template class ND4J_EXPORT ReduceFunction<double>;
 
-        //template void ReduceFunction<float16>::exec<simdOps::LogSumExp<float16>>(float16*, int*, float16*, float16*, int*, int*, int, int*, Nd4jIndex*);
-        //template void ReduceFunction<float>::exec<simdOps::LogSumExp<float>>(float*, int*, float*, float*, int*, int*, int, int*, Nd4jIndex*);
-        //template void ReduceFunction<double>::exec<simdOps::LogSumExp<double>>(double*, int*, double*, double*, int*, int*, int, int*, Nd4jIndex*);
+        //template void ReduceFunction<float16>::exec<simdOps::LogSumExp<float16>>(float16*, int*, float16*, float16*, int*, int*, int, int*, Nd4jLong*);
+        //template void ReduceFunction<float>::exec<simdOps::LogSumExp<float>>(float*, int*, float*, float*, int*, int*, int, int*, Nd4jLong*);
+        //template void ReduceFunction<double>::exec<simdOps::LogSumExp<double>>(double*, int*, double*, double*, int*, int*, int, int*, Nd4jLong*);
 
-        BUILD_CALL_1(template void ReduceFunction<float>::exec, float, (float*, int*, float*, float*, int*, int*, int, int*, Nd4jIndex*), REDUCE_OPS)
-        BUILD_CALL_1(template void ReduceFunction<float16>::exec, float16, (float16*, int*, float16*, float16*, int*, int*, int, int*, Nd4jIndex*), REDUCE_OPS)
-        BUILD_CALL_1(template void ReduceFunction<double>::exec, double, (double*, int*, double*, double*, int*, int*, int, int*, Nd4jIndex*), REDUCE_OPS)
+        BUILD_CALL_1(template void ReduceFunction<float>::exec, float, (float*, int*, float*, float*, int*, int*, int, int*, Nd4jLong*), REDUCE_OPS)
+        BUILD_CALL_1(template void ReduceFunction<float16>::exec, float16, (float16*, int*, float16*, float16*, int*, int*, int, int*, Nd4jLong*), REDUCE_OPS)
+        BUILD_CALL_1(template void ReduceFunction<double>::exec, double, (double*, int*, double*, double*, int*, int*, int, int*, Nd4jLong*), REDUCE_OPS)
 
         BUILD_CALL_1(template float ReduceFunction<float>::execScalar, float, (float *x, int *, float*), REDUCE_OPS)
         BUILD_CALL_1(template float16 ReduceFunction<float16>::execScalar, float16, (float16 *x, int *, float16*), REDUCE_OPS)

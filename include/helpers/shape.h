@@ -128,7 +128,7 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT void fill(T* buffer, T value, Nd4jIndex length);
+    ND4J_EXPORT void fill(T* buffer, T value, Nd4jLong length);
 
 #ifdef __CUDACC__
     __host__ __device__
@@ -700,12 +700,12 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
     __host__ __device__
 #endif
 
-    ND4J_EXPORT Nd4jIndex length(Nd4jLong *shapeInfo);
+    ND4J_EXPORT Nd4jLong length(Nd4jLong *shapeInfo);
 
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT Nd4jIndex length(std::initializer_list<int>& shape);
+    ND4J_EXPORT Nd4jLong length(std::initializer_list<int>& shape);
 
 /***
  * Returns the offset portion of an information buffer
@@ -1195,7 +1195,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT Nd4jIndex prodLong( Nd4jLong *data, int length);
+    ND4J_EXPORT Nd4jLong prodLong( Nd4jLong *data, int length);
 
     /**
      * Returns the rear most left over item not present in
@@ -1231,7 +1231,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT Nd4jIndex getOffset(Nd4jIndex baseOffset,  Nd4jLong *shape,  Nd4jLong *stride,  Nd4jLong *indices,int rank);
+    ND4J_EXPORT Nd4jLong getOffset(Nd4jLong baseOffset,  Nd4jLong *shape,  Nd4jLong *stride,  Nd4jLong *indices,int rank);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
@@ -1359,7 +1359,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT Nd4jIndex *computeIndices(int rank,  Nd4jLong *shape,  Nd4jLong *stride);
+    ND4J_EXPORT Nd4jLong *computeIndices(int rank,  Nd4jLong *shape,  Nd4jLong *stride);
 
     /**
    * Compute the real linear indices for the
@@ -1369,7 +1369,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT Nd4jIndex *computeIndices( Nd4jLong *shapeBuffer);
+    ND4J_EXPORT Nd4jLong *computeIndices( Nd4jLong *shapeBuffer);
 
     /**
  * Convert a linear index to
@@ -1460,7 +1460,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
     __host__
 #endif
     // return absolute index of array min, min is sub-array of max, index to be returned is min index and corresponds to maxIdx of max array 
-    ND4J_EXPORT Nd4jIndex subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx);
+    ND4J_EXPORT Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx);
 
 #ifdef __CUDACC__
     __host__ __device__
@@ -2290,12 +2290,12 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    INLINEDEF Nd4jIndex *computeIndices(int rank, Nd4jLong *shape,  Nd4jLong *stride) {
-        Nd4jIndex length = shape::prodLong(shape,rank);
+    INLINEDEF Nd4jLong *computeIndices(int rank, Nd4jLong *shape,  Nd4jLong *stride) {
+        Nd4jLong length = shape::prodLong(shape,rank);
 
         traceNew(13);
 
-        Nd4jIndex *ret = new Nd4jIndex[length];
+        Nd4jLong *ret = new Nd4jLong[length];
         for(int i = 0; i < length; i++) {
             Nd4jLong *idx = shape::ind2sub(rank, shape, i);
             ret[i] = shape::getOffset(0, shape, stride, idx, rank);
@@ -2311,7 +2311,7 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    INLINEDEF Nd4jIndex *computeIndices(Nd4jLong *shapeBuffer) {
+    INLINEDEF Nd4jLong *computeIndices(Nd4jLong *shapeBuffer) {
         return computeIndices(shape::rank(shapeBuffer),shape::shapeOf(shapeBuffer),shape::stride(shapeBuffer));
     }
 
@@ -2343,7 +2343,7 @@ template <typename T>
 #ifdef __CUDACC__
 __host__ __device__
 #endif
- INLINEDEF void fill(T* buffer, T value, Nd4jIndex length) {
+ INLINEDEF void fill(T* buffer, T value, Nd4jLong length) {
 
 #pragma omp simd
      for (int e = 0; e < length; e++)
@@ -3230,7 +3230,7 @@ __host__ __device__
         Nd4jLong *indices = new Nd4jLong[rank];
         memset((void *) indices,0,rank * sizeof(int));
         indices[0] = sliceIdx;
-        Nd4jIndex offset = shape::getOffset(0,newShape,newStride,indices,rank);
+        Nd4jLong offset = shape::getOffset(0,newShape,newStride,indices,rank);
         newShapeBuffer[shape::shapeInfoLength(newRank) - 3] = offset;
         if(shape::isMatrix(shapeBuffer)) {
             newShapeBuffer[shape::shapeInfoLength(newRank) - 2] = currStride[1];
@@ -3356,7 +3356,7 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF Nd4jIndex length(Nd4jLong *shapeInfo) {
+    INLINEDEF Nd4jLong length(Nd4jLong *shapeInfo) {
         int rank = shape::rank(shapeInfo);
         if (rank == 0)
             return 1L;
@@ -3370,8 +3370,8 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    INLINEDEF Nd4jIndex length(std::initializer_list<int>& shape) {
-        Nd4jIndex ret = 1;
+    INLINEDEF Nd4jLong length(std::initializer_list<int>& shape) {
+        Nd4jLong ret = 1;
         for (auto v : shape) {
             ret *= v;
         }
@@ -4100,8 +4100,8 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    INLINEDEF Nd4jIndex getOffset(Nd4jIndex baseOffset,  Nd4jLong *shape,  Nd4jLong *stride,  Nd4jLong *indices, int rank) {
-        Nd4jIndex offset = baseOffset;
+    INLINEDEF Nd4jLong getOffset(Nd4jLong baseOffset,  Nd4jLong *shape,  Nd4jLong *stride,  Nd4jLong *indices, int rank) {
+        Nd4jLong offset = baseOffset;
         for(int i = 0; i < rank; i++) {
             if(indices[i] >= shape[i] && shape[i] != 1) {
 #ifdef __CUDA_ARCH__
@@ -4510,8 +4510,8 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    INLINEDEF Nd4jIndex prodLong( Nd4jLong *data, int length) {
-        Nd4jIndex prod = 1;
+    INLINEDEF Nd4jLong prodLong( Nd4jLong *data, int length) {
+        Nd4jLong prod = 1;
         for (int i = 0; i < length; i++) {
             prod *= data[i];
         }
@@ -4961,12 +4961,12 @@ __host__ __device__
     __host__
 #endif
 // return absolute index of array min, min is sub-array of max, index to be returned is min's index and corresponds to maxIdx of max array 
-INLINEDEF Nd4jIndex subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx) {
+INLINEDEF Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx) {
 
     Nd4jLong *idxPerRank = new Nd4jLong[maxShapeInfo[0]];
     ind2subC(maxShapeInfo[0], const_cast<Nd4jLong*>(maxShapeInfo)+1, const_cast<int&>(maxIdx), idxPerRank);    
 
-    Nd4jIndex minIdx = 0;
+    Nd4jLong minIdx = 0;
     for(int i = 0; i < minShapeInfo[0]; ++i) {
         if(minShapeInfo[minShapeInfo[0] - i] == 1 || idxPerRank[maxShapeInfo[0] - i - 1] == 0)
             continue;
