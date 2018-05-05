@@ -1207,7 +1207,7 @@ template <typename T>
             int lim = shape::shapeInfoLength(rank);
             printf("%s: [", msg);
             for (int i = 0; i < shape::shapeInfoLength(rank); i++) {
-                printf("%lld", _shapeInfo[i]);
+                printf("%lld", (long long) _shapeInfo[i]);
 
                 if (i < lim - 1)
                     printf(", ");

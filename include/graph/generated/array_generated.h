@@ -18,16 +18,16 @@ enum ByteOrder {
   ByteOrder_MAX = ByteOrder_BE
 };
 
-inline ByteOrder (&EnumValuesByteOrder())[2] {
-  static ByteOrder values[] = {
+inline const ByteOrder (&EnumValuesByteOrder())[2] {
+  static const ByteOrder values[] = {
     ByteOrder_LE,
     ByteOrder_BE
   };
   return values;
 }
 
-inline const char **EnumNamesByteOrder() {
-  static const char *names[] = {
+inline const char * const *EnumNamesByteOrder() {
+  static const char * const names[] = {
     "LE",
     "BE",
     nullptr
@@ -62,8 +62,8 @@ enum DataType {
   DataType_MAX = DataType_QINT16
 };
 
-inline DataType (&EnumValuesDataType())[17] {
-  static DataType values[] = {
+inline const DataType (&EnumValuesDataType())[17] {
+  static const DataType values[] = {
     DataType_INHERIT,
     DataType_BOOL,
     DataType_FLOAT8,
@@ -85,8 +85,8 @@ inline DataType (&EnumValuesDataType())[17] {
   return values;
 }
 
-inline const char **EnumNamesDataType() {
-  static const char *names[] = {
+inline const char * const *EnumNamesDataType() {
+  static const char * const names[] = {
     "INHERIT",
     "BOOL",
     "FLOAT8",
@@ -121,8 +121,8 @@ struct FlatArray FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_DTYPE = 8,
     VT_BYTEORDER = 10
   };
-  const flatbuffers::Vector<int32_t> *shape() const {
-    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_SHAPE);
+  const flatbuffers::Vector<int64_t> *shape() const {
+    return GetPointer<const flatbuffers::Vector<int64_t> *>(VT_SHAPE);
   }
   const flatbuffers::Vector<int8_t> *buffer() const {
     return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_BUFFER);
@@ -148,7 +148,7 @@ struct FlatArray FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct FlatArrayBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_shape(flatbuffers::Offset<flatbuffers::Vector<int32_t>> shape) {
+  void add_shape(flatbuffers::Offset<flatbuffers::Vector<int64_t>> shape) {
     fbb_.AddOffset(FlatArray::VT_SHAPE, shape);
   }
   void add_buffer(flatbuffers::Offset<flatbuffers::Vector<int8_t>> buffer) {
@@ -174,7 +174,7 @@ struct FlatArrayBuilder {
 
 inline flatbuffers::Offset<FlatArray> CreateFlatArray(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<int32_t>> shape = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int64_t>> shape = 0,
     flatbuffers::Offset<flatbuffers::Vector<int8_t>> buffer = 0,
     DataType dtype = DataType_INHERIT,
     ByteOrder byteOrder = ByteOrder_LE) {
@@ -188,13 +188,13 @@ inline flatbuffers::Offset<FlatArray> CreateFlatArray(
 
 inline flatbuffers::Offset<FlatArray> CreateFlatArrayDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<int32_t> *shape = nullptr,
+    const std::vector<int64_t> *shape = nullptr,
     const std::vector<int8_t> *buffer = nullptr,
     DataType dtype = DataType_INHERIT,
     ByteOrder byteOrder = ByteOrder_LE) {
   return nd4j::graph::CreateFlatArray(
       _fbb,
-      shape ? _fbb.CreateVector<int32_t>(*shape) : 0,
+      shape ? _fbb.CreateVector<int64_t>(*shape) : 0,
       buffer ? _fbb.CreateVector<int8_t>(*buffer) : 0,
       dtype,
       byteOrder);
@@ -204,15 +204,30 @@ inline const nd4j::graph::FlatArray *GetFlatArray(const void *buf) {
   return flatbuffers::GetRoot<nd4j::graph::FlatArray>(buf);
 }
 
+inline const nd4j::graph::FlatArray *GetSizePrefixedFlatArray(const void *buf) {
+  return flatbuffers::GetSizePrefixedRoot<nd4j::graph::FlatArray>(buf);
+}
+
 inline bool VerifyFlatArrayBuffer(
     flatbuffers::Verifier &verifier) {
   return verifier.VerifyBuffer<nd4j::graph::FlatArray>(nullptr);
+}
+
+inline bool VerifySizePrefixedFlatArrayBuffer(
+    flatbuffers::Verifier &verifier) {
+  return verifier.VerifySizePrefixedBuffer<nd4j::graph::FlatArray>(nullptr);
 }
 
 inline void FinishFlatArrayBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<nd4j::graph::FlatArray> root) {
   fbb.Finish(root);
+}
+
+inline void FinishSizePrefixedFlatArrayBuffer(
+    flatbuffers::FlatBufferBuilder &fbb,
+    flatbuffers::Offset<nd4j::graph::FlatArray> root) {
+  fbb.FinishSizePrefixed(root);
 }
 
 }  // namespace graph

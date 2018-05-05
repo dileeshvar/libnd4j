@@ -4123,7 +4123,7 @@ __host__ __device__
 #ifdef __CUDA_ARCH__
                 printf("D: Index %i [%lld] must not be >= shape[%lld].\n", i,indices[i],shape[i]);
 #else
-                printf("H: Index %i [%lld] must not be >= shape[%lld].\n", i,indices[i],shape[i]);
+                printf("H: Index %i [%lld] must not be >= shape[%lld].\n", i, (long long) indices[i], (long long) shape[i]);
 #endif
 
 #ifdef __CUDA_ARCH__
@@ -4242,7 +4242,7 @@ __host__ __device__
 #endif
     INLINEDEF void printIntArray(Nd4jLong *arr,int length) {
         for(int i = 0; i < length; i++) {
-            printf(" %lld ",arr[i]);
+            printf(" %lld ", (long long) arr[i]);
         }
 
         printf("\n");
@@ -4257,7 +4257,7 @@ __host__ __device__
         printf("Rank %d\n",rank);
         printf("Shape:\n");
         for(int i = 0; i < rank; i++) {
-            printf(" %lld ",shape[i]);
+            printf(" %lld ",(long long) shape[i]);
         }
 
         printf("\n");
@@ -4265,7 +4265,7 @@ __host__ __device__
         Nd4jLong *stride = shape::stride(shapeInfo);
         printf("Stride:\n");
         for(int i = 0; i < rank; i++) {
-            printf(" %lld ",stride[i]);
+            printf(" %lld ", (long long) stride[i]);
         }
 
         printf("\n");
@@ -4281,7 +4281,7 @@ __host__ __device__
         int lim = shape::shapeInfoLength(rank);
         printf("ShapeInfo: [");
         for (int i = 0; i < lim; i++) {
-            printf("%lld", shapeInfo[i]);
+            printf("%lld", (long long) shapeInfo[i]);
 
             if (i < lim - 1) {
                 printf(", ");
@@ -4300,11 +4300,11 @@ __host__ __device__
     INLINEDEF void printShapeInfoLinear(const char *msg, int rank, Nd4jLong *shape, Nd4jLong *strides) {
         printf("%s : [", msg);
         for (int i = 0; i < rank; i++) {
-            printf("%lld, ", shape[i]);
+            printf("%lld, ", (long long) shape[i]);
         }
 
         for (int i = 0; i < rank; i++) {
-            printf("%lld", strides[i]);
+            printf("%lld", (long long) strides[i]);
 
             if (i < rank - 1)
                 printf(", ");
@@ -4324,7 +4324,7 @@ __host__ __device__
         int lim = shape::shapeInfoLength(rank);
         printf("%s : [", msg);
         for (int i = 0; i < lim; i++) {
-            printf("%lld", shapeInfo[i]);
+            printf("%lld", (long long) shapeInfo[i]);
 
             if (i < lim - 1) {
                 printf(", ");
