@@ -14,7 +14,7 @@ namespace functions {
         T IndexReduce<T>::execScalar(
                 const int opNum,
                 T *x,
-                int *xShapeInfo,
+                Nd4jLong *xShapeInfo,
                 T *extraParams) {
             RETURNING_DISPATCH_BY_OPNUM(execScalar, PARAMS(x, xShapeInfo, extraParams), INDEX_REDUCE_OPS);
         }
@@ -22,18 +22,18 @@ namespace functions {
         template <typename T>
         void IndexReduce<T>::exec(const int opNum,
                   T *x,
-                  int *xShapeInfo,
+                  Nd4jLong *xShapeInfo,
                   T *extraParams,
                   T *result,
-                  int *resultShapeInfoBuffer,
+                  Nd4jLong *resultShapeInfoBuffer,
                   int *dimension,
-                  int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffset) {
+                  int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffset) {
             DISPATCH_BY_OPNUM(exec, PARAMS(x, xShapeInfo, extraParams, result, resultShapeInfoBuffer, dimension, dimensionLength, tadShapeInfo, tadOffset), INDEX_REDUCE_OPS);
         }
 
         template <typename T>
         template<typename OpType>
-        T IndexReduce<T>::execScalar(T *x, int *xShapeInfo, T *extraParams) {
+        T IndexReduce<T>::execScalar(T *x, Nd4jLong *xShapeInfo, T *extraParams) {
 
             //T startingVal = OpType::startingValue(x);
             IndexValue<T> startingIndex = OpType::startingIndexValue(x);
@@ -41,10 +41,10 @@ namespace functions {
             Nd4jLong length = shape::length(xShapeInfo);
             int xElementWiseStride = shape::elementWiseStride(xShapeInfo);
             if(xElementWiseStride < 1) {
-                int *xShape = shape::shapeOf(xShapeInfo);
-                int *xStride = shape::stride(xShapeInfo);
+                auto xShape = shape::shapeOf(xShapeInfo);
+                auto xStride = shape::stride(xShapeInfo);
                 int tadRank = shape::rank(xShapeInfo);
-                int xCoord[MAX_RANK];
+                Nd4jLong xCoord[MAX_RANK];
 
                 for (Nd4jLong i = 0; i < length; i++) {
                     shape::ind2subC(tadRank,xShape, i, xCoord);
@@ -130,7 +130,7 @@ namespace functions {
 
         template <typename T>
         template<typename OpType>
-        void IndexReduce<T>::exec(T *x, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfoBuffer, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffset) {
+        void IndexReduce<T>::exec(T *x, Nd4jLong *xShapeInfo, T *extraParams, T *result, Nd4jLong *resultShapeInfoBuffer, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffset) {
 
             if(shape::isScalar(resultShapeInfoBuffer)) {
                 result[0] = execScalar<OpType>(x,xShapeInfo,extraParams);
@@ -146,7 +146,7 @@ namespace functions {
                 startingIndex[i] = val;
             }
 
-            int *tadOnlyShapeInfo = tadShapeInfo;
+            auto tadOnlyShapeInfo = tadShapeInfo;
             Nd4jLong *tadOffsets = tadOffset;
             shape::TAD *tad = nullptr;
 
@@ -180,24 +180,23 @@ namespace functions {
                              * along long which to iterate.
                              */
 
-                int *tadShapeShapeInfo = tadOnlyShapeInfo;
-                int *xShape = shape::shapeOf(tadShapeShapeInfo);
-                int *xStride = shape::stride(tadShapeShapeInfo);
+                auto tadShapeShapeInfo = tadOnlyShapeInfo;
+                auto xShape = shape::shapeOf(tadShapeShapeInfo);
+                auto xStride = shape::stride(tadShapeShapeInfo);
                 int rank = shape::rank(tadShapeShapeInfo);
 
 
 #pragma omp  parallel for schedule(guided) if (resultLength > TAD_THRESHOLD) default(shared)
                 for(Nd4jLong i = 0; i < resultLength; i++) {
-                    Nd4jLong offset = tadOffsets[i];
-
+                    auto offset = tadOffsets[i];
 
                     IndexValue<T> indexValue = OpType::startingIndexValue(&x[offset]);
 
-                    int xCoord[MAX_RANK];
+                    Nd4jLong xCoord[MAX_RANK];
 
                     for(int j = 0; j < tadLength; j++) {
                         shape::ind2subC(rank,xShape, j, xCoord);
-                        Nd4jLong xOffset = shape::getOffset(offset, xShape, xStride, xCoord, rank);
+                        auto  xOffset = shape::getOffset(offset, xShape, xStride, xCoord, rank);
 
                         IndexValue<T> comp;
                         comp.index = j;
@@ -207,12 +206,11 @@ namespace functions {
                     result[i] = indexValue.index;
                 }
             } else {
-                int tadElementWiseStride = shape::elementWiseStride(tadOnlyShapeInfo);
-                //const int tadLength = shape::length(tadOnlyShapeInfo);
+                auto tadElementWiseStride = shape::elementWiseStride(tadOnlyShapeInfo);
 
 //#pragma omp parallel for schedule(guided) if (resultLength > TAD_THRESHOLD) default(shared)
                 for(Nd4jLong i = 0;  i < resultLength; i++) {
-                    Nd4jLong baseOffset = tadOffsets[i];
+                    auto baseOffset = tadOffsets[i];
                     IndexValue<T> indexValue = OpType::startingIndexValue(&x[baseOffset]);
 
 // FIXME: proper reduction required here

@@ -66,22 +66,22 @@ namespace nd4j {
     class ND4J_EXPORT ArrayOptions {
 
     public:
-        static bool isNewFormat(int *shapeInfo);
-        static bool hasPropertyBitSet(int *shapeInfo, int property);
-        static bool togglePropertyBit(int *shapeInfo, int property);
-        static void unsetPropertyBit(int *shapeInfo, int property);
-        static void setPropertyBit(int *shapeInfo, int property);
-        static void setPropertyBits(int *shapeInfo, std::initializer_list<int> properties);
+        static bool isNewFormat(Nd4jLong *shapeInfo);
+        static bool hasPropertyBitSet(Nd4jLong *shapeInfo, int property);
+        static bool togglePropertyBit(Nd4jLong *shapeInfo, int property);
+        static void unsetPropertyBit(Nd4jLong *shapeInfo, int property);
+        static void setPropertyBit(Nd4jLong *shapeInfo, int property);
+        static void setPropertyBits(Nd4jLong *shapeInfo, std::initializer_list<int> properties);
 
-        static bool isSparseArray(int *shapeInfo);
-        static bool isUnsigned(int *shapeInfo);
+        static bool isSparseArray(Nd4jLong *shapeInfo);
+        static bool isUnsigned(Nd4jLong *shapeInfo);
 
-        static nd4j::DataType dataType(int *shapeInfo);
-        static SpaceType spaceType(int *shapeInfo);
-        static ArrayType arrayType(int *shapeInfo);
-        static SparseType sparseType(int *shapeInfo);
+        static nd4j::DataType dataType(Nd4jLong *shapeInfo);
+        static SpaceType spaceType(Nd4jLong *shapeInfo);
+        static ArrayType arrayType(Nd4jLong *shapeInfo);
+        static SparseType sparseType(Nd4jLong *shapeInfo);
 
-        static bool hasExtraProperties(int *shapeInfo);
+        static bool hasExtraProperties(Nd4jLong *shapeInfo);
     };
 }
 

@@ -188,8 +188,6 @@ namespace nd4j {
                             idx++;
 
                         }
-
-                        delete[] coordsUse;
                     }
 
                 }
@@ -221,7 +219,7 @@ namespace nd4j {
                 //result tad offset + the current offset for each tad + array offset (matches current array)
                 T *currResultTadWithOffset = result  + resultTad->tadOffsets[j];
                 //ensure we start at the proper index, we need to move the starting index forward relative to the desired array offset
-                int* sub = shape::ind2subC(shape::rank(resultTad->tadOnlyShapeInfo),shape::shapeOf(resultTad->tadOnlyShapeInfo),arrOffset);
+                auto sub = shape::ind2subC(shape::rank(resultTad->tadOnlyShapeInfo),shape::shapeOf(resultTad->tadOnlyShapeInfo),arrOffset);
                 Nd4jLong baseOffset = shape::getOffset(0,shape::shapeOf(resultTad->tadOnlyShapeInfo),shape::stride(resultTad->tadOnlyShapeInfo),sub,shape::rank(resultTad->tadOnlyShapeInfo));
                 delete[] sub;
                 currResultTadWithOffset += baseOffset;
@@ -250,11 +248,11 @@ namespace nd4j {
                             }
                         }
                         else {
-                            int shapeIter[MAX_RANK];
-                            int coord[MAX_RANK];
+                            Nd4jLong shapeIter[MAX_RANK];
+                            Nd4jLong coord[MAX_RANK];
                             int dim;
                             int rankIter = shape::rank(arrTad->tadOnlyShapeInfo);
-                            int xStridesIter[MAX_RANK];
+                            Nd4jLong xStridesIter[MAX_RANK];
                             if (PrepareOneRawArrayIter<T>(rankIter,
                                                           shape::shapeOf(arrTad->tadOnlyShapeInfo),
                                                           arrTadData,
@@ -286,14 +284,14 @@ namespace nd4j {
                         //don't use element wise stride for either
                     else {
 
-                        int shapeIter[MAX_RANK];
-                        int coord[MAX_RANK];
+                        Nd4jLong shapeIter[MAX_RANK];
+                        Nd4jLong coord[MAX_RANK];
                         int dim;
-                        int xStridesIter[MAX_RANK];
-                        int resultStridesIter[MAX_RANK];
-                        int *xShape = shape::shapeOf(arrTad->tadOnlyShapeInfo);
-                        int *xStride = shape::stride(arrTad->tadOnlyShapeInfo);
-                        int *resultStride = shape::stride(resultTad->tadOnlyShapeInfo);
+                        Nd4jLong xStridesIter[MAX_RANK];
+                        Nd4jLong resultStridesIter[MAX_RANK];
+                        auto xShape = shape::shapeOf(arrTad->tadOnlyShapeInfo);
+                        auto xStride = shape::stride(arrTad->tadOnlyShapeInfo);
+                        auto resultStride = shape::stride(resultTad->tadOnlyShapeInfo);
                         int rank = shape::rank(arrTad->tadOnlyShapeInfo);
                         if (PrepareTwoRawArrayIter<T>(rank,
                                                       xShape,
@@ -435,28 +433,28 @@ namespace nd4j {
     }
 
     template <typename T>
-    int SpecialMethods<T>::getPosition(int *xShapeInfo, int index) {
-        int xEWS = shape::elementWiseStride(xShapeInfo);
+    Nd4jLong SpecialMethods<T>::getPosition(Nd4jLong *xShapeInfo, Nd4jLong index) {
+        auto xEWS = shape::elementWiseStride(xShapeInfo);
 
         if (xEWS == 1) {
             return index;
         } else if (xEWS > 1) {
             return index * xEWS;
         } else {
-            int xCoord[MAX_RANK];
+            Nd4jLong xCoord[MAX_RANK];
             int xRank = shape::rank(xShapeInfo);
-            int *xShape = shape::shapeOf(xShapeInfo);
-            int *xStride = shape::stride(xShapeInfo);
+            auto xShape = shape::shapeOf(xShapeInfo);
+            auto xStride = shape::stride(xShapeInfo);
 
             shape::ind2subC(xRank, xShape, index, xCoord);
-            Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+            auto xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
 
             return xOffset;
         }
     }
 
     template<typename T>
-    void SpecialMethods<T>::quickSort_parallel_internal(T* array, int *xShapeInfo, int left, int right, int cutoff, bool descending) {
+    void SpecialMethods<T>::quickSort_parallel_internal(T* array, Nd4jLong *xShapeInfo, int left, int right, int cutoff, bool descending) {
 
         int i = left, j = right;
         T tmp;
@@ -511,7 +509,7 @@ namespace nd4j {
     }
 
     template<typename T>
-    void SpecialMethods<T>::quickSort_parallel(T* array, int *xShapeInfo, Nd4jLong lenArray, int numThreads, bool descending){
+    void SpecialMethods<T>::quickSort_parallel(T* array, Nd4jLong *xShapeInfo, Nd4jLong lenArray, int numThreads, bool descending){
 
         int cutoff = 1000;
 
@@ -546,12 +544,12 @@ namespace nd4j {
 
 
     template<typename T>
-    void SpecialMethods<T>::sortGeneric(T *x, int *xShapeInfo, bool descending) {
+    void SpecialMethods<T>::sortGeneric(T *x, Nd4jLong *xShapeInfo, bool descending) {
         quickSort_parallel(x, xShapeInfo, shape::length(xShapeInfo), omp_get_max_threads(), descending);
     }
 
     template<typename T>
-    void SpecialMethods<T>::sortTadGeneric(T *x, int *xShapeInfo, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
+    void SpecialMethods<T>::sortTadGeneric(T *x, Nd4jLong *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
         //quickSort_parallel(x, xShapeInfo, shape::length(xShapeInfo), omp_get_max_threads(), descending);
         Nd4jLong xLength = shape::length(xShapeInfo);
         Nd4jLong xTadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);

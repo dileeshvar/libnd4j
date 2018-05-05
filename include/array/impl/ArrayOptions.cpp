@@ -2,33 +2,33 @@
 #include <helpers/shape.h>
 
 namespace nd4j {
-    bool ArrayOptions::isNewFormat(int *shapeInfo) {
+    bool ArrayOptions::isNewFormat(Nd4jLong *shapeInfo) {
         return (shape::extra(shapeInfo) != 0);
     }
 
-    bool ArrayOptions::isSparseArray(int *shapeInfo) {
+    bool ArrayOptions::isSparseArray(Nd4jLong *shapeInfo) {
         return hasPropertyBitSet(shapeInfo, ARRAY_SPARSE);
     }
 
-    bool ArrayOptions::hasExtraProperties(int *shapeInfo) {
+    bool ArrayOptions::hasExtraProperties(Nd4jLong *shapeInfo) {
         return hasPropertyBitSet(shapeInfo, ARRAY_EXTRAS);
     }
 
-    bool ArrayOptions::hasPropertyBitSet(int *shapeInfo, int property) {
+    bool ArrayOptions::hasPropertyBitSet(Nd4jLong *shapeInfo, int property) {
         if (!isNewFormat(shapeInfo))
             return false;
 
         return ((shape::extra(shapeInfo) & property) == property);
     }
 
-    bool ArrayOptions::isUnsigned(int *shapeInfo) {
+    bool ArrayOptions::isUnsigned(Nd4jLong *shapeInfo) {
         if (!isNewFormat(shapeInfo))
             return false;
 
         return hasPropertyBitSet(shapeInfo, ARRAY_UNSIGNED);
     }
 
-    nd4j::DataType ArrayOptions::dataType(int *shapeInfo) {
+    nd4j::DataType ArrayOptions::dataType(Nd4jLong *shapeInfo) {
         if (hasPropertyBitSet(shapeInfo, ARRAY_FLOAT))
             return nd4j::DataType::DataType_FLOAT;
         else if (hasPropertyBitSet(shapeInfo, ARRAY_DOUBLE))
@@ -61,7 +61,7 @@ namespace nd4j {
             throw std::runtime_error("Bad datatype");
     }
 
-    SpaceType ArrayOptions::spaceType(int *shapeInfo) {
+    SpaceType ArrayOptions::spaceType(Nd4jLong *shapeInfo) {
         if (hasPropertyBitSet(shapeInfo, ARRAY_QUANTIZED))
             return SpaceType::QUANTIZED;
         if (hasPropertyBitSet(shapeInfo, ARRAY_COMPLEX))
@@ -70,28 +70,28 @@ namespace nd4j {
             return SpaceType::CONTINUOUS;
     }
 
-    ArrayType ArrayOptions::arrayType(int *shapeInfo) {
+    ArrayType ArrayOptions::arrayType(Nd4jLong *shapeInfo) {
         if (hasPropertyBitSet(shapeInfo, ARRAY_SPARSE))
             return ArrayType::SPARSE;
         else // by default we return DENSE type here
             return ArrayType::DENSE;
     }
 
-    bool ArrayOptions::togglePropertyBit(int *shapeInfo, int property) {
+    bool ArrayOptions::togglePropertyBit(Nd4jLong *shapeInfo, int property) {
         shape::extra(shapeInfo) ^= property;
 
         return hasPropertyBitSet(shapeInfo, property);
     }
 
-    void ArrayOptions::setPropertyBit(int *shapeInfo, int property) {
+    void ArrayOptions::setPropertyBit(Nd4jLong *shapeInfo, int property) {
         shape::extra(shapeInfo) |= property;
     }
 
-    void ArrayOptions::unsetPropertyBit(int *shapeInfo, int property) {
+    void ArrayOptions::unsetPropertyBit(Nd4jLong *shapeInfo, int property) {
         shape::extra(shapeInfo) &= property;
     }
 
-    SparseType ArrayOptions::sparseType(int *shapeInfo) {
+    SparseType ArrayOptions::sparseType(Nd4jLong *shapeInfo) {
         if (!isSparseArray(shapeInfo))
             throw std::runtime_error("Not a sparse array");
 
@@ -105,7 +105,7 @@ namespace nd4j {
             return SparseType::LIL;
     }
 
-    void ArrayOptions::setPropertyBits(int *shapeInfo, std::initializer_list<int> properties) {
+    void ArrayOptions::setPropertyBits(Nd4jLong *shapeInfo, std::initializer_list<int> properties) {
         for (auto v: properties) {
             if (!hasPropertyBitSet(shapeInfo, v))
                 setPropertyBit(shapeInfo, v);

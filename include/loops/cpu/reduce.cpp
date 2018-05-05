@@ -11,20 +11,20 @@ namespace functions {
 
         template <typename T>
         template <typename OpType>
-            T _CUDA_H ReduceFunction<T>::execScalar(T *x, int *xShapeInfo, T *extraParams) {
+            T _CUDA_H ReduceFunction<T>::execScalar(T *x, Nd4jLong *xShapeInfo, T *extraParams) {
                 const Nd4jLong length = shape::length(xShapeInfo);
                 int xElementWiseStride = shape::elementWiseStride(xShapeInfo);
                 if (xElementWiseStride >= 1) {
                     return execScalar<OpType>(x, xElementWiseStride, length, extraParams);
                 }
                 else {
-                    int shapeIter[MAX_RANK];
-                    int coord[MAX_RANK];
+                    Nd4jLong shapeIter[MAX_RANK];
+                    Nd4jLong coord[MAX_RANK];
                     int dim;
-                    int xStridesIter[MAX_RANK];
+                    Nd4jLong xStridesIter[MAX_RANK];
 
-                    int *xShape = shape::shapeOf(xShapeInfo);
-                    int *xStride = shape::stride(xShapeInfo);
+                    auto xShape = shape::shapeOf(xShapeInfo);
+                    auto xStride = shape::stride(xShapeInfo);
                     T start = OpType::startingValue(x);
                     int rank = shape::rank(xShapeInfo);
 
@@ -59,20 +59,20 @@ namespace functions {
             }
 
         template <typename T>
-        T ReduceFunction<T>::execScalar(const int opNum, T *x, int *xShapeInfo, T *extraParams) {
+        T ReduceFunction<T>::execScalar(const int opNum, T *x, Nd4jLong *xShapeInfo, T *extraParams) {
                 RETURNING_DISPATCH_BY_OPNUM(execScalar, PARAMS(x, xShapeInfo, extraParams), REDUCE_OPS);
         }
 
         template <typename T>
         void ReduceFunction<T>::exec(const int opNum,
                              T *x,
-                             int *xShapeInfo,
+                             Nd4jLong *xShapeInfo,
                              T *extraParams,
                              T *result,
-                             int *resultShapeInfoBuffer,
+                             Nd4jLong *resultShapeInfoBuffer,
                              int *dimension,
                              int dimensionLength,
-                             int *tadShapeInfo,
+                             Nd4jLong *tadShapeInfo,
                              Nd4jLong *tadOffset) {
                 DISPATCH_BY_OPNUM(exec, PARAMS(x,
                                                xShapeInfo,
@@ -89,16 +89,16 @@ namespace functions {
         template <typename T>
         template <typename OpType>
         void _CUDA_H ReduceFunction<T>::exec(T *x,
-                             int *xShapeInfo,
+                             Nd4jLong *xShapeInfo,
                              T *extraParams,
                              T *result,
-                             int *resultShapeInfoBuffer,
+                             Nd4jLong *resultShapeInfoBuffer,
                              int *dimension,
                              int dimensionLength,
-                             int *tadShapeInfo,
+                             Nd4jLong *tadShapeInfo,
                              Nd4jLong *tadOffset) {
 
-                int resultLength = shape::length(resultShapeInfoBuffer);
+                auto resultLength = shape::length(resultShapeInfoBuffer);
 
                 //pre squeezed: this is for keeping the pointer to the original
                 //shape information for tad offset
@@ -115,8 +115,8 @@ namespace functions {
                     return;
                 }
 
-                int *tadOnlyShapeInfo = tadShapeInfo;
-                Nd4jLong *tadOffsets = tadOffset;
+                auto tadOnlyShapeInfo = tadShapeInfo;
+                auto tadOffsets = tadOffset;
                 shape::TAD *tad = nullptr;
 
                 if (tadOnlyShapeInfo == nullptr || tadOffsets == nullptr) {
@@ -134,9 +134,9 @@ namespace functions {
                 }
 
 
-                const int tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
-                int numTads = shape::length(xShapeInfo) / tadLength;
-                int tadEWS = shape::elementWiseStride(tadOnlyShapeInfo);
+                const auto tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
+                auto numTads = shape::length(xShapeInfo) / tadLength;
+                auto tadEWS = shape::elementWiseStride(tadOnlyShapeInfo);
 
                 int tadsPerThread = resultLength / TAD_THRESHOLD;
                 int num_threads = nd4j::math::nd4j_max<int>(1, tadsPerThread);
@@ -166,20 +166,20 @@ namespace functions {
                     }
                 }
                 else {
-                    int *tadShape = shape::shapeOf(tadOnlyShapeInfo);
-                    int *tadStride = shape::stride(tadOnlyShapeInfo);
+                    auto tadShape = shape::shapeOf(tadOnlyShapeInfo);
+                    auto tadStride = shape::stride(tadOnlyShapeInfo);
                     int tadRank = shape::rank(tadOnlyShapeInfo);
 
 #pragma omp  parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared)
                     for (int i = 0; i < resultLength; i++) {
-                        Nd4jLong offset = tadOffsets[i];
-                        int xCoord[MAX_RANK];
+                        auto offset = tadOffsets[i];
+                        Nd4jLong xCoord[MAX_RANK];
 
                         T start = OpType::startingValue(x + offset);
 
                         for (int j = 0; j < tadLength; j++) {
                             shape::ind2subC(tadRank, tadShape, j, xCoord);
-                            Nd4jLong xOffset = shape::getOffset(offset, tadShape, tadStride, xCoord, tadRank);
+                            auto xOffset = shape::getOffset(offset, tadShape, tadStride, xCoord, tadRank);
 
                             start = OpType::update(start, OpType::op(x[xOffset], extraParams), extraParams);
                         }
@@ -196,16 +196,16 @@ namespace functions {
         template <typename T>
         template<typename OpType>
         void _CUDA_H ReduceFunction<T>::exec(T *x,
-                             int *xShapeInfo,
+                             Nd4jLong *xShapeInfo,
                              T *extraParams,
                              T *result,
-                             int *resultShapeInfo) {
+                             Nd4jLong *resultShapeInfo) {
                 return execScalar<OpType>(x, xShapeInfo, extraParams);
         }
 
         template <typename T>
         template <typename OpType>
-        T _CUDA_H ReduceFunction<T>::execScalar(const T *x, int xElementWiseStride, Nd4jLong length, T *extraParams) {
+        T _CUDA_H ReduceFunction<T>::execScalar(const T *x, Nd4jLong xElementWiseStride, Nd4jLong length, T *extraParams) {
                 T startingVal = OpType::startingValue(x);
                 if (xElementWiseStride == 1) {
                     if (length < ELEMENT_THRESHOLD) {
@@ -331,12 +331,12 @@ namespace functions {
         //template void ReduceFunction<float>::exec<simdOps::LogSumExp<float>>(float*, int*, float*, float*, int*, int*, int, int*, Nd4jLong*);
         //template void ReduceFunction<double>::exec<simdOps::LogSumExp<double>>(double*, int*, double*, double*, int*, int*, int, int*, Nd4jLong*);
 
-        BUILD_CALL_1(template void ReduceFunction<float>::exec, float, (float*, int*, float*, float*, int*, int*, int, int*, Nd4jLong*), REDUCE_OPS)
-        BUILD_CALL_1(template void ReduceFunction<float16>::exec, float16, (float16*, int*, float16*, float16*, int*, int*, int, int*, Nd4jLong*), REDUCE_OPS)
-        BUILD_CALL_1(template void ReduceFunction<double>::exec, double, (double*, int*, double*, double*, int*, int*, int, int*, Nd4jLong*), REDUCE_OPS)
+        BUILD_CALL_1(template void ReduceFunction<float>::exec, float, (float*, Nd4jLong*, float*, float*, Nd4jLong*, int*, int, Nd4jLong*, Nd4jLong*), REDUCE_OPS)
+        BUILD_CALL_1(template void ReduceFunction<float16>::exec, float16, (float16*, Nd4jLong*, float16*, float16*, Nd4jLong*, int*, int, Nd4jLong*, Nd4jLong*), REDUCE_OPS)
+        BUILD_CALL_1(template void ReduceFunction<double>::exec, double, (double*, Nd4jLong*, double*, double*, Nd4jLong*, int*, int, Nd4jLong*, Nd4jLong*), REDUCE_OPS)
 
-        BUILD_CALL_1(template float ReduceFunction<float>::execScalar, float, (float *x, int *, float*), REDUCE_OPS)
-        BUILD_CALL_1(template float16 ReduceFunction<float16>::execScalar, float16, (float16 *x, int *, float16*), REDUCE_OPS)
-        BUILD_CALL_1(template double ReduceFunction<double>::execScalar, double, (double *x, int *, double*), REDUCE_OPS)
+        BUILD_CALL_1(template float ReduceFunction<float>::execScalar, float, (float *x, Nd4jLong *, float*), REDUCE_OPS)
+        BUILD_CALL_1(template float16 ReduceFunction<float16>::execScalar, float16, (float16 *x, Nd4jLong *, float16*), REDUCE_OPS)
+        BUILD_CALL_1(template double ReduceFunction<double>::execScalar, double, (double *x, Nd4jLong *, double*), REDUCE_OPS)
     }
 }

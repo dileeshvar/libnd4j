@@ -29,7 +29,7 @@ namespace nd4j {
         static void accumulateGeneric(T **x, T *z, int n, const Nd4jLong length);
         static void averageGeneric(T **x, T *z, int n, const Nd4jLong length, bool propagate);
 
-        static int getPosition(int *xShapeInfo, int index);
+        static Nd4jLong getPosition(Nd4jLong *xShapeInfo, Nd4jLong index);
         static void quickSort_parallel_internal(T* array, Nd4jLong *xShapeInfo, int left, int right, int cutoff, bool descending);
         static void quickSort_parallel(T* array, Nd4jLong *xShapeInfo, Nd4jLong lenArray, int numThreads, bool descending);
 

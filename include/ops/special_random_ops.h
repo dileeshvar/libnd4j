@@ -22,7 +22,7 @@ namespace randomOps {
 
 
 #ifdef __CUDACC__
-        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             /**
              * X holds data,
              * Y holds probabilities
@@ -86,9 +86,9 @@ namespace randomOps {
                     __syncthreads();
                 }
             } else {
-                int xCoord[MAX_RANK];
-                int yCoord[MAX_RANK];
-                int zCoord[MAX_RANK];
+                Nd4jLong xCoord[MAX_RANK];
+                Nd4jLong yCoord[MAX_RANK];
+                Nd4jLong zCoord[MAX_RANK];
 
                 __shared__ int xRank;
                 __shared__ int yRank;
@@ -265,7 +265,7 @@ namespace randomOps {
         static const bool requiresSpecial = true;
 
 #ifdef __CUDACC__
-        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             __shared__ T epsilon;
             __shared__ T two_pi;
 
@@ -425,7 +425,7 @@ namespace randomOps {
         static const bool requiresSpecial = true;
 
 #ifdef __CUDACC__
-        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             int trials = (int) extraArguments[0];
             T prob = extraArguments[1];
 
@@ -551,7 +551,7 @@ namespace randomOps {
         static const bool requiresSpecial = true;
 
 #ifdef __CUDACC__
-        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             int trials = (int) extraArguments[0];
             T prob = extraArguments[1];
 
@@ -674,7 +674,7 @@ namespace randomOps {
 
 
 #ifdef __CUDACC__
-        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             __shared__ T epsilon;
             __shared__ T two_pi;
 
@@ -838,7 +838,7 @@ namespace randomOps {
 
 
 #ifdef __CUDACC__
-        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, int *xShapeBuffer, T *y, int *yShapeBuffer, T *z, int *zShapeBuffer, T *extraArguments) {
+        __device__ static inline void specialOpCuda(Nd4jPointer state, T *x, Nd4jLong *xShapeBuffer, T *y, Nd4jLong *yShapeBuffer, T *z, Nd4jLong *zShapeBuffer, T *extraArguments) {
             __shared__ T epsilon;
             __shared__ T two_pi;
 

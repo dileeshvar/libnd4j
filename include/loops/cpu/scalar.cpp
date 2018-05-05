@@ -13,7 +13,7 @@ namespace functions {
 
         template<typename T>
         template<typename OpType>
-        void ScalarTransform<T>::transform(T *x, int *xShapeInfo, T *extraParams, T *z, int *zShapeInfo, T *scalars, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, int *tadShapeInfoZ, Nd4jLong *tadOffsetsZ) {
+        void ScalarTransform<T>::transform(T *x, Nd4jLong *xShapeInfo, T *extraParams, T *z, Nd4jLong *zShapeInfo, T *scalars, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, Nd4jLong *tadShapeInfoZ, Nd4jLong *tadOffsetsZ) {
 
             if (tadShapeInfoZ == nullptr) {
                 tadShapeInfoZ = tadShapeInfo;
@@ -35,8 +35,8 @@ namespace functions {
 #pragma omp parallel for schedule(guided) num_threads(num_threads) if (num_threads > 1) proc_bind(AFFINITY) default(shared)
             for (int r = 0; r < numTads; r++) {
 
-                Nd4jLong offset = tadOffsets[r];
-                Nd4jLong offsetZ = tadOffsetsZ[r];
+                auto offset = tadOffsets[r];
+                auto offsetZ = tadOffsetsZ[r];
                 T scalar = scalars[r];
 
                 if (tadEWS >= 1 && zEWS >= 1) {
@@ -68,16 +68,16 @@ namespace functions {
         template<typename T>
         void ScalarTransform<T>::transform(int opNum,
                               T *x,
-                              int *xShapeInfo,
+                              Nd4jLong *xShapeInfo,
                               T *extraParams,
                               T *z,
-                              int *zShapeInfo,
+                              Nd4jLong *zShapeInfo,
                               T *scalars,
                               int *dimension,
                               int dimensionLength,
-                              int *tadShapeInfo,
+                              Nd4jLong *tadShapeInfo,
                               Nd4jLong *tadOffsets,
-                              int *tadShapeInfoZ,
+                              Nd4jLong *tadShapeInfoZ,
                               Nd4jLong *tadOffsetsZ) {
             DISPATCH_BY_OPNUM(transform, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), SCALAR_OPS);
         }
@@ -85,19 +85,19 @@ namespace functions {
         template<typename T>
         void ScalarTransform<T>::transform(const int opNum,
                               T *x,
-                              int *xShapeInfo,
+                              Nd4jLong *xShapeInfo,
                               T *result,
-                              int *resultShapeInfo,
+                              Nd4jLong *resultShapeInfo,
                               T scalar,
                               T *extraParams,
-                              int *indexes,
-                              int *resultIndexes) {
+                              Nd4jLong *indexes,
+                              Nd4jLong *resultIndexes) {
             DISPATCH_BY_OPNUM(transform, PARAMS(x, xShapeInfo, result, resultShapeInfo, scalar, extraParams, indexes, resultIndexes), SCALAR_OPS);
         }
 
 
         template<typename T>
-        void ScalarTransform<T>::transform(const int opNum, T *x, int xStride, T *result, int resultStride,
+        void ScalarTransform<T>::transform(const int opNum, T *x, Nd4jLong xStride, T *result, Nd4jLong resultStride,
                               T scalar, T *extraParams, const Nd4jLong n) {
             DISPATCH_BY_OPNUM(transform, PARAMS(x, xStride, result, resultStride, scalar, extraParams, n), SCALAR_OPS);
         }
@@ -105,9 +105,9 @@ namespace functions {
         template<typename T>
         void ScalarTransform<T>::transform(const int opNum,
                               T *x,
-                              int *xShapeInfo,
+                              Nd4jLong *xShapeInfo,
                               T *result,
-                              int *resultShapeInfo,
+                              Nd4jLong *resultShapeInfo,
                               T scalar, T *extraParams) {
             DISPATCH_BY_OPNUM(transform, PARAMS(x, xShapeInfo, result, resultShapeInfo, scalar, extraParams), SCALAR_OPS);
         }
@@ -115,13 +115,13 @@ namespace functions {
         template<typename T>
         template<typename OpType>
         void ScalarTransform<T>::transform(T *x,
-                              int *xShapeInfo,
+                              Nd4jLong *xShapeInfo,
                               T *result,
-                              int *resultShapeInfo,
+                              Nd4jLong *resultShapeInfo,
                               T scalar,
                               T *extraParams,
-                              int *indexes,
-                              int *resultIndexes) {
+                              Nd4jLong *indexes,
+                              Nd4jLong *resultIndexes) {
             const Nd4jLong n = shape::length(xShapeInfo);
 #pragma omp parallel for simd schedule(guided) if (n > ELEMENT_THRESHOLD) proc_bind(AFFINITY) default(shared)
             for (Nd4jLong i = 0; i < n; i++) {
@@ -132,9 +132,9 @@ namespace functions {
         template<typename T>
         template<typename OpType>
         void ScalarTransform<T>::transform(T *x,
-                               int *xShapeInfo,
+                               Nd4jLong *xShapeInfo,
                                T *result,
-                               int *resultShapeInfo,
+                               Nd4jLong *resultShapeInfo,
                                T scalar, T *extraParams) {
             char xOrdering = shape::order(xShapeInfo);
             char resultOrdering = shape::order(resultShapeInfo);
@@ -149,14 +149,14 @@ namespace functions {
 
             int resultElementWiseStride = shape::elementWiseStride(resultShapeInfo);
             if(xOrdering != resultOrdering || xElementWiseStride < 1 || resultElementWiseStride < 0) {
-                int shapeIter[MAX_RANK];
-                int coord[MAX_RANK];
+                Nd4jLong shapeIter[MAX_RANK];
+                Nd4jLong coord[MAX_RANK];
                 int dim;
-                int xStridesIter[MAX_RANK];
-                int resultStridesIter[MAX_RANK];
-                int *xShape = shape::shapeOf(xShapeInfo);
-                int *xStride = shape::stride(xShapeInfo);
-                int *resultStride = shape::stride(resultShapeInfo);
+                Nd4jLong xStridesIter[MAX_RANK];
+                Nd4jLong resultStridesIter[MAX_RANK];
+                auto xShape = shape::shapeOf(xShapeInfo);
+                auto xStride = shape::stride(xShapeInfo);
+                auto resultStride = shape::stride(resultShapeInfo);
                 int rank = shape::rank(xShapeInfo);
                 if(PrepareTwoRawArrayIter<T>(rank,
                                              xShape,
@@ -196,23 +196,20 @@ namespace functions {
                     transform<OpType>(x,xElementWiseStride,result,resultElementWiseStride,scalar,extraParams,n);
                 }
                 else {
-                    int *xShape = shape::shapeOf(xShapeInfo);
-                    int *resultShape = shape::shapeOf(resultShapeInfo);
+                    auto xShape = shape::shapeOf(xShapeInfo);
+                    auto resultShape = shape::shapeOf(resultShapeInfo);
 
-                    int *xStride = shape::stride(xShapeInfo);
-                    int *resultStride = shape::stride(resultShapeInfo);
+                    auto xStride = shape::stride(xShapeInfo);
+                    auto resultStride = shape::stride(resultShapeInfo);
                     int xRank = shape::rank(xShapeInfo);
                     int resultRank = shape::rank(resultShapeInfo);
 
-                    int xOffset = shape::offset(xShapeInfo);
-                    int resultOffset = shape::offset(resultShapeInfo);
-
 #pragma omp parallel for simd schedule(guided) if (n > ELEMENT_THRESHOLD) proc_bind(AFFINITY) default(shared)
                     for (Nd4jLong i = 0; i < n; i++) {
-                        int *xIdx = shape::ind2sub(xRank, xShape, i);
-                        int *resultIdx = shape::ind2sub(resultRank, resultShape, i);
-                        Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xIdx, xRank);
-                        Nd4jLong resultOffset2 = shape::getOffset(resultOffset, resultShape, resultStride, resultIdx,
+                        auto xIdx = shape::ind2sub(xRank, xShape, i);
+                        auto resultIdx = shape::ind2sub(resultRank, resultShape, i);
+                        auto xOffset2 = shape::getOffset(0, xShape, xStride, xIdx, xRank);
+                        auto resultOffset2 = shape::getOffset(0, resultShape, resultStride, resultIdx,
                                                                    resultRank);
 
                         result[resultOffset2] = OpType::op(x[xOffset2], scalar, extraParams);
@@ -229,7 +226,7 @@ namespace functions {
 
             template<typename T>
             template<typename OpType>
-            void ScalarTransform<T>::transform(T *x, int xStride, T *result, int resultStride, T scalar, T *extraParams, const Nd4jLong n) {
+            void ScalarTransform<T>::transform(T *x, Nd4jLong xStride, T *result, Nd4jLong resultStride, T scalar, T *extraParams, const Nd4jLong n) {
 /*
                 Nd4jLong elementsPerThread = n / ELEMENT_THRESHOLD;
                 int num_threads = nd4j::math::nd4j_max<int>(1, elementsPerThread);

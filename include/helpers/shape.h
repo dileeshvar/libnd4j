@@ -707,6 +707,12 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #endif
     ND4J_EXPORT Nd4jLong length(std::initializer_list<int>& shape);
 
+
+#ifdef __CUDACC__
+    __host__ __device__
+#endif
+    ND4J_EXPORT Nd4jLong length(std::initializer_list<Nd4jLong>& shape);
+
 /***
  * Returns the offset portion of an information buffer
  */
@@ -3371,6 +3377,17 @@ __host__ __device__
     __host__ __device__
 #endif
     INLINEDEF Nd4jLong length(std::initializer_list<int>& shape) {
+        Nd4jLong ret = 1;
+        for (auto v : shape) {
+            ret *= v;
+        }
+        return ret;
+    }
+
+    #ifdef __CUDACC__
+    __host__ __device__
+    #endif
+    INLINEDEF Nd4jLong length(std::initializer_list<Nd4jLong>& shape) {
         Nd4jLong ret = 1;
         for (auto v : shape) {
             ret *= v;

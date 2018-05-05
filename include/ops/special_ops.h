@@ -253,8 +253,8 @@ namespace simdOps {
             const int inH = (int) shape::sizeAt(xShapeBuffer, 2);
             const int inW = (int) shape::sizeAt(xShapeBuffer, 3);
 
-            int *strideIn = shape::stride(xShapeBuffer);
-            int *strideOut = shape::stride(resultShapeBuffer);
+            auto strideIn = shape::stride(xShapeBuffer);
+            auto strideOut = shape::stride(resultShapeBuffer);
 
             const bool fOrder = shape::order(resultShapeBuffer) == 'f';
             const Nd4jLong zLength = shape::length(resultShapeBuffer);
@@ -352,12 +352,6 @@ namespace simdOps {
                             } else {
 								result[_b + _k + yy * strideOut[2] + xx * strideOut[3]] = res;
                             }
-
-/*
-                            nd4j_printf("index: %i; hstart: %i; hend: %i; wstart: %i; wend: %i; ph: %i; pw: %i; hstart_orig: %i; hend_orig: %i;\n", idx, hstart, hend, wstart, wend, yy, xx, hSO, hEO);
-
-                            idx++;
-                            */
 						}
 					}
 				}
@@ -997,10 +991,10 @@ namespace simdOps {
 			Nd4jLong *resultShapeBuffer,
 			T *extraParams, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
-            const int *inShape = shape::shapeOf(xShapeBuffer);
-            const int *inStride = shape::stride(xShapeBuffer);
-            const int *outShape = shape::shapeOf(xShapeBuffer);
-            const int *outStride = shape::stride(resultShapeBuffer);
+            const Nd4jLong *inShape = shape::shapeOf(xShapeBuffer);
+            const Nd4jLong *inStride = shape::stride(xShapeBuffer);
+            const Nd4jLong *outShape = shape::shapeOf(xShapeBuffer);
+            const Nd4jLong *outStride = shape::stride(resultShapeBuffer);
 			
 			const int kH = inShape[2];
 			const int kW = inShape[3];        
@@ -1177,7 +1171,7 @@ namespace simdOps {
 		static const bool requiresSpecial = true;
 
 #ifdef __CUDACC__
-		static inline __device__ void execSpecialCuda(T *dx, int *xShapeBuffer, T *result, int *zShapeBuffer, T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+		static inline __device__ void execSpecialCuda(T *dx, Nd4jLong *xShapeBuffer, T *result, Nd4jLong *zShapeBuffer, T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
             __shared__ Nd4jLong xLength;
 			__shared__ int xEWS;
             __shared__ char xOrder;
@@ -1227,8 +1221,8 @@ namespace simdOps {
 				    }
 				    __syncthreads();
 
-					int xCoord[MAX_RANK];
-					int zCoord[MAX_RANK];
+					Nd4jLong xCoord[MAX_RANK];
+					Nd4jLong zCoord[MAX_RANK];
 
 					for (int e = tid; e < xLength / 2; e += blockDim.x * gridDim.x) {
                         if (xOrder == 'c') {
@@ -1239,8 +1233,8 @@ namespace simdOps {
                             shape::ind2sub(xRank, xShape, sLength - e, zCoord);
                         }
 
-                        Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                        Nd4jLong zOffset = shape::getOffset(0, xShape, xStride, zCoord, xRank);
+                        auto xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                        auto zOffset = shape::getOffset(0, xShape, xStride, zCoord, xRank);
 
                         result[zOffset] = dx[xOffset];
 					}
@@ -1286,8 +1280,8 @@ namespace simdOps {
 				    }
 				    __syncthreads();
 
-					int xCoord[MAX_RANK];
-					int zCoord[MAX_RANK];
+					Nd4jLong xCoord[MAX_RANK];
+					Nd4jLong zCoord[MAX_RANK];
 
                     for (int e = tid; e < xLength; e += blockDim.x * gridDim.x) {
                         if (xOrder == 'c') {
@@ -1427,13 +1421,13 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
+			Nd4jLong *resultShapeBuffer,
 			T *extraParams,
-			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
-			int *shape = shape::shapeOf(xShapeBuffer);
+			auto shape = shape::shapeOf(xShapeBuffer);
 			__shared__ T maxResult;
 			__shared__ int *maxResultShapeBuffer;
 
@@ -1579,13 +1573,13 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
+			Nd4jLong *resultShapeBuffer,
 			T *extraParams,
-			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
-			int *shape = shape::shapeOf(xShapeBuffer);
-			int *stride = shape::stride(xShapeBuffer);
+			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
+			auto shape = shape::shapeOf(xShapeBuffer);
+			auto stride = shape::stride(xShapeBuffer);
 			//iterate along rows
 
 			__shared__ T maxResult;
@@ -1738,11 +1732,11 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
+			Nd4jLong *resultShapeBuffer,
 			T *extraParams,
-			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
 			int *shape = shape::shapeOf(xShapeBuffer);
 			__shared__ T maxResult;
@@ -1946,9 +1940,9 @@ namespace simdOps {
 
 		static inline  __device__ void doAllCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
+			Nd4jLong *resultShapeBuffer,
 			T *extraParams,
 			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager) {
 // this code is safe to delete, it's never used
@@ -2107,14 +2101,14 @@ namespace simdOps {
 
 
 			else {
-				int shapeIter[MAX_RANK];
-				int coord[MAX_RANK];
+				Nd4jLong shapeIter[MAX_RANK];
+				Nd4jLong coord[MAX_RANK];
 				int dim;
-				int xStridesIter[MAX_RANK];
-				int resultStridesIter[MAX_RANK];
-				int *xShape = shape::shapeOf(xShapeBuffer);
-				int *xStride = shape::stride(xShapeBuffer);
-				int *resultStride = shape::stride(resultShapeBuffer);
+				Nd4jLong xStridesIter[MAX_RANK];
+				Nd4jLong resultStridesIter[MAX_RANK];
+				auto xShape = shape::shapeOf(xShapeBuffer);
+				auto xStride = shape::stride(xShapeBuffer);
+				auto resultStride = shape::stride(resultShapeBuffer);
 				int rank = shape::rank(xShapeBuffer);
 				T *originalResult = result;
 				if (PrepareTwoRawArrayIter<T>(rank,
@@ -2174,10 +2168,10 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			// FIXME: MAX_DIMENSION is lower then FP16 frame
 			if (extraParams == nullptr || (int) extraParams[0] == MAX_DIMENSION) {
 				doAllCuda(dx, xShapeBuffer, result, resultShapeBuffer, extraParams, allocationPointer, reductionPointer, manager);
@@ -2382,15 +2376,15 @@ namespace simdOps {
                             int num_threads = nd4j::math::nd4j_max<int>(1, tadsPerThread);
                             num_threads = nd4j::math::nd4j_min<int>(num_threads, omp_get_max_threads());
 
-                            int offset = tadOffsets[r];
-                            int shapeIter[MAX_RANK];
-                            int coord[MAX_RANK];
+                            auto offset = tadOffsets[r];
+                            Nd4jLong shapeIter[MAX_RANK];
+                            Nd4jLong coord[MAX_RANK];
                             int dim;
-                            int xStridesIter[MAX_RANK];
-                            int resultStridesIter[MAX_RANK];
-                            int *xShape = shape::shapeOf(tadShapeShapeInfo);
-                            int *xStride = shape::stride(tadShapeShapeInfo);
-                            int *resultStride = shape::stride(tadShapeShapeInfo);
+                            Nd4jLong xStridesIter[MAX_RANK];
+                            Nd4jLong resultStridesIter[MAX_RANK];
+                            auto xShape = shape::shapeOf(tadShapeShapeInfo);
+                            auto xStride = shape::stride(tadShapeShapeInfo);
+                            auto resultStride = shape::stride(tadShapeShapeInfo);
                             int rank = shape::rank(tadShapeShapeInfo);
                             T *xPointer = dx + offset;
                             T *resultPointer = result + offset;

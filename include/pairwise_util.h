@@ -198,10 +198,10 @@ template <typename T>
 #ifdef __CUDACC__
 __host__ __device__
 #endif
-inline int PrepareOneRawArrayIter(int ndim, int shape[],
-                                  T data[], int strides[],
-                                  int *out_ndim, int outShape[],
-                                  T **out_data, int *outStrides) {
+inline int PrepareOneRawArrayIter(int ndim, Nd4jLong shape[],
+                                  T data[], Nd4jLong strides[],
+                                  int *out_ndim, Nd4jLong outShape[],
+                                  T **out_data, Nd4jLong *outStrides) {
 
     for (int i = 0; i < ndim; i++) {
         outShape[i] = shape[i];
