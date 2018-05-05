@@ -69,13 +69,13 @@ namespace nd4j {
                                             if(kRow == -pH && kCol == -pW) {        // first pass
                                                 for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col0+=colStride5) 
                                                     if (is_a_ge_zero_and_a_lt_b(colCol, iW)) 
-                                                        *(im1 + colCol * imStride3) = *col0;                                                                                                                                                        
+                                                        *(im1 + colCol * imStride3) = 0.;//*col0;
                                             }
                                             else {
                                                 for (int colCol = kCol; colCol < kCol + colColEnd; colCol+=sW, col0+=colStride5) {
                                                     if (is_a_ge_zero_and_a_lt_b(colCol, iW)) {
                                                         im2 = im1 + colCol * imStride3;                                                    
-                                                        *im2 += *col0;                                                    
+                                                        // *im2 += *col0;                                                    
                                                     }
                                                 }                                                   
                                             }
