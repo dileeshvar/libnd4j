@@ -27,7 +27,7 @@ namespace nd4j {
         std::vector<Nd4jLong*>* asVector();
         void destroy();
         int size();
-        int* at(int idx);
+        Nd4jLong* at(int idx);
         void push_back(Nd4jLong *shape);
         void push_back(std::vector<Nd4jLong>& shape);
 
