@@ -798,9 +798,8 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    template <typename T>
-    ND4J_EXPORT void removeIndex(T *data, T *indexes, Nd4jLong dataLength, Nd4jLong indexesLength,
-                               Nd4jLong *out);
+    template <typename T1, typename T2>
+    ND4J_EXPORT void removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T1 *out);
 
     /**
  * Return a copy of this array with the
@@ -817,8 +816,8 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
-    ND4J_EXPORT Nd4jLong * removeIndex(Nd4jLong *data, int *indexes, int dataLength, int indexesLength);
+    template <typename T1, typename T2>
+    ND4J_EXPORT T1* removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength);
 
     /**
      * Iterate over a given set of indexes
@@ -1662,7 +1661,7 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
             retShapeLength = 2;
         }
         else {
-            retShape = shape::removeIndex(shape::shapeOf(originalShapeBuffer), dimension, shape::shapeInfoLength(shape::rank(originalShapeBuffer)), dimensionLength);
+            retShape = shape::removeIndex<Nd4jLong, int>(shape::shapeOf(originalShapeBuffer), dimension, shape::shapeInfoLength(shape::rank(originalShapeBuffer)), dimensionLength);
             retShapeLength =   shape::rank(originalShapeBuffer) - dimensionLength;
         }
         //ensure vector is proper shape
@@ -3584,8 +3583,8 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    template <typename T>
-    INLINEDEF void removeIndex(T* data, T *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T *ret) {
+    template <typename T1, typename T2>
+    INLINEDEF void removeIndex(T1* data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T1 *ret) {
 
         int count = 0;
         int absLength = dataLength - indexesLength;
@@ -3620,16 +3619,16 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    template <typename T>
-    INLINEDEF T* removeIndex(T *data, T *indexes, Nd4jLong dataLength, Nd4jLong indexesLength) {
+    template <typename T1, typename T2>
+    INLINEDEF T1* removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength) {
         int lengthOfArr = dataLength - indexesLength;
         if(lengthOfArr < 0) {
             printf("Remove index call created a <= 0 length array. This was likely not intended.");
         }
 
-        T *ret = new T[lengthOfArr];
+        T1 *ret = new T1[lengthOfArr];
         memset(ret,0,sizeof(int)  * lengthOfArr);
-        removeIndex<T>(data,indexes,dataLength,indexesLength,ret);
+        removeIndex<T1, T2>(data, indexes, dataLength, indexesLength, ret);
         return ret;
     }
 
@@ -4004,7 +4003,7 @@ __host__ __device__
             return shape::prod(shape,rank);
         int absSelta = nd4j::math::nd4j_abs<int>(rank - dimensionLength);
         traceNew(27);
-        Nd4jLong *ret2 = shape::removeIndex(shape,dimension,rank,dimensionLength);
+        Nd4jLong *ret2 = shape::removeIndex<Nd4jLong>(shape, dimension, rank, dimensionLength);
         int ret = prod(ret2, absSelta);
         delete[] ret2;
         return ret;
