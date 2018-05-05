@@ -20,6 +20,7 @@
 #include <indexing/IndicesList.h>
 #include <helpers/ShapeUtils.h>
 #include <sstream>
+#include <helpers/ArrayUtils.h>
 
 namespace nd4j {
 

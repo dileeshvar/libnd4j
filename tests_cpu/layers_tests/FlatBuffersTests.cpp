@@ -19,8 +19,8 @@ class FlatBuffersTest : public testing::Test {
 public:
     int alpha = 0;
 
-    int *cShape = new int[8]{2, 2, 2, 2, 1, 0, 1, 99};
-    int *fShape = new int[8]{2, 2, 2, 1, 2, 0, 1, 102};
+    Nd4jLong *cShape = new Nd4jLong[8]{2, 2, 2, 2, 1, 0, 1, 99};
+    Nd4jLong *fShape = new Nd4jLong[8]{2, 2, 2, 1, 2, 0, 1, 102};
 
     FlatBuffersTest() {
         Environment::getInstance()->setDebug(false);
@@ -524,7 +524,7 @@ TEST_F(FlatBuffersTest, ReadStridedSlice_1) {
 
 TEST_F(FlatBuffersTest, ReduceDim_1) {
     
-    NDArray<float> exp('c', (std::vector<int>){3});
+    NDArray<float> exp('c', {3});
     exp.assign(3.0);
 
 

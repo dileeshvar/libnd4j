@@ -6,23 +6,23 @@
 
 class OnesTest : public testing::Test {
 public:
-    int shapeBuffer[12] = {4,4,3,1,1,3,1,1,1,0,1,99};
+    Nd4jLong shapeBuffer[12] = {4,4,3,1,1,3,1,1,1,0,1,99};
     int dimension[3] = {0,2,3};
-    int tadAssertionShape[10] = {3,1,1,4,1,1,3,0,3,99};
+    Nd4jLong tadAssertionShape[10] = {3,1,1,4,1,1,3,0,3,99};
     int dimensionLength = 3;
 };
 
 class LabelTest : public testing::Test {
 public:
     float labels[450] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
-    int shapeInfo[8] = {2,150,3,1,150,0,1,102};
+    Nd4jLong shapeInfo[8] = {2,150,3,1,150,0,1,102};
     int dimension[1] = {1};
     int dimensionLength = 1;
-    int tadShapeInfoAssert[8] = {2,1,3,1,150,0,150,99};
+    Nd4jLong tadShapeInfoAssert[8] = {2,1,3,1,150,0,150,99};
 };
 class ThreeDTest : public testing::Test {
 public:
-    int shape[3] = {3,4,5};
+    Nd4jLong shape[3] = {3,4,5};
     int *shapeBuffer;
     ThreeDTest() {
         shapeBuffer = shape::shapeBuffer(3,shape);
@@ -38,13 +38,13 @@ class VectorTest : public testing::Test {
 
 class NumTadTests : public testing::Test {
 public:
-    int shape[3] = {3,4,5};
+    Nd4jLong shape[3] = {3,4,5};
     int dimension = 0;
 };
 
 class ShapeTest :  public testing::Test {
 public:
-    int vectorShape[2] = {1,2};
+    Nd4jLong vectorShape[2] = {1,2};
 };
 
 class MatrixTest : public testing::Test {
@@ -53,11 +53,11 @@ public:
     int cols = 4;
     int rank = 2;
     int dims[2] = {0,1};
-    int expectedShapes[2][2] = {
+    Nd4jLong expectedShapes[2][2] = {
             {1,3},
             {1,4}
     };
-    int expectedStrides[2][2] = {
+    Nd4jLong expectedStrides[2][2] = {
             {1,4},
             {1,1}
     };
@@ -65,7 +65,7 @@ public:
 
 class TADStall : public testing::Test {
 public:
-    int shape[4] = {3,3,4,5};
+    Nd4jLong shape[4] = {3,3,4,5};
     int dimensions[3]  = {1,2,3};
 };
 
@@ -76,12 +76,12 @@ public:
     int dim2 = 5;
     int rank = 3;
     int dims[3] = {0,1,2};
-    int expectedShapes[3][2] = {
+    Nd4jLong expectedShapes[3][2] = {
             {1,3},
             {1,4},
             {1,5}
     };
-    int expectedStrides[3][2] = {
+    Nd4jLong expectedStrides[3][2] = {
             {1,20},
             {1,5},
             {1,1}
@@ -95,22 +95,22 @@ public:
     int cols = 4;
     int dim2 = 5;
     int dimensionLength = 2;
-    int dims[3][2] = {
+    Nd4jLong dims[3][2] = {
             {0,1},{0,2},{1,2}
     };
 
-    int shape[3] {rows,cols,dim2};
+    Nd4jLong shape[3] {rows,cols,dim2};
 
     //Along dimension 0,1: expect matrix with shape [rows,cols]
     //Along dimension 0,2: expect matrix with shape [rows,dim2]
     //Along dimension 1,2: expect matrix with shape [cols,dim2]
-    int expectedShapes[3][2] = {
+    Nd4jLong expectedShapes[3][2] = {
             {rows,cols},
             {rows,dim2},
             {cols,dim2}
     };
 
-    int expectedStrides[3][2] = {
+    Nd4jLong expectedStrides[3][2] = {
             {20,5},
             {20,1},
             {5,1}
@@ -125,7 +125,7 @@ public:
     int cols = 4;
     int dim2 = 5;
     int dim3 = 6;
-    int shape[4] = {rows,cols,dim2,dim3};
+    Nd4jLong shape[4] = {rows,cols,dim2,dim3};
     int dimensionLength = 2;
     //Along dimension 0,1: expect matrix with shape [rows,cols]
     //Along dimension 0,2: expect matrix with shape [rows,dim2]
@@ -134,7 +134,7 @@ public:
     //Along dimension 1,3: expect matrix with shape [cols,dim3]
     //Along dimension 2,3: expect matrix with shape [dim2,dim3]
 
-    int dims[6][2] = {
+    Nd4jLong dims[6][2] = {
             {0,1},
             {0,2},
             {0,3},
@@ -143,7 +143,7 @@ public:
             {2,3}
     };
 
-    int expectedShapes[6][2] = {
+    Nd4jLong expectedShapes[6][2] = {
              {rows,cols},
              {rows,dim2},
              {rows,dim3},
@@ -152,7 +152,7 @@ public:
             ,{dim2,dim3}
     };
 
-    int expectedStrides[6][2] = {
+    Nd4jLong expectedStrides[6][2] = {
             {120,30},
             {120,6},
             {120,1},
@@ -165,20 +165,20 @@ public:
 
 class OrderTest : public testing::Test {
 public:
-    int expected[8] = {2,3,4,1,3,0,-1,102};
-    int test[8] = {2,3,4,1,3,0,-1,102};
+    Nd4jLong expected[8] = {2,3,4,1,3,0,-1,102};
+    Nd4jLong test[8] = {2,3,4,1,3,0,-1,102};
 
 };
 
 
 class LeadingOnes : public testing::Test {
 public:
-    int shapeBufferF[16] = {4,1,1,4,4,1,1,1,4,0,1,102};
-    int shapeBufferC[16] = {4,1,1,4,4,16,16,4,1,0,1,99};
+    Nd4jLong shapeBufferF[16] = {4,1,1,4,4,1,1,1,4,0,1,102};
+    Nd4jLong shapeBufferC[16] = {4,1,1,4,4,16,16,4,1,0,1,99};
     int dimensionLength = 2;
     int dimension[2] = {2,3};
-    int tadAssertionC[10] = {3,4,4,1,4,1,16,0,-1,99};
-    int tadCAssertionF[10] = {3,4,4,1,1,4,1,0,-1,99};
+    Nd4jLong tadAssertionC[10] = {3,4,4,1,4,1,16,0,-1,99};
+    Nd4jLong tadCAssertionF[10] = {3,4,4,1,1,4,1,0,-1,99};
 };
 
 
@@ -189,8 +189,8 @@ TEST_F(LeadingOnes,OnesTest) {
     shape::TAD *fTad = new shape::TAD(shapeBufferF,dimension,dimensionLength);
     fTad->createTadOnlyShapeInfo();
     fTad->createOffsets();
-    ASSERT_TRUE(arrsEquals(10,tadCAssertionF,fTad->tadOnlyShapeInfo));
-    ASSERT_TRUE(arrsEquals(10,tadAssertionC,cTad->tadOnlyShapeInfo));
+    ASSERT_TRUE(arrsEquals(10, tadCAssertionF, fTad->tadOnlyShapeInfo));
+    ASSERT_TRUE(arrsEquals(10, tadAssertionC, cTad->tadOnlyShapeInfo));
 
     delete cTad;
     delete fTad;
@@ -199,8 +199,8 @@ TEST_F(LeadingOnes,OnesTest) {
 
 class NormalThreeFourFive : public testing::Test {
 public:
-    int assertionBuffer[8] = {2, 3, 4, 20, 5, 0, -1, 99};
-    int inputShapeBuffer[10] = {3,3,4,5,20,5,1,0,1,99};
+    Nd4jLong assertionBuffer[8] = {2, 3, 4, 20, 5, 0, -1, 99};
+    Nd4jLong inputShapeBuffer[10] = {3,3,4,5,20,5,1,0,1,99};
     int dimensionLength = 2;
     int dimension[2] = {0,1};
 };
@@ -220,8 +220,8 @@ class DimensionWarning : public testing::Test {
 public:
     int dimensionLength = 2;
     int dimensions[2] = {0,1};
-    int shape[3] = {1,5,1};
-    int *shapeBuffer = shape::shapeBuffer(3,shape);
+    Nd4jLong shape[3] = {1,5,1};
+    Nd4jLong *shapeBuffer = shape::shapeBuffer(3,shape);
 
     ~DimensionWarning() {
         delete[] shapeBuffer;
@@ -238,7 +238,7 @@ TEST_F(DimensionWarning,ShapeWarning) {
 
 
 class TadRank : public testing::Test {
-    int shapeBuffer[12] = {4,2,1,3,3,9,9,3,1,0,1,99};
+    Nd4jLong shapeBuffer[12] = {4,2,1,3,3,9,9,3,1,0,1,99};
     int dimensionLength = 2;
     int dimension[2] = {2,3};
 
@@ -258,8 +258,8 @@ class SliceTensorTest : public testing::Test {};
 
 class ElementWiseStrideTest : public testing::Test {
 public:
-    int shape[3] = {3,4,5};
-    int stride[2] = {20,5};
+    Nd4jLong shape[3] = {3,4,5};
+    Nd4jLong stride[2] = {20,5};
     int elementWiseStrideAssertion = -1;
 };
 
@@ -269,15 +269,15 @@ class LengthPerSliceTest : public testing::Test{};
 
 class ExpectedValuesTest : public testing::Test {
 public:
-    int mainShape[4] = {9,7,5,3};
+    Nd4jLong mainShape[4] = {9,7,5,3};
     int testDimensions[3] = {0,2,3};
 
 };
 
 class BeginOneTadTest : public testing::Test {
 public:
-    int assertionShapeBuffer[8] = {2,3,5,1,3,0,-1,102};
-    int inputShapeBuffer[10] = {3,1,3,5,1,1,3,0,1,102};
+    Nd4jLong assertionShapeBuffer[8] = {2,3,5,1,3,0,-1,102};
+    Nd4jLong inputShapeBuffer[10] = {3,1,3,5,1,1,3,0,1,102};
     int dimensionLength = 2;
     int dimension[2] = {1,2};
     //error: [2,1,1,1,1,0,1,97]
@@ -292,9 +292,9 @@ INDArray array4d = Nd4j.ones(1, 10, 10, 10);
 INDArray sum40 = array4d.sum(0);
      */
 public:
-    int threeDShape[3] = {1,10,10};
-    int fourDShape[4] = {1,10,10,10};
-    int *threeDShapeBuffer = nullptr,*fourDShapeBuffer = nullptr;
+    Nd4jLong threeDShape[3] = {1,10,10};
+    Nd4jLong fourDShape[4] = {1,10,10,10};
+    Nd4jLong *threeDShapeBuffer = nullptr,*fourDShapeBuffer = nullptr;
     int dimensionThree = 1;
     int dimensionThreeTwo = 0;
     int dimensionFour = 0;
@@ -338,9 +338,9 @@ TEST_F(FourDTest,ThreeDFourDTest) {
 
 class RowVectorOnesTest : public testing::Test {
 public:
-    int shapeBuffer[12] = {4,4,3,1,1,3,1,1,1,0,1,99};
+    Nd4jLong shapeBuffer[12] = {4,4,3,1,1,3,1,1,1,0,1,99};
     float data[12] = {1,2,3,4,5,6,7,8,9,10,11,12};
-    int assertionBuffer[10] = {3,4,1,1,3,1,1,0,-1,99};
+    Nd4jLong assertionBuffer[10] = {3,4,1,1,3,1,1,0,-1,99};
     int dimensionLength = 3;
     int dimension[3] = {0,2,3};
 };
@@ -357,10 +357,10 @@ TEST_F(RowVectorOnesTest,TadShape) {
 
 class SixDTest : public testing::Test {
 public:
-    int inputShapeBuffer[16] = {6,1,1,4,4,4,4,1,1,1,4,16,64,0,1,102};
+    Nd4jLong inputShapeBuffer[16] = {6,1,1,4,4,4,4,1,1,1,4,16,64,0,1,102};
     int dimensionLength = 2;
     int dimension[2] = {2,3};
-    int assertionShapeBuffer[8] = {2,4,4,1,4,0,-1,102};
+    Nd4jLong assertionShapeBuffer[8] = {2,4,4,1,4,0,-1,102};
 };
 
 TEST_F(SixDTest,SixDWithOnes) {
@@ -374,10 +374,10 @@ TEST_F(SixDTest,SixDWithOnes) {
 
 class TrailingTest : public testing::Test {
 public:
-    int inputShapeBuffer[12] = {4,5,5,5,1,1,5,25,125,0,1,102};
+    Nd4jLong inputShapeBuffer[12] = {4,5,5,5,1,1,5,25,125,0,1,102};
     int dimensionLength = 1;
     int dimension[1] = {0};
-    int assertionShapeBuffer[8] = {2,1,5,125,1,0,-1,99};
+    Nd4jLong assertionShapeBuffer[8] = {2,1,5,125,1,0,-1,99};
 };
 
 TEST_F(TrailingTest,TrailingTest2) {
@@ -392,10 +392,10 @@ TEST_F(TrailingTest,TrailingTest2) {
 
 class ScalarTest : public testing::Test {
 public:
-    int inputShapeBuffer[12] = {3,2,3,4,12,4,1,0,1,99};
+    Nd4jLong inputShapeBuffer[12] = {3,2,3,4,12,4,1,0,1,99};
     int dimensionLength = 1;
     int dimension[1] = {1};
-    int assertionShapeBuffer[8] = {2,1,1,1,1,0,1,99};
+    Nd4jLong assertionShapeBuffer[8] = {2,1,1,1,1,0,1,99};
 };
 /*
 TEST_F(ScalarTest,ScalarTest2) {
@@ -412,10 +412,10 @@ TEST_F(ScalarTest,ScalarTest2) {
 
 class ThreeTest : public testing::Test {
 public:
-    int inputShapeBuffer[10] = {3,4,3,2,6,2,1,0,1,99};
+    Nd4jLong inputShapeBuffer[10] = {3,4,3,2,6,2,1,0,1,99};
     int dimensionLength = 1;
     int dimension[1] = {0};
-    int assertionShapeBuffer[8] = {2,1,4,1,6,0,6,99};
+    Nd4jLong assertionShapeBuffer[8] = {2,1,4,1,6,0,6,99};
 };
 
 TEST_F(ThreeTest,ThreeTest ) {
@@ -431,7 +431,7 @@ TEST_F(ThreeTest,ThreeTest ) {
 TEST_F(BeginOneTadTest,TadTest) {
     shape::TAD *tad = new shape::TAD(inputShapeBuffer,dimension,dimensionLength);
     tad->createTadOnlyShapeInfo();
-    int *tadShapeBuffer = tad->tadOnlyShapeInfo;
+    auto tadShapeBuffer = tad->tadOnlyShapeInfo;
     //[2,1,1,1,1,0,1,97]
     ASSERT_TRUE(arrsEquals(8,assertionShapeBuffer,tadShapeBuffer));
 
@@ -450,17 +450,17 @@ TEST_F(OnesTest,OnesTadTest) {
 TEST_F(LabelTest,LabelTad) {
     shape::TAD *tad = new shape::TAD(shapeInfo,dimension,dimensionLength);
     tad->createTadOnlyShapeInfo();
-    int *tadShapeInfo = tad->tadOnlyShapeInfo;
+    auto tadShapeInfo = tad->tadOnlyShapeInfo;
     ASSERT_TRUE(arrsEquals(8,tadShapeInfoAssert,tadShapeInfo));
 
     delete tad;
 }
 
 TEST_F(ExpectedValuesTest,TadTest) {
-    int *shapeBuffer = shape::shapeBuffer(4,mainShape);
+    auto shapeBuffer = shape::shapeBuffer(4,mainShape);
     shape::TAD *tad = new shape::TAD(shapeBuffer,testDimensions,3);
     tad->createTadOnlyShapeInfo();
-    int *shapeInfo = tad->tadOnlyShapeInfo;
+    auto shapeInfo = tad->tadOnlyShapeInfo;
 
     delete tad;
     delete[] shapeBuffer;
@@ -468,8 +468,8 @@ TEST_F(ExpectedValuesTest,TadTest) {
 
 TEST_F(OrderTest,testOrder) {
     int rank = shape::rank(expected);
-    int *expectedShape = shape::shapeOf(expected);
-    int *expectedStride = shape::stride(expected);
+    auto expectedShape = shape::shapeOf(expected);
+    auto expectedStride = shape::stride(expected);
     int realOrder = shape::getOrder(rank,expectedShape,expectedStride,1);
     int expectedOrder = 102;
     ASSERT_EQ(expectedOrder,realOrder);
@@ -478,13 +478,13 @@ TEST_F(OrderTest,testOrder) {
 
 TEST_F(ThreeDTest,TensorAlongDimensionTest) {
     int dimension[2] = {0,2};
-    int tadShapeAssertion[2] = {3,5};
-    int strideAssertion[2] = {20,1};
+    Nd4jLong tadShapeAssertion[2] = {3,5};
+    Nd4jLong strideAssertion[2] = {20,1};
     shape::TAD *tad = new shape::TAD(0,this->shapeBuffer,dimension,2);
     tad->createTadOnlyShapeInfo();
-    int *shapeBufferTest = tad->tadOnlyShapeInfo;
-    int *shapeTest = shape::shapeOf(shapeBufferTest);
-    int *strideTest = shape::stride(shapeBufferTest);
+    auto shapeBufferTest = tad->tadOnlyShapeInfo;
+    auto shapeTest = shape::shapeOf(shapeBufferTest);
+    auto strideTest = shape::stride(shapeBufferTest);
     ASSERT_TRUE(arrsEquals(2,tadShapeAssertion,shapeTest));
     ASSERT_TRUE(arrsEquals(2,strideAssertion,strideTest));
     delete tad;
