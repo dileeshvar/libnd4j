@@ -16,7 +16,7 @@ namespace helpers {
 /////////////////////////////////////////////////////////////////////////////////////
 // this legacy op is written by raver119@gmail.com
 template<typename T>
-void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, int numOfElemsToReverse) {
+void reverseArray(T *inArr, Nd4jLong *inShapeBuffer, T *outArr, Nd4jLong *outShapeBuffer, int numOfElemsToReverse) {
             
             Nd4jLong inLength = shape::length(inShapeBuffer);
             if(numOfElemsToReverse == 0)
@@ -48,11 +48,11 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                 } 
                 else {
                     int inRank = shape::rank(inShapeBuffer);
-                    int *inShape = shape::shapeOf(inShapeBuffer);
-                    int *inStride = shape::stride(inShapeBuffer);
+                    auto inShape = shape::shapeOf(inShapeBuffer);
+                    auto inStride = shape::stride(inShapeBuffer);
 
-                    int inCoord[MAX_RANK];
-                    int outCoord[MAX_RANK];
+                    Nd4jLong inCoord[MAX_RANK];
+                    Nd4jLong outCoord[MAX_RANK];
 
 #pragma omp parallel for private(inCoord, outCoord) schedule(guided)
                     for (Nd4jLong e = 0; e < numOfElemsToReverse / 2; e++) {
@@ -73,7 +73,7 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
             } 
             else {
                 // single step phase here
-                int outEWS = shape::elementWiseStride(outShapeBuffer);
+                auto outEWS = shape::elementWiseStride(outShapeBuffer);
                 char outOrder = shape::order(outShapeBuffer);
 
                 if (inEWS == 1 && outEWS == 1 && inOrder == outOrder) {
@@ -103,15 +103,15 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                 else {
 
                     int inRank = shape::rank(inShapeBuffer);
-                    int *inShape = shape::shapeOf(inShapeBuffer);
-                    int *inStride = shape::stride(inShapeBuffer);
+                    auto inShape = shape::shapeOf(inShapeBuffer);
+                    auto inStride = shape::stride(inShapeBuffer);
 
                     int outRank = shape::rank(outShapeBuffer);
-                    int *outShape = shape::shapeOf(outShapeBuffer);
-                    int *outStride = shape::stride(outShapeBuffer);
+                    auto outShape = shape::shapeOf(outShapeBuffer);
+                    auto outStride = shape::stride(outShapeBuffer);
 
-                    int inCoord[MAX_RANK];
-                    int outCoord[MAX_RANK];
+                    Nd4jLong inCoord[MAX_RANK];
+                    Nd4jLong outCoord[MAX_RANK];
 
 #pragma omp parallel for private(inCoord, outCoord) schedule(guided)
                     for (Nd4jLong e = 0; e < numOfElemsToReverse; e++) {
@@ -126,8 +126,8 @@ void reverseArray(T *inArr, int *inShapeBuffer, T *outArr, int *outShapeBuffer, 
                         else
                             shape::ind2sub(outRank, outShape, (sLength - e), outCoord);
 
-                        Nd4jLong inOffset = shape::getOffset(0, inShape, inStride, inCoord, inRank);
-                        Nd4jLong outOffset = shape::getOffset(0, outShape, outStride, outCoord, outRank);
+                        auto inOffset = shape::getOffset(0, inShape, inStride, inCoord, inRank);
+                        auto outOffset = shape::getOffset(0, outShape, outStride, outCoord, outRank);
 
                         outArr[outOffset] = inArr[inOffset];
                     }
@@ -230,9 +230,9 @@ template void reverseSequence<float>(const NDArray<float>* input, const NDArray<
 template void reverseSequence<float16>(const NDArray<float16>* input, const NDArray<float16>* seqLengths, NDArray<float16>* output, int seqDim, const int batchDim);
 template void reverseSequence<double>(const NDArray<double>* input, const NDArray<double>* seqLengths, NDArray<double>* output, int seqDim, const int batchDim);
 
-template void reverseArray<float>(float *inArr, int *inShapeBuffer, float *outArr, int *outShapeBuffer, int numOfElemsToReverse);
-template void reverseArray<float16>(float16 *inArr, int *inShapeBuffer, float16 *outArr, int *outShapeBuffer, int numOfElemsToReverse);
-template void reverseArray<double>(double *inArr, int *inShapeBuffer, double *outArr, int *outShapeBuffer, int numOfElemsToReverse);
+template void reverseArray<float>(float *inArr, Nd4jLong *inShapeBuffer, float *outArr, Nd4jLong *outShapeBuffer, int numOfElemsToReverse);
+template void reverseArray<float16>(float16 *inArr, Nd4jLong *inShapeBuffer, float16 *outArr, Nd4jLong *outShapeBuffer, int numOfElemsToReverse);
+template void reverseArray<double>(double *inArr, Nd4jLong *inShapeBuffer, double *outArr, Nd4jLong *outShapeBuffer, int numOfElemsToReverse);
 
 template void reverse<float>(const NDArray<float>* input, NDArray<float>* output, const std::vector<int>* intArgs);
 template void reverse<float16>(const NDArray<float16>* input, NDArray<float16>* output, const std::vector<int>* intArgs);

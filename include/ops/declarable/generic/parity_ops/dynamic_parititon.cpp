@@ -33,11 +33,11 @@ namespace ops {
     }
 
     DECLARE_SHAPE_FN(dynamic_partition) {
-        int numPartition = INT_ARG(0);
+        auto numPartition = INT_ARG(0);
         NDArray<T>* indices = INPUT_VARIABLE(1);
         std::vector<int> partitionSizes(numPartition, 0);
-        int* in = inputShape->at(0);
-        int* idx = inputShape->at(1); 
+        auto in = inputShape->at(0);
+        auto idx = inputShape->at(1); 
         for (int i = 0; i < numPartition; i++) {
             for (int e = 0; e < indices->lengthOf(); ++e)
                 if ((*indices)(e) == T(i))
@@ -47,8 +47,8 @@ namespace ops {
         auto shapes = SHAPELIST();
         int outRank = shape::rank(in) - shape::rank(idx) + 1;
         for (int e = 0; e < numPartition; e++) {
-            int *newShape;
-            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(outRank), int);
+            Nd4jLong *newShape;
+            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(outRank), Nd4jLong);
             //shape::shapeVector(partitionSizes[e], newShape);
             newShape[0] = outRank;
             newShape[1] = partitionSizes[e];

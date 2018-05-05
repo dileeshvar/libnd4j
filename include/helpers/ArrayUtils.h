@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include <vector>
 #include <cstring>
+#include <pointercast.h>
 
 namespace nd4j {
     namespace ArrayUtils {
@@ -16,6 +17,10 @@ namespace nd4j {
 
         void toLongPtr(std::initializer_list<Nd4jLong> list, Nd4jLong* target);
         void toLongPtr(std::vector<Nd4jLong>& list, Nd4jLong* target);
+
+
+        std::vector<Nd4jLong> toLongVector(std::vector<int> vec);
+        std::vector<Nd4jLong> toLongVector(std::vector<Nd4jLong> vec);
     }
 }
 

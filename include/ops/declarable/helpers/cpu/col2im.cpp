@@ -16,10 +16,10 @@ namespace nd4j {
             template <typename T>
             void _col2im(nd4j::graph::LaunchContext& context, T *im, T *col, Nd4jLong *imShapeInfo, Nd4jLong *colShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW) {
 
-                const int *colShape = shape::shapeOf(colShapeInfo);
-                const int *colStride = shape::stride(colShapeInfo);
-                const int *imShape = shape::shapeOf(imShapeInfo);
-                const int *imStride = shape::stride(imShapeInfo);
+                const Nd4jLong *colShape = shape::shapeOf(colShapeInfo);
+                const Nd4jLong *colStride = shape::stride(colShapeInfo);
+                const Nd4jLong *imShape = shape::shapeOf(imShapeInfo);
+                const Nd4jLong *imStride = shape::stride(imShapeInfo);
 
                 const int kH = colShape[2];
                 const int kW = colShape[3];        
@@ -133,9 +133,9 @@ namespace nd4j {
                 }
             }
 
-            template void _col2im<float>(nd4j::graph::LaunchContext& context, float *in, float *output, int *outShapeInfo, int *inShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW);
-            template void _col2im<float16>(nd4j::graph::LaunchContext& context, float16 *in, float16 *output, int *outShapeInfo, int *inShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW);
-            template void _col2im<double>(nd4j::graph::LaunchContext& context, double *in, double *output, int *outShapeInfo, int *inShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW);
+            template void _col2im<float>(nd4j::graph::LaunchContext& context, float *in, float *output, Nd4jLong *outShapeInfo, Nd4jLong *inShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW);
+            template void _col2im<float16>(nd4j::graph::LaunchContext& context, float16 *in, float16 *output, Nd4jLong *outShapeInfo, Nd4jLong *inShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW);
+            template void _col2im<double>(nd4j::graph::LaunchContext& context, double *in, double *output, Nd4jLong *outShapeInfo, Nd4jLong *inShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW);
         }
     }
 }

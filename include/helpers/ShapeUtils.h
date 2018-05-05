@@ -32,7 +32,7 @@ namespace nd4j {
         // evaluate shapeInfo of transposed array
         static Nd4jLong* evalTranspShapeInfo(const NDArray<T>& arr, nd4j::memory::Workspace* workspace);
 
-        static bool insertDimension(int rank, int *shape, int axis, int dimension);
+        static bool insertDimension(int rank, Nd4jLong *shape, int axis, Nd4jLong dimension);
 
         static bool copyVectorPart(std::vector<int>& target, std::vector<int>& source, int rank, int offset);
 

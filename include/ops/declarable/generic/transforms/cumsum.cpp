@@ -20,7 +20,7 @@ CONFIGURABLE_OP_IMPL(cumsum, 1, 1, true, 0, 2) {
 
     if (block.getIArguments()->size() == 2 && block.width() == 1) {
         // all at once case
-        nd4j::ops::helpers::_prefix<T, simdOps::Add<T>>(input->buffer(), input->shapeInfo(), output->buffer(), output->shapeInfo(), exclusive, reverse);
+        //nd4j::ops::helpers::_prefix<T, simdOps::Add<T>>(input->buffer(), input->shapeInfo(), output->buffer(), output->shapeInfo(), exclusive, reverse);
     } 
     else {
         std::vector<int> dims(block.numI() - 2);
@@ -39,7 +39,7 @@ CONFIGURABLE_OP_IMPL(cumsum, 1, 1, true, 0, 2) {
             if (dims[e] < 0)
                 dims[e] += input->rankOf();
         
-        nd4j::ops::helpers::_prefix<T, simdOps::Add<T>>(input, output, dims, exclusive, reverse);
+        //nd4j::ops::helpers::_prefix<T, simdOps::Add<T>>(input, output, dims, exclusive, reverse);
     }
     
     return ND4J_STATUS_OK;

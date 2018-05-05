@@ -60,8 +60,8 @@ namespace nd4j {
              *
              * TODO: we want workspaces support right here
              */
-            bool allocateResult(Context<T>& block, std::initializer_list<int>& shape, char order = 'c');
-            bool allocateResult(Context<T>& block, int* shape);
+            bool allocateResult(Context<T>& block, std::initializer_list<Nd4jLong>& shape, char order = 'c');
+            bool allocateResult(Context<T>& block, Nd4jLong* shape);
 
             /**
              * This method overwrites existen NDArray or NDArrayList in VariableSpace

@@ -39,8 +39,8 @@ namespace nd4j {
 
         DECLARE_SHAPE_FN(sequence_mask) {
 
-            int* outShapeInfo = nullptr;
-            int* in = inputShape->at(0);
+            Nd4jLong* outShapeInfo = nullptr;
+            Nd4jLong* in = inputShape->at(0);
             int outRank = shape::rank(in) + 1;
             NDArray<T>* input = INPUT_VARIABLE(0);
             Nd4jLong maxInd = input->argMax();
@@ -60,7 +60,7 @@ namespace nd4j {
                 maxInd = static_cast<Nd4jLong>(max);
 
             int lastDimension = maxInd;
-            ALLOCATE(outShapeInfo, block.getWorkspace(), shape::shapeInfoLength(outRank), int);
+            ALLOCATE(outShapeInfo, block.getWorkspace(), shape::shapeInfoLength(outRank), Nd4jLong);
             outShapeInfo[0] = outRank;
             for(int i = 0; i < outRank - 1; ++i)
                 outShapeInfo[i + 1] = shape::sizeAt(in, i);

@@ -20,10 +20,10 @@ namespace nd4j {
             Nd4jPointer *data,
             Nd4jPointer *inputShapeInfo,
             T *result,
-            int *resultShapeInfo) {
+            Nd4jLong *resultShapeInfo) {
         //number of total arrays, every other dimension should be the same
         T **dataBuffers = reinterpret_cast<T **>(data);
-        int **inputShapeInfoPointers = reinterpret_cast<int **>(inputShapeInfo);
+        Nd4jLong **inputShapeInfoPointers = reinterpret_cast<Nd4jLong **>(inputShapeInfo);
 
         bool allC = true;
         bool allScalar = true;
@@ -87,7 +87,7 @@ namespace nd4j {
         int resultStride = shape::elementWiseStride(resultShapeInfo);
         //vector case
         if(shape::isVector(resultShapeInfo)) {
-            int coordsUse[MAX_RANK];
+            Nd4jLong coordsUse[MAX_RANK];
             Nd4jLong idx = 0;
             if(resultStride == 1) {
                 for(int i = 0; i < numArrays; i++) {
@@ -174,8 +174,8 @@ namespace nd4j {
                     }
                         //non vector or different order (element wise stride can't be used)
                     else {
-                        int *coordsUse = new int[shape::rank(inputShapeInfoPointers[i])];
-                        Nd4jLong  currArrLength = shape::length(inputShapeInfoPointers[i]);
+                        Nd4jLong coordsUse[MAX_RANK];
+                        Nd4jLong currArrLength = shape::length(inputShapeInfoPointers[i]);
 
                         for(Nd4jLong arrIdx = 0; arrIdx < currArrLength; arrIdx++) {
                             shape::ind2subC(shape::rank(inputShapeInfoPointers[i]),shape::shapeOf(inputShapeInfoPointers[i]),arrIdx,coordsUse);

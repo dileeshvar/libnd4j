@@ -230,14 +230,14 @@ namespace nd4j {
 
 
         template <typename T>
-        bool nd4j::ops::DeclarableOp<T>::allocateResult(Context<T>& block, int* shape) {
+        bool nd4j::ops::DeclarableOp<T>::allocateResult(Context<T>& block, Nd4jLong* shape) {
             auto var = block.variable(block.getNodeId(), 0);
 
             auto workspace = block.getWorkspace();
 
             Nd4jLong len = shape::length(shape);
-            int* __shape;
-            ALLOCATE(__shape, workspace, shape::shapeInfoLength(shape[0]), int); //new int[shape[0] * 2 + 4];
+            Nd4jLong* __shape;
+            ALLOCATE(__shape, workspace, shape::shapeInfoLength(shape[0]), Nd4jLong); //new int[shape[0] * 2 + 4];
 
             memcpy(__shape, shape, shape::shapeInfoByteLength(shape[0]));
 
@@ -264,7 +264,7 @@ namespace nd4j {
 
 
         template <typename T>
-        bool nd4j::ops::DeclarableOp<T>::allocateResult(Context<T>& block, std::initializer_list<int>& shape, char order) {
+        bool nd4j::ops::DeclarableOp<T>::allocateResult(Context<T>& block, std::initializer_list<Nd4jLong>& shape, char order) {
             auto var = block.variable(block.getNodeId(), 0);
             auto workspace = block.getWorkspace();
 
@@ -496,24 +496,24 @@ namespace nd4j {
         }
 
         template<typename T>
-        nd4j::ResultSet<T>*  nd4j::ops::DeclarableOp<T>::execute(std::initializer_list<NDArray<T>*> inputs, std::initializer_list<T> tArgs, std::initializer_list<int> iArgs, bool isInplace) {
+        nd4j::ResultSet<T>*  nd4j::ops::DeclarableOp<T>::execute(std::initializer_list<NDArray<T>*> inputs, std::initializer_list<T> tArgs, std::initializer_list<Nd4jLong> iArgs, bool isInplace) {
             std::vector<NDArray<T>*> ins(inputs);
             std::vector<T> tas(tArgs);
-            std::vector<int> ias(iArgs);
+            std::vector<Nd4jLong> ias(iArgs);
             return this->execute(ins, tas, ias, isInplace);
         }
 
         template<typename T>
-        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(std::initializer_list<NDArray<T>*> inputs, std::initializer_list<NDArray<T>*> outputs , std::initializer_list<T> tArgs, std::initializer_list<int> iArgs, bool isInplace) {
+        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(std::initializer_list<NDArray<T>*> inputs, std::initializer_list<NDArray<T>*> outputs , std::initializer_list<T> tArgs, std::initializer_list<Nd4jLong> iArgs, bool isInplace) {
             std::vector<NDArray<T>*> ins(inputs);
             std::vector<NDArray<T>*> ous(outputs);
             std::vector<T> tas(tArgs);
-            std::vector<int> ias(iArgs);
+            std::vector<Nd4jLong> ias(iArgs);
             return this->execute(ins, ous, tas, ias, isInplace);
         }
 
         template <typename T>
-        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(std::vector<NDArray<T>*>& inputs, std::vector<NDArray<T>*>& outputs, std::vector<T>& tArgs, std::vector<int>& iArgs, bool isInplace) {
+        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(std::vector<NDArray<T>*>& inputs, std::vector<NDArray<T>*>& outputs, std::vector<T>& tArgs, std::vector<Nd4jLong>& iArgs, bool isInplace) {
             VariableSpace<T> variableSpace;
             FlowPath fp;
             variableSpace.setFlowPath(&fp);
@@ -555,7 +555,7 @@ namespace nd4j {
         }
 
         template <typename T>
-        nd4j::ResultSet<T>* nd4j::ops::DeclarableOp<T>::execute(std::vector<NDArray<T>*>& inputs, std::vector<T>& tArgs, std::vector<int>& iArgs, bool isInplace) {
+        nd4j::ResultSet<T>* nd4j::ops::DeclarableOp<T>::execute(std::vector<NDArray<T>*>& inputs, std::vector<T>& tArgs, std::vector<Nd4jLong>& iArgs, bool isInplace) {
             VariableSpace<T> variableSpace;
             auto arrayList = new ResultSet<T>();
             //ResultSet<T> arrayList;

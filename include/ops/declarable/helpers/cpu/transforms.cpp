@@ -326,14 +326,14 @@ void gatherND(NDArray<T>& input, NDArray<T>& indices, NDArray<T>& output) {
     std::iota(tadDims.begin(), tadDims.end(), lastIndDim);
     ResultSet<T>* innerMostIn = NDArrayFactory<T>::allTensorsAlongDimension(&input, tadDims);
 
-    int* outerShapeInfo = nullptr;
-    ALLOCATE(outerShapeInfo, input.getWorkspace(), shape::shapeInfoLength(lastIndDim), int);
+    Nd4jLong* outerShapeInfo = nullptr;
+    ALLOCATE(outerShapeInfo, input.getWorkspace(), shape::shapeInfoLength(lastIndDim), Nd4jLong);
     outerShapeInfo[0] = lastIndDim;
     for(int i = 1; i <= lastIndDim; ++i)
         outerShapeInfo[i] = input.sizeAt(i-1);
     shape::updateStrides(outerShapeInfo, input.ordering());
 
-    int* idx = new int[lastIndDim];
+    Nd4jLong idx[MAX_RANK];
 
     for(int i = 0; i < innerMostInd->size(); ++i) {
                 
@@ -345,7 +345,7 @@ void gatherND(NDArray<T>& input, NDArray<T>& indices, NDArray<T>& output) {
             idx[j] = (*idxSubArr)(j);
         }
                 
-        int currentInd0 = (int)shape::getOffset(0, shape::shapeOf(outerShapeInfo), shape::stride(outerShapeInfo), idx, lastIndDim);
+        auto currentInd0 = shape::getOffset(0, shape::shapeOf(outerShapeInfo), shape::stride(outerShapeInfo), idx, lastIndDim);
 
         if(rankIn != lastIndDim) {
             NDArray<T>* outSubArr = innerMostOut->at(i);
@@ -358,7 +358,6 @@ void gatherND(NDArray<T>& input, NDArray<T>& indices, NDArray<T>& output) {
     delete innerMostInd;
     delete innerMostIn;
     delete innerMostOut;
-    delete []idx;
     RELEASE(outerShapeInfo, input.getWorkspace());    
 }
 
