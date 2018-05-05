@@ -2099,7 +2099,7 @@ TEST_F(ConvolutionTests, vol2col_test2) {
 //////////////////////////////////////////////////////////////////////
 TEST_F(ConvolutionTests, col2im_test1) {
 
-    int bS=2, iH=2,iW=2,  iC=2,oC=2, kH=2,kW=2,  sD=1,sH=1,sW=1,  pD=0,pH=0,pW=0,  dD=1,dH=1,dW=1;
+    int bS=2, iH=20,iW=20,  iC=2,oC=2, kH=2,kW=2,  sD=1,sH=1,sW=1,  pD=0,pH=0,pW=0,  dD=1,dH=1,dW=1;
     int       oH=2,oW=2;
     
     NDArray<float> image ('c', {bS, iC, iH, iW});
@@ -2108,7 +2108,7 @@ TEST_F(ConvolutionTests, col2im_test1) {
     NDArray<float> columns('c', {bS, iC, kH, kW, oH, oW});
     nd4j::NDArrayFactory<float>::linspace(1, columns);
 
-    NDArray<float> imageExpected('c', {bS, iC, iH, iW}, {1., 7., 12., 34., 17., 39., 44., 98., 33., 71., 76., 162., 49., 103., 108., 226.});
+    // NDArray<float> imageExpected('c', {bS, iC, iH, iW}, {1., 7., 12., 34., 17., 39., 44., 98., 33., 71., 76., 162., 49., 103., 108., 226.});
 
     LaunchContext ctx;
     nd4j::ops::helpers::_col2im<float>(ctx, image.getBuffer(), columns.getBuffer(), image.getShapeInfo(), columns.getShapeInfo(), sH, sW, pH, pW, iH, iW, dH, dW);    
@@ -2117,6 +2117,27 @@ TEST_F(ConvolutionTests, col2im_test1) {
     ASSERT_TRUE(1);
 }
 
+//////////////////////////////////////////////////////////////////////
+TEST_F(ConvolutionTests, col2im_test2) {
+
+    int bS=2, iH=2,iW=2,  iC=2,oC=2, kH=2,kW=2,  sD=1,sH=1,sW=1,  pD=0,pH=0,pW=0,  dD=1,dH=1,dW=1;
+    int       oH=2,oW=2;
+    
+    NDArray<float> image ('c', {iH, bS, iC, iW});
+    image.permutei({1, 2, 0, 3});
+    image = -2.;
+    
+    NDArray<float> columns('c', {kW, oH, oW, bS, iC, kH});
+    columns.permutei({3, 4, 5, 0, 1, 2});
+    nd4j::NDArrayFactory<float>::linspace(1, columns);
+
+    NDArray<float> imageExpected('c', {bS, iC, iH, iW}, {1., 7., 12., 34., 17., 39., 44., 98., 33., 71., 76., 162., 49., 103., 108., 226.});
+
+    LaunchContext ctx;
+    nd4j::ops::helpers::_col2im<float>(ctx, image.getBuffer(), columns.getBuffer(), image.getShapeInfo(), columns.getShapeInfo(), sH, sW, pH, pW, iH, iW, dH, dW);    
+    
+    ASSERT_TRUE(image.equalsTo(imageExpected));        
+}
 
 #endif //LIBND4J_CONVOLUTIONTESTS_H
 
