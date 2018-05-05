@@ -132,7 +132,7 @@ namespace nd4j {
         }
 
         DECLARE_SHAPE_FN(choose) {
-            int *shape;
+            Nd4jLong *shape;
             int rank;
             if(block.width() > 1) {
                 auto first = INPUT_VARIABLE(0);
@@ -152,10 +152,10 @@ namespace nd4j {
                 rank = first->rankOf();
             }
 
-            int* newShape;
+            Nd4jLong* newShape;
             COPY_SHAPE(shape, newShape);
 
-            int *shapeScalar = ShapeUtils<T>::createScalarShapeInfo(block.workspace());
+            auto shapeScalar = ShapeUtils<T>::createScalarShapeInfo(block.workspace());
 
             return SHAPELIST(newShape, shapeScalar);
         }

@@ -627,13 +627,13 @@ int* ShapeUtils<T>::evalDiagShapeInfo(const int* shapeInfoConst, nd4j::memory::W
 }
 
 template<typename T>
-std::vector<int> ShapeUtils<T>::evalBroadcastBackwardAxis(int *operand, int *result) {
+std::vector<int> ShapeUtils<T>::evalBroadcastBackwardAxis(Nd4jLong *operand, Nd4jLong *result) {
     const int xRank = shape::rank(operand);
     const int zRank = shape::rank(result);
     std::vector<int> axis;
 
-    int *xShape = shape::shapeOf(operand);
-    int *zShape = shape::shapeOf(result);
+    auto xShape = shape::shapeOf(operand);
+    auto zShape = shape::shapeOf(result);
 
     int minRank = nd4j::math::nd4j_min<int>(xRank, zRank);
     int maxRank = nd4j::math::nd4j_max<int>(xRank, zRank);

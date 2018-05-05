@@ -77,9 +77,9 @@ namespace nd4j {
 
             int scale = INT_ARG(0);
 
-            int* newShape;
-            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(4), int);
-            int shape[] = {shape::shapeOf(inShape)[0], shape::shapeOf(inShape)[1], shape::shapeOf(inShape)[2] * scale, shape::shapeOf(inShape)[3] * scale};
+            Nd4jLong* newShape;
+            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(4), Nd4jLong);
+            Nd4jLong shape[] = {shape::shapeOf(inShape)[0], shape::shapeOf(inShape)[1], shape::shapeOf(inShape)[2] * scale, shape::shapeOf(inShape)[3] * scale};
             shape::shapeBuffer(4, shape, newShape);
 
             return SHAPELIST(newShape);
@@ -172,9 +172,9 @@ namespace nd4j {
 
             int scale = INT_ARG(0);
 
-            int* newShape;
-            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(4), int);
-            int shape[] = {shape::shapeOf(inShape)[0], shape::shapeOf(inShape)[1], shape::shapeOf(inShape)[2] / scale, shape::shapeOf(inShape)[3] / scale};
+            Nd4jLong* newShape;
+            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(4), Nd4jLong);
+            Nd4jLong shape[] = {shape::shapeOf(inShape)[0], shape::shapeOf(inShape)[1], shape::shapeOf(inShape)[2] / scale, shape::shapeOf(inShape)[3] / scale};
             shape::shapeBuffer(4, shape, newShape);
 
             return SHAPELIST(newShape);

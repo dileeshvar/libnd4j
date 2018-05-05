@@ -14,7 +14,7 @@ namespace nd4j {
 
             // input [bS, iC, kH, kW, oH, oW] is de-convoluted to output [bS, iC, iH, iW]
             template <typename T>
-            void _col2im(nd4j::graph::LaunchContext& context, T *im, T *col, int *imShapeInfo, int *colShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW) {
+            void _col2im(nd4j::graph::LaunchContext& context, T *im, T *col, Nd4jLong *imShapeInfo, Nd4jLong *colShapeInfo, int sH, int sW, int pH, int pW, int iH, int iW, int dH, int dW) {
 
                 const int *colShape = shape::shapeOf(colShapeInfo);
                 const int *colStride = shape::stride(colShapeInfo);

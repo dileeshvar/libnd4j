@@ -55,11 +55,11 @@ namespace ops  {
             const T* colBuff = col.getBuffer();            
             T* volBuff       = vol.getBuffer();            
 
-            int *colShapeOnly = shape::shapeOf(col.getShapeInfo());
-            int *colStrides   = shape::stride(col.getShapeInfo());
-            int *volShapeOnly = shape::shapeOf(vol.getShapeInfo());
-            char volOrder     = shape::order(vol.getShapeInfo());
-            int *volStrides   = shape::stride(vol.getShapeInfo());
+            auto colShapeOnly = shape::shapeOf(col.getShapeInfo());
+            auto colStrides   = shape::stride(col.getShapeInfo());
+            auto volShapeOnly = shape::shapeOf(vol.getShapeInfo());
+            auto volOrder     = shape::order(vol.getShapeInfo());
+            auto volStrides   = shape::stride(vol.getShapeInfo());
 
             int strideBS   = colStrides[0];
             int strideColC = colStrides[1];
@@ -922,12 +922,12 @@ void ConvolutionUtils<T>::vol2col2(NDArray<T>& vol, NDArray<T>& col, const int s
 
     T* colBuff = col.getBuffer();    
 
-    int *colShape  = shape::shapeOf(col.getShapeInfo());
-    char colOrder  = shape::order(col.getShapeInfo());
-    int *colStride = shape::stride(col.getShapeInfo());
+    auto colShape  = shape::shapeOf(col.getShapeInfo());
+    auto colOrder  = shape::order(col.getShapeInfo());
+    auto colStride = shape::stride(col.getShapeInfo());
 
-    int *volShape  = shape::shapeOf(vol.getShapeInfo());
-    int *volStride = shape::stride(vol.getShapeInfo());
+    auto volShape  = shape::shapeOf(vol.getShapeInfo());
+    auto volStride = shape::stride(vol.getShapeInfo());
 
     int bS   = volShape[0];
     int volC = volShape[1];

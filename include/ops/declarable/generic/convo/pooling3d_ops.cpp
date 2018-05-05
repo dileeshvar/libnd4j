@@ -11,7 +11,7 @@
 namespace nd4j {
     namespace ops {
         DECLARE_SHAPE_FN(avgpool3d) {
-            int* input = inputShape->at(0);
+            auto input = inputShape->at(0);
 
             int kT = INT_ARG(0);
             int kW = INT_ARG(1);
@@ -67,12 +67,12 @@ namespace nd4j {
                     --owidth;
             }
 
-            int *shapeOf;
-            int *newShape;
-            ALLOCATE(shapeOf, block.getWorkspace(), 5, int);
-            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(5), int);
+            Nd4jLong *shapeOf;
+            Nd4jLong *newShape;
+            ALLOCATE(shapeOf, block.getWorkspace(), 5, Nd4jLong);
+            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(5), Nd4jLong);
 
-            nd4j::ArrayUtils::toIntPtr({nBatch, (int) nslices, (int)otime, (int)oheight, (int)owidth}, shapeOf);
+            nd4j::ArrayUtils::toLongPtr({nBatch, (Nd4jLong) nslices, (Nd4jLong)otime, (Nd4jLong)oheight, (Nd4jLong)owidth}, shapeOf);
 
             shape::shapeBuffer(5, shapeOf, newShape);
 
@@ -158,9 +158,8 @@ namespace nd4j {
         }
         DECLARE_SHAPE_FN(avgpool3d_bp) {
             // output shape equals to input shape, all out of sudden
-            int* newShape;
-            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(inputShape->at(0)), int);
-            memcpy(newShape, inputShape->at(0), shape::shapeInfoByteLength(inputShape->at(0)));
+            Nd4jLong* newShape;
+            COPY_SHAPE(inputShape->at(0), newShape);
             return SHAPELIST(newShape);
         }
 
@@ -400,7 +399,7 @@ namespace nd4j {
             // "Output shape expected to be [%i, %i, %i, %i, %i], but got [%i, %i, %i, %i, %i] instead", input->sizeAt(0), nslices, otime, oheight, owidth, output->sizeAt(0), output->sizeAt(1), output->sizeAt(2), output->sizeAt(3), output->sizeAt(4));
             // REQUIRE_TRUE(indices->isSameShape(output), 0, "Output and Indices shapes should be equal");
 
-            int* inputShapeInfo = inputShape->at(0);   
+            Nd4jLong* inputShapeInfo = inputShape->at(0);   
                 
             int rank = inputShapeInfo[0];       // = 5
             int bS = inputShapeInfo[1];
@@ -438,9 +437,9 @@ namespace nd4j {
             int shapeInfoLength = rank*2 + 4;        
             char order = (char)(inputShapeInfo[shapeInfoLength-1]);
         
-            int* newShapeInfo0(nullptr), *newShapeInfo1(nullptr);
-            ALLOCATE(newShapeInfo0, block.getWorkspace(), shapeInfoLength, int);
-            ALLOCATE(newShapeInfo1, block.getWorkspace(), shapeInfoLength, int);
+            Nd4jLong* newShapeInfo0(nullptr), *newShapeInfo1(nullptr);
+            ALLOCATE(newShapeInfo0, block.getWorkspace(), shapeInfoLength, Nd4jLong);
+            ALLOCATE(newShapeInfo1, block.getWorkspace(), shapeInfoLength, Nd4jLong);
 
             newShapeInfo0[0] = rank;
             newShapeInfo0[1] = bS;
@@ -561,9 +560,8 @@ namespace nd4j {
         DECLARE_SHAPE_FN(maxpool3d_bp) {
             // output shape equals to input shape, all out of sudden
             // FIXME: remove memcpy here
-            int* newShape;
-            ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(inputShape->at(0)), int);
-            memcpy(newShape, inputShape->at(0), shape::shapeInfoByteLength(inputShape->at(0)));
+            Nd4jLong* newShape;
+            COPY_SHAPE(inputShape->at(0), newShape);
             return SHAPELIST(newShape);
         }
     }

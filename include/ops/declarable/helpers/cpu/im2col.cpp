@@ -15,7 +15,7 @@ namespace nd4j {
 
             // input [bS, iC, iH, iW] is convoluted to output [bS, iC, kH, kW, oH, oW]
             template <typename T>
-            void _im2col(nd4j::graph::LaunchContext& context, T *out, T *in, int *zShape, int *xShape, int kH, int kW, int sH, int sW, int pH, int pW, int dH, int dW, bool isSameMode, T zeroPadVal) {
+            void _im2col(nd4j::graph::LaunchContext& context, T *out, T *in, Nd4jLong *zShape, Nd4jLong *xShape, int kH, int kW, int sH, int sW, int pH, int pW, int dH, int dW, bool isSameMode, T zeroPadVal) {
 
                 const int *outShape  = shape::shapeOf(zShape);
                 const char outOrder  = shape::order(zShape);

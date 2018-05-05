@@ -50,7 +50,7 @@ namespace nd4j {
                 isEpsilonDup = true;
             }
 
-            int strideToCompare[] = {oH*oW, iD*oH*oW, oW, 1};
+            Nd4jLong strideToCompare[] = {oH*oW, iD*oH*oW, oW, 1};
             if (!cOrderStrides && shape::strideDescendingCAscendingF(epsilon->getShapeInfo())) {
                 cOrderStrides = true;
             }
@@ -107,9 +107,8 @@ namespace nd4j {
         DECLARE_SHAPE_FN(maxpool2d_bp) {
             
             // FIXME: remove memcpy here
-            int* newShapeInfo = nullptr;
-            ALLOCATE(newShapeInfo, block.getWorkspace(), shape::shapeInfoLength(inputShape->at(0)), int);
-            memcpy(newShapeInfo, inputShape->at(0), shape::shapeInfoByteLength(inputShape->at(0)));
+            Nd4jLong* newShapeInfo = nullptr;
+            COPY_SHAPE(inputShape->at(0), newShapeInfo);
             return SHAPELIST(newShapeInfo);
         }
 
@@ -162,8 +161,8 @@ namespace nd4j {
 
         DECLARE_SHAPE_FN(maxpool2d) {
             //NDArray<T> *x = block.getVariables().at(0)->getNDArray();
-            int* inShape = inputShape->at(0);
-            int* shapeOf = shape::shapeOf(inShape);
+            auto inShape = inputShape->at(0);
+            auto shapeOf = shape::shapeOf(inShape);
             // 0 - number of dimensions; 1,2 - kernel Height/Width; 3,4 - stride Height/Width; 5,6 - pad Height/Width; 7,8 - dilation Height/Width; 9,10 - input Height/Width; 11 - batch size; 12 - input depth; 13 - same mode;
             std::vector<int> argI = *(block.getIArguments());
             int kH = argI[0];
@@ -196,8 +195,8 @@ namespace nd4j {
                 ConvolutionUtils<T>::_calcPadding2D(pH, pW, oH, oW, iH, iW, argI[0], argI[1], argI[2], argI[3], argI[6], argI[7]);
 
             // allocate memory for new shape
-            int* newShapeInfo = nullptr;
-            ALLOCATE(newShapeInfo, block.getWorkspace(), 12, int);
+            Nd4jLong* newShapeInfo = nullptr;
+            ALLOCATE(newShapeInfo, block.getWorkspace(), 12, Nd4jLong);
             if (isNCHW) {
                 newShapeInfo[0] = 4;        // rank
                 newShapeInfo[1] = bS;

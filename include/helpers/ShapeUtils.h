@@ -16,7 +16,7 @@ namespace nd4j {
         public:
        
         // evaluate shape for array resulting from tensorDot operation, also evaluate shapes and permutation dimensions for transposition of two input arrays 
-        static std::vector<Nd4jLong> evalShapeForTensorDot(const int* aShapeInfo, const int* bShapeInfo, std::vector<int> axesA, std::vector<int> axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
+        static std::vector<Nd4jLong> evalShapeForTensorDot(const Nd4jLong* aShapeInfo, const Nd4jLong* bShapeInfo, std::vector<int> axesA, std::vector<int> axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
         static std::vector<Nd4jLong> evalShapeForTensorDot(const NDArray<T>* a,   const NDArray<T>* b,   const std::vector<int>& axesA, const std::vector<int>& axesB, std::vector<int>& permutAt, std::vector<int>& permutBt, std::vector<Nd4jLong>& shapeAt, std::vector<Nd4jLong>& shapeBt);
 
         // evaluate resulting shape after reduce operation
@@ -77,7 +77,7 @@ namespace nd4j {
         // evaluate shapeInfo for diagonal array which is made using input arr elements as diagonal
         static Nd4jLong* evalDiagShapeInfo(const Nd4jLong* shapeInfo, nd4j::memory::Workspace* workspace);
 
-        static std::vector<int> evalBroadcastBackwardAxis(int *operand, int *result);
+        static std::vector<int> evalBroadcastBackwardAxis(Nd4jLong *operand, Nd4jLong *result);
 
         // utility to calculate matrix product shape with give source shapes and additional params 
         // returns ShapeList pointer with result shape

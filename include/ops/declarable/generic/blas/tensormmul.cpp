@@ -60,10 +60,10 @@ namespace nd4j {
             
             int rank = outShape.size();
 
-            std::vector<int>* newShapeInfo = nullptr; 
-            ALLOCATE(newShapeInfo, block.getWorkspace(), shape::shapeInfoLength(rank), std::vector<int>); 
+            Nd4jLong* newShapeInfo = nullptr; 
+            ALLOCATE(newShapeInfo, block.getWorkspace(), shape::shapeInfoLength(rank), Nd4jLong); 
             newShapeInfo[0] = rank;
-            copy(outShape.begin(), outShape.end(), newShapeInfo+1);
+            std::copy(outShape.begin(), outShape.end(), newShapeInfo+1);
             
             shape::updateStrides(newShapeInfo, 'c');
 
