@@ -1991,7 +1991,7 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 
         copy->shape = new Nd4jLong[toCopy->rank];
 
-        memcpy(copy->shape, toCopy->shape, toCopy->rank * sizeof(int));
+        memcpy(copy->shape, toCopy->shape, toCopy->rank * sizeof(Nd4jLong));
 
         traceNew(9);
 
@@ -2599,8 +2599,8 @@ __host__ __device__
         Nd4jLong *shapeDeref = *shape;
         //we know they are just reversed, dimension length of 2
         if(length == 2) {
-            int shapeFirst = shapeDeref[0];
-            int shapeSecond = shapeDeref[1];
+            auto shapeFirst = shapeDeref[0];
+            auto shapeSecond = shapeDeref[1];
             shapeDeref[0] = shapeSecond;
             shapeDeref[1] = shapeFirst;
             return;
@@ -2610,8 +2610,8 @@ __host__ __device__
             return;
         }
 
-        Nd4jLong *temp = new Nd4jLong[length];
-        memcpy(temp,shapeDeref,sizeof(int) * length);
+        auto temp = new Nd4jLong[length];
+        memcpy(temp,shapeDeref,sizeof(Nd4jLong) * length);
         for (int i = 0; i < length; i++) {
             shapeDeref[i] = temp[rearrange[i]];
         }
@@ -2636,7 +2636,7 @@ __host__ __device__
 #endif
 
     INLINEDEF Nd4jLong *permuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange) {
-        int len = shape::shapeInfoLength(shape::rank(shapeBuffer));
+        auto len = shape::shapeInfoLength(shape::rank(shapeBuffer));
         Nd4jLong *copy = shape::copyOf(len, shapeBuffer);
         doPermuteShapeBuffer(copy,rearrange);
         return copy;
@@ -2674,7 +2674,7 @@ __host__ __device__
 
         // if everything is ok then perform permute 
         auto temp = new Nd4jLong[shape::shapeInfoLength(rank)];
-        memcpy(temp, shapeInfo, sizeof(int) * shape::shapeInfoLength(rank));
+        memcpy(temp, shapeInfo, sizeof(Nd4jLong) * shape::shapeInfoLength(rank));
         for (int i = 0; i < rank; ++i) {
             shapeInfo[i + 1]        = temp[rearrange[i] + 1];
             shapeInfo[i + 1 + rank] = temp[rearrange[i] + 1 + rank];
@@ -3178,7 +3178,7 @@ __host__ __device__
             //row vector: slice index 0 is a valid index, just copy the whole thing
             if(currShape[0] == 1) {
                 if(sliceIdx == 0) {
-                    memcpy(newShapeBuffer,shapeBuffer,shape::shapeInfoLength(shape::rank(shapeBuffer) * sizeof(int)));
+                    memcpy(newShapeBuffer,shapeBuffer,shape::shapeInfoByteLength(shape::rank(shapeBuffer)));
                     return newShapeBuffer;
                 }
             }
@@ -3204,8 +3204,8 @@ __host__ __device__
             }
         }
 
-        Nd4jLong *indices = new Nd4jLong[rank];
-        memset((void *) indices,0,rank * sizeof(int));
+        auto indices = new Nd4jLong[rank];
+        memset((void *) indices,0,rank * sizeof(Nd4jLong));
         indices[0] = sliceIdx;
         Nd4jLong offset = shape::getOffset(0,newShape,newStride,indices,rank);
         newShapeBuffer[shape::shapeInfoLength(newRank) - 3] = offset;
@@ -3598,8 +3598,8 @@ __host__ __device__
             printf("Remove index call created a <= 0 length array. This was likely not intended.");
         }
 
-        T1 *ret = new T1[lengthOfArr];
-        memset(ret,0,sizeof(int)  * lengthOfArr);
+        auto ret = new T1[lengthOfArr];
+        memset(ret,0,sizeof(T1)  * lengthOfArr);
         removeIndex<T1, T2>(data, indexes, dataLength, indexesLength, ret);
         return ret;
     }

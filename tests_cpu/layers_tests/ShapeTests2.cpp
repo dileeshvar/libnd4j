@@ -530,8 +530,8 @@ TEST_F(PermuteTest,PermuteShapeBufferTest) {
     EXPECT_TRUE(arrsEquals(4,assertionShapeBuffer,shapeBufferOriginal));
 
     auto backwardsAssertion = shape::shapeBuffer(4,permutedOrder);
-    auto permuted = shape::permuteShapeBuffer(assertionShapeBuffer,permuteOrder);
-    EXPECT_TRUE(arrsEquals(4,backwardsAssertion,permuted));
+    auto permuted = shape::permuteShapeBuffer(assertionShapeBuffer, permuteOrder);
+    EXPECT_TRUE(arrsEquals(4, backwardsAssertion, permuted));
 
 
     delete[] permuted;

@@ -156,14 +156,14 @@ TEST_F(ShapeTests, Test_ShapeDetector_6) {
     Nd4jLong shape[] = {2, 1, 1, 1, 1, 0, 1, 99};
 
     ASSERT_EQ(8, shape::shapeInfoLength(shape));
-    ASSERT_EQ(32, shape::shapeInfoByteLength(shape));
+    ASSERT_EQ(64, shape::shapeInfoByteLength(shape));
 }
 
 TEST_F(ShapeTests, Test_ShapeDetector_7) {
     Nd4jLong shape[] = {3, 1, 1, 1, 1, 1, 1, 0, 1, 99};
 
     ASSERT_EQ(10, shape::shapeInfoLength(shape));
-    ASSERT_EQ(40, shape::shapeInfoByteLength(shape));
+    ASSERT_EQ(80, shape::shapeInfoByteLength(shape));
 }
 
 TEST_F(ShapeTests, Test_Transpose_1) {

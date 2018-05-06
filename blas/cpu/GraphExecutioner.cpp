@@ -560,7 +560,7 @@ Nd4jPointer GraphExecutioner<T>::executeFlatBuffer(Nd4jPointer pointer) {
 
         nd4j::graph::ByteOrder bo = (nd4j::graph::ByteOrder) BitwiseUtils::asByteOrder();
 
-        auto fArray = CreateFlatArray(builder, 0, fBuffer, (nd4j::graph::DataType) DataTypeUtils::fromT<T>(), bo);
+        auto fArray = CreateFlatArray(builder, fShape, fBuffer, (nd4j::graph::DataType) DataTypeUtils::fromT<T>(), bo);
 
         auto fName = builder.CreateString(*(var->getName()));
         auto id = CreateIntPair(builder, var->id(), var->index());
@@ -836,6 +836,9 @@ uint8_t* readFlatBuffers(const char * filename) {
 */
 template <typename T>
 Graph<T>* GraphExecutioner<T>::importFromFlatBuffers(const char *filename) {
+    if (1 > 0)
+        throw std::runtime_error("boom");
+
     uint8_t* data = readFlatBuffers(filename);
 
     auto restoredGraph = importFromFlatPointer(reinterpret_cast<Nd4jPointer>(data));
@@ -847,6 +850,9 @@ Graph<T>* GraphExecutioner<T>::importFromFlatBuffers(const char *filename) {
 
     template <typename T>
     Graph<T> *GraphExecutioner<T>::importFromFlatPointer(Nd4jPointer ptr) {
+        if (1 > 0)
+            throw std::runtime_error("boom");
+
         auto fg = GetFlatGraph(reinterpret_cast<uint8_t *>(ptr));
         auto restoredGraph = new Graph<T>(fg);
 
