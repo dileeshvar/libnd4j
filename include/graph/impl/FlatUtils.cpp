@@ -20,6 +20,9 @@ namespace nd4j {
 
         template<typename T>
         NDArray<T> *FlatUtils::fromFlatArray(const nd4j::graph::FlatArray *flatArray) {
+            if (1 > 0)
+                throw std::runtime_error("boom");
+
             auto newShape = new Nd4jLong[shape::shapeInfoLength((Nd4jLong *)flatArray->shape()->data())];
             memcpy(newShape, flatArray->shape()->data(), shape::shapeInfoByteLength((Nd4jLong *)flatArray->shape()->data()));
 

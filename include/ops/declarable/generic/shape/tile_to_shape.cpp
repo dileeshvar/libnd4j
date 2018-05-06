@@ -29,10 +29,12 @@ namespace ops {
         Nd4jLong *newShape;
         ALLOCATE(newShape, block.getWorkspace(), shape::shapeInfoLength(block.numI()), Nd4jLong);
 
-//        if (shape::order(in) == 'c')
-//            shape::shapeBuffer(block.numI(), block.getIArguments()->data(), newShape);
-//        else 
-//            shape::shapeBufferFortran(block.numI(), block.getIArguments()->data(), newShape);
+        auto conv = ArrayUtils::toLongVector(*block.getIArguments());
+
+        if (shape::order(in) == 'c')
+            shape::shapeBuffer(block.numI(), conv.data(), newShape);
+        else
+            shape::shapeBufferFortran(block.numI(), conv.data(), newShape);
 
         return SHAPELIST(newShape);
     }

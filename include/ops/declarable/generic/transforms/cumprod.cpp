@@ -19,7 +19,7 @@ namespace nd4j {
 
             if (block.getIArguments()->size() == 2 && block.width() == 1) {
                 // all at once case
-                //nd4j::ops::helpers::_prefix<T, simdOps::Multiply<T>>(input->buffer(), input->shapeInfo(), output->buffer(), output->shapeInfo(), exclusive, reverse);
+                nd4j::ops::helpers::_prefix<T, simdOps::Multiply<T>>(input->buffer(), input->shapeInfo(), output->buffer(), output->shapeInfo(), exclusive, reverse);
             } else {
                 std::vector<int> dims(block.numI() - 2);
 
@@ -36,7 +36,7 @@ namespace nd4j {
                     if (dims[e] < 0)
                         dims[e] += input->rankOf();
 
-                //nd4j::ops::helpers::_prefix<T, simdOps::Multiply<T>>(input, output, dims, exclusive, reverse);
+                nd4j::ops::helpers::_prefix<T, simdOps::Multiply<T>>(input, output, dims, exclusive, reverse);
             }
 
             return ND4J_STATUS_OK;

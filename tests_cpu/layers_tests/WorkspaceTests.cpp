@@ -218,8 +218,8 @@ TEST_F(WorkspaceTests, Test_Externalized_1) {
 
     NDArray<float> x('c', {10, 10}, &ws);
 
-    ASSERT_EQ(32 + 400, ws.getUsedSize());
-    ASSERT_EQ(32 + 400, ws.getCurrentOffset());
+    ASSERT_EQ(64 + 400, ws.getUsedSize());
+    ASSERT_EQ(64 + 400, ws.getCurrentOffset());
 
     x.assign(2.0);
 

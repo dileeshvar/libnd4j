@@ -531,8 +531,6 @@ namespace nd4j {
             for ( fit = _unmapped.begin(); fit != _unmapped.end(); fit++ ) {
                 int tK = fit->first;
                 int tF = _unmappedMap.at(cnts++);
-
-                nd4j_printf("Firtst: %i; tF: %i\n", tK, tF);
             }
 
             int buildCnt = 0;
