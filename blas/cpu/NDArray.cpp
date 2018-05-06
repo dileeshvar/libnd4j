@@ -2053,12 +2053,25 @@ NDArray<T>* NDArray<T>::permute(const int* dimensions, const int rank) const {
     return ret;
 }
 
+/////////////////////////////////////////////////////////////////////////
+    template <typename T>
+    NDArray<T>* NDArray<T>::permute(const Nd4jLong* dimensions, const int rank) const {
+        int tempDims[MAX_RANK];
+        shape::convertT<Nd4jLong, int>((Nd4jLong *) dimensions, tempDims, rank);
+        return permute(tempDims, rank);
+    }
+
 
 //////////////////////////////////////////////////////////////////////////
 template <typename T>
 NDArray<T>* NDArray<T>::permute(const std::vector<int>& dimensions) const {
     return permute(dimensions.data(), dimensions.size());
 }
+
+    template <typename T>
+    NDArray<T>* NDArray<T>::permute(const std::vector<Nd4jLong>& dimensions) const {
+        return permute(dimensions.data(), dimensions.size());
+    }
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -2067,6 +2080,9 @@ NDArray<T>* NDArray<T>::permute(const std::initializer_list<int>& dimensions) co
     std::vector<int> vec(dimensions);
     return permute(vec);
 }
+
+
+
 
 //////////////////////////////////////////////////////////////////////////
 template <typename T>

@@ -126,7 +126,7 @@ namespace shape {
 #ifdef __CUDACC__
         __host__ __device__
 #endif
-        INLINEDEF Nd4jLong* permuteShapeBuffer(Nd4jLong *shapeBuffer, Nd4jLong *rearrange);
+        INLINEDEF Nd4jLong* permuteShapeBuffer(Nd4jLong *shapeBuffer, int *rearrange);
 
 
 
@@ -358,12 +358,12 @@ namespace shape {
         }
         else {
             for (int i = 0; i <  numTads; i++) {
-                Nd4jLong offset = tadOffsets[i];
-                int shapeIter[MAX_RANK];
-                int coord[MAX_RANK];
+                auto  offset = tadOffsets[i];
+                Nd4jLong shapeIter[MAX_RANK];
+                Nd4jLong coord[MAX_RANK];
                 int dim;
                 int rankIter = shape::rank(tadOnlyShapeInfo);
-                int xStridesIter[MAX_RANK];
+                Nd4jLong xStridesIter[MAX_RANK];
                 T *xPointer = x + offset;
                 if (PrepareOneRawArrayIter<T>(rankIter,
                                               shape::shapeOf(tadOnlyShapeInfo),
@@ -399,10 +399,10 @@ namespace shape {
         doPermuteShapeBuffer(this->rank, out, rearrange);
     }
 
-    INLINEDEF Nd4jLong* TAD::permuteShapeBuffer(Nd4jLong* shapeBuffer, Nd4jLong* rearrange) {
+    INLINEDEF Nd4jLong* TAD::permuteShapeBuffer(Nd4jLong* shapeBuffer, int *rearrange) {
         int len = shape::shapeInfoLength(this->rank);
         Nd4jLong *copy = shape::copyOf(len,shapeBuffer);
-        doPermuteShapeBuffer(rank,copy,rearrange);
+        doPermuteShapeBuffer(rank, copy,rearrange);
         return copy;
     }
 

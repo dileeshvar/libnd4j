@@ -192,7 +192,7 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    ND4J_EXPORT void doPermuteShapeBuffer(int rank,Nd4jLong *shapeBuffer, int* rearrange, Nd4jLong *tmpBuffer);
+    ND4J_EXPORT void doPermuteShapeBuffer(int rank, Nd4jLong *shapeBuffer, int *rearrange, Nd4jLong *tmpBuffer);
 
 #ifdef __CUDACC__
     template <typename T>
@@ -377,8 +377,7 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
-    ND4J_EXPORT void permuteShapeBufferInPlace(Nd4jLong *shapeBuffer, int* rearrange,Nd4jLong *out);
+    ND4J_EXPORT void permuteShapeBufferInPlace(Nd4jLong *shapeBuffer, int* rearrange, Nd4jLong *out);
 
 #ifdef __CUDACC__
     __host__ __device__
@@ -456,11 +455,8 @@ __host__ __device__
  * @param shapeLength
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int checkArrangeArray(Nd4jLong *arr, int arrLength, int shapeLength);
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD int checkArrangeArray(T *arr, int arrLength, int shapeLength);
 
 /**
  * Permute the shape information
@@ -555,28 +551,21 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * This buffer allocates memory
  * that must be freed elsewhere.
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    ND4J_EXPORT Nd4jLong *copyOf(int length, Nd4jLong *toCopy);
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD T* copyOf(Nd4jLong length, T *toCopy);
 
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *copyOf(int length, Nd4jLong *toCopy, Nd4jLong *ret);
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD T* copyOf(Nd4jLong length, T *toCopy, T *ret);
 
     /**
  * Return a copy of a buffer.
  * This buffer allocates memory
  * that must be freed elsewhere.
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    ND4J_EXPORT void copyTo(int length, Nd4jLong *from, Nd4jLong *to);
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD void copyTo(Nd4jLong length, T *from, T *to);
     /**
 * Return a copy of a buffer.
 * This buffer allocates memory
@@ -618,11 +607,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 
     ND4J_EXPORT int slices(Nd4jLong *shapeBuffer);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *sliceOfShapeBuffer(int sliceIdx,Nd4jLong *shapeBuffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *sliceOfShapeBuffer(Nd4jLong sliceIdx, Nd4jLong *shapeBuffer);
 /**
  * Returns the length of the
  * shape information buffer:
@@ -907,21 +892,18 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param length
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *reverseCopy(Nd4jLong *data, int length);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    ND4J_EXPORT void reverseCopyTo(Nd4jLong *from, Nd4jLong *to, int length);
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD T* reverseCopy(T *data, Nd4jLong length);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD void reverseCopyTo(T *from, T *to, Nd4jLong length);
 
-    ND4J_EXPORT void reverseCopyTo(Nd4jLong *from, Nd4jLong *to, Nd4jLong *indexes,int length);
+    template <typename T>
+    ND4J_EXPORT _CUDA_HD void reverseCopyTo(T *from, T *to, Nd4jLong *indexes, Nd4jLong length);
+
+    template <typename T1, typename T2>
+    ND4J_EXPORT _CUDA_H void convertT(T1 *from, T2 *to, Nd4jLong length);
 /**
  *
  * @param arr1
@@ -2572,7 +2554,7 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF Nd4jLong *doPermuteSwap(int length, Nd4jLong *shape, Nd4jLong *rearrange) {
+    INLINEDEF Nd4jLong *doPermuteSwap(int length, Nd4jLong *shape,  int *rearrange) {
         traceNew(16);
         Nd4jLong *ret = new Nd4jLong[length];
         for (int i = 0; i < length; i++) {
@@ -2592,7 +2574,7 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF void doPermuteSwap(int length, Nd4jLong **shape, Nd4jLong *rearrange) {
+    INLINEDEF void doPermuteSwap(int length, Nd4jLong **shape, int *rearrange) {
         if(length == 1) {
             return;
         }
@@ -2642,10 +2624,11 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF void permuteShapeBufferInPlace(Nd4jLong *shapeBuffer, int* rearrange,Nd4jLong *out) {
+    INLINEDEF void permuteShapeBufferInPlace(Nd4jLong *shapeBuffer, int *rearrange, Nd4jLong *out) {
         if(shapeBuffer != out)
-            memcpy(out,shapeBuffer,sizeof(int) * shape::shapeInfoLength(shape::rank(shapeBuffer)));
-        doPermuteShapeBuffer(shape::rank(shapeBuffer),shapeBuffer,rearrange,out);
+            memcpy(out,shapeBuffer,sizeof(Nd4jLong) * shape::shapeInfoLength(shape::rank(shapeBuffer)));
+
+        doPermuteShapeBuffer(shape::rank(shapeBuffer), shapeBuffer, rearrange, out);
     }
 
 #ifdef __CUDACC__
@@ -2654,7 +2637,7 @@ __host__ __device__
 
     INLINEDEF Nd4jLong *permuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange) {
         int len = shape::shapeInfoLength(shape::rank(shapeBuffer));
-        Nd4jLong *copy = shape::copyOf(len,shapeBuffer);
+        Nd4jLong *copy = shape::copyOf(len, shapeBuffer);
         doPermuteShapeBuffer(copy,rearrange);
         return copy;
     }
@@ -2731,7 +2714,7 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF void doPermuteShapeBuffer(Nd4jLong *shapeBuffer,Nd4jLong *rearrange, Nd4jLong *tmpBuffer) {
+    INLINEDEF void doPermuteShapeBuffer(Nd4jLong *shapeBuffer, int *rearrange, int *tmpBuffer) {
         Nd4jLong *shapeRef = shapeBuffer;
         //rank of the rearrange array == rank of shape buffer
         int rearrageRank = shape::rank(shapeRef);
@@ -2751,17 +2734,17 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF void doPermuteShapeBuffer(int rank,Nd4jLong *shapeBuffer,Nd4jLong *rearrange) {
+    INLINEDEF void doPermuteShapeBuffer(int rank,Nd4jLong *shapeBuffer, int *rearrange) {
         Nd4jLong *shapeRef = shapeBuffer;
         //rank of the rearrange array == rank of shape buffer
         int rearrageRank = rank;
         Nd4jLong *shape = shape::shapeOf(shapeRef);
         Nd4jLong *stride = shape::stride(shapeRef);
-        Nd4jLong *rearrangeCopy1 = shape::copyOf(rearrageRank,rearrange);
+        auto rearrangeCopy1 = shape::copyOf(rearrageRank, rearrange);
         shape::doPermuteSwap(rearrageRank,&shape,rearrangeCopy1);
         delete[] rearrangeCopy1;
-        Nd4jLong *rearrangeCopy2 = shape::copyOf(rearrageRank,rearrange);
-        shape::doPermuteSwap(rearrageRank,&stride,rearrangeCopy2);
+        auto rearrangeCopy2 = shape::copyOf(rearrageRank,rearrange);
+        shape::doPermuteSwap(rearrageRank, &stride, rearrangeCopy2);
         shapeBuffer[shape::shapeInfoLength(rank) - 1] = shape::getOrder(rank,shape,stride,1);
         shapeBuffer[shape::shapeInfoLength(rank) - 2] = -1;
         delete[] rearrangeCopy2;
@@ -2771,14 +2754,15 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF void doPermuteShapeBuffer(int rank,Nd4jLong *shapeBuffer,Nd4jLong *rearrange, Nd4jLong *tmpBuffer) {
+    INLINEDEF void doPermuteShapeBuffer(int rank, Nd4jLong *shapeBuffer, int *rearrange, Nd4jLong *tmpBuffer) {
         Nd4jLong *shapeRef = shapeBuffer;
         //rank of the rearrange array == rank of shape buffer
         int rearrageRank = rank;
-        Nd4jLong *shape = shape::shapeOf(shapeRef);
-        Nd4jLong *stride = shape::stride(shapeRef);
+        auto shape = shape::shapeOf(shapeRef);
+        auto stride = shape::stride(shapeRef);
         if(shapeBuffer != tmpBuffer)
             shape::copyOf(rearrageRank,shapeBuffer, tmpBuffer);
+
         shape::doPermuteSwap(rearrageRank,&shape,rearrange);
         shape::doPermuteSwap(rearrageRank,&stride,rearrange);
         shapeRef[shapeInfoLength(rank) - 2] = -1;
@@ -2879,11 +2863,9 @@ __host__ __device__
  * @param shapeLength
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    INLINEDEF int checkArrangeArray(Nd4jLong *arr, int arrLength, int shapeLength) {
+    template <typename T>
+    INLINEDEF _CUDA_HD int checkArrangeArray(T *arr, int arrLength, int shapeLength) {
         if (arrLength != shapeLength)
             return -1;
         for (int i = 0; i < arrLength; i++) {
@@ -2924,7 +2906,7 @@ __host__ __device__
     __host__ __device__
 #endif
 
-    INLINEDEF void permute(ShapeInformation **info, Nd4jLong *rearrange, int rank) {
+    INLINEDEF void permute(ShapeInformation **info, int *rearrange, int rank) {
         ShapeInformation *infoDeref = *info;
         checkArrangeArray(rearrange, rank, rank);
         shape::doPermuteSwap(rank, &infoDeref->shape, rearrange);
@@ -3096,22 +3078,17 @@ __host__ __device__
  * This buffer allocates memory
  * that must be freed elsewhere.
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF Nd4jLong *copyOf(int length, Nd4jLong *toCopy) {
+    template <typename T>
+    INLINEDEF _CUDA_HD T *copyOf(Nd4jLong length, T *toCopy) {
         traceNew(18);
 
-        Nd4jLong *ret = new Nd4jLong[length];
+        T *ret = new T[length];
         return copyOf(length, toCopy, ret);
     }
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    INLINEDEF Nd4jLong *copyOf(int length, Nd4jLong *toCopy, Nd4jLong *ret) {
-        memcpy(ret, toCopy, sizeof(int)*length);
+    template <typename T>
+    INLINEDEF _CUDA_HD T* copyOf(Nd4jLong length, T *toCopy, T *ret) {
+        memcpy(ret, toCopy, sizeof(T)*length);
         return ret;
     }
 
@@ -3120,11 +3097,9 @@ __host__ __device__
 * This buffer allocates memory
 * that must be freed elsewhere.
 */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    INLINEDEF void copyTo(int length, Nd4jLong *from, Nd4jLong *to) {
-        memcpy(to, from, sizeof(int)*length);
+    template <typename T>
+    INLINEDEF _CUDA_HD void copyTo(Nd4jLong length, T *from, T *to) {
+        memcpy(to, from, sizeof(T)*length);
     }
 
 /**
@@ -3153,7 +3128,7 @@ __host__ __device__
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    INLINEDEF Nd4jLong *permutedStrides(Nd4jLong *toPermute, int shapeRank, Nd4jLong *rearrange) {
+    INLINEDEF Nd4jLong *permutedStrides(Nd4jLong *toPermute, int shapeRank, int *rearrange) {
         Nd4jLong *strideCopy = copyOf(shapeRank, toPermute);
         checkArrangeArray(rearrange, shapeRank, shapeRank);
         Nd4jLong *newStride = doPermuteSwap(shapeRank, strideCopy, rearrange);
@@ -3182,11 +3157,8 @@ __host__ __device__
         return shape::shapeOf(shapeBuffer)[0];
     }
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    INLINEDEF Nd4jLong *sliceOfShapeBuffer(Nd4jLong sliceIdx, Nd4jLong *shapeBuffer) {
+    INLINEDEF _CUDA_HD Nd4jLong *sliceOfShapeBuffer(Nd4jLong sliceIdx, Nd4jLong *shapeBuffer) {
         int rank = shape::rank(shapeBuffer);
         int newRank = rank - 1;
         if(newRank < 2)
@@ -3878,50 +3850,41 @@ __host__ __device__
  * Generate a reverse
  * copy of the data
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+
     template <typename T>
-    INLINEDEF T* reverseCopy(T *data, int length) {
+    INLINEDEF _CUDA_HD T* reverseCopy(T *data, Nd4jLong length) {
         if (length < 1)
             return nullptr;
 
         traceNew(24);
 
         T *copy = new T[length];
-        for (int i = 0; i <= length / 2; i++) {
-            int temp = data[i];
+        for (Nd4jLong i = 0; i <= length / 2; i++) {
+            T temp = data[i];
             copy[i] = data[length - i - 1];
             copy[length - i - 1] = temp;
         }
         return copy;
     }
 
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF void reverseCopyTo(Nd4jLong *from, Nd4jLong *to, int length) {
+    template <typename T>
+    INLINEDEF _CUDA_HD void reverseCopyTo(T *from, T *to, Nd4jLong length) {
         if (length < 1)
             return;
-        for (int i = 0; i <= length / 2; i++) {
-            int temp = from[i];
+        for (Nd4jLong i = 0; i <= length / 2; i++) {
+            T temp = from[i];
             to[i] = from[length - i - 1];
             to[length - i - 1] = temp;
         }
     }
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF void reverseCopyTo(Nd4jLong *from, Nd4jLong *to, Nd4jLong *indexes, int length) {
+    template <typename T>
+    INLINEDEF _CUDA_HD void reverseCopyTo(T *from, T *to, Nd4jLong *indexes, Nd4jLong length) {
         if (length < 1)
             return;
 
-        for (int i = 0; i <= length / 2; i++) {
-            int temp = from[indexes[i]];
+        for (Nd4jLong i = 0; i <= length / 2; i++) {
+            T temp = from[indexes[i]];
             to[i] = from[indexes[length - i - 1]];
             to[length - i - 1] = temp;
         }
@@ -5037,6 +5000,11 @@ INLINEDEF Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* m
         buffer[5] = 99;
     }
 
+    template <typename T1, typename T2>
+    INLINEDEF _CUDA_H void convertT(T1 *from, T2 *to, Nd4jLong length) {
+        for (Nd4jLong e = 0; e < length; e++)
+                to[e] = (T2) from[e];
+    };
 
 }
 

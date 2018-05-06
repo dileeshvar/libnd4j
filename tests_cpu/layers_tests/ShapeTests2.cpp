@@ -134,7 +134,7 @@ public:
     //Along dimension 1,3: expect matrix with shape [cols,dim3]
     //Along dimension 2,3: expect matrix with shape [dim2,dim3]
 
-    Nd4jLong dims[6][2] = {
+    int dims[6][2] = {
             {0,1},
             {0,2},
             {0,3},
@@ -554,7 +554,7 @@ TEST_F(SliceVectorTest,RowColumnVectorTest) {
     Nd4jLong *scalarSliceInfo = shape::createScalarShapeInfo();
     Nd4jLong *scalarColumnAssertion = shape::createScalarShapeInfo();
     scalarColumnAssertion[shape::shapeInfoLength(2) - 3] = 1;
-    Nd4jLong *scalarColumnTest = shape::sliceOfShapeBuffer(1,colVectorShapeInfo);
+    Nd4jLong *scalarColumnTest = shape::sliceOfShapeBuffer(1L,colVectorShapeInfo);
     EXPECT_TRUE(arrsEquals(2,scalarColumnAssertion,scalarColumnTest));
 
     delete[] scalarColumnTest;

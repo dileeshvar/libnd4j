@@ -28,6 +28,7 @@ namespace nd4j {
 
         // evaluate shapeInfo of permuted array
         static Nd4jLong* evalPermShapeInfo(const int* dimensions, const int rank, const NDArray<T>& arr, nd4j::memory::Workspace* workspace);
+        static Nd4jLong* evalPermShapeInfo(const Nd4jLong* dimensions, const int rank, const NDArray<T>& arr, nd4j::memory::Workspace* workspace);
 
         // evaluate shapeInfo of transposed array
         static Nd4jLong* evalTranspShapeInfo(const NDArray<T>& arr, nd4j::memory::Workspace* workspace);
