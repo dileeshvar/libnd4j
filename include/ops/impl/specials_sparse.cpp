@@ -22,7 +22,7 @@ namespace nd4j {
                 if (e > 0)
                     printf(", ");
 
-                printf("%i", indices[x * rank + e]);
+                printf("%lld", (long long) indices[x * rank + e]);
             }
             printf("] ");
         }

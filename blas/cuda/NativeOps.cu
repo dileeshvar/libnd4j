@@ -319,10 +319,10 @@ dim3 getBetterDimensions(int deviceId, int numTads, int tadLength, int xRank, cu
 /*
  * This method returns kernel launch param for linear memory access
  */
-dim3 getFlatLaunchParams(int deviceId, int *xShapeInfo, int *yShapeInfo, cudaFuncAttributes funcAttr) {
-	int xRank = shape::rank(xShapeInfo);
-	int yRank = yShapeInfo == nullptr ? 0 : shape::rank(yShapeInfo);
-	int zRank = 0;
+dim3 getFlatLaunchParams(int deviceId, Nd4jLong *xShapeInfo, Nd4jLong *yShapeInfo, cudaFuncAttributes funcAttr) {
+	auto xRank = shape::rank(xShapeInfo);
+	auto yRank = yShapeInfo == nullptr ? 0 : shape::rank(yShapeInfo);
+	auto zRank = 0;
 
 	int memory_limit = getBaseMemorySize(xRank, funcAttr);
 
@@ -332,7 +332,7 @@ dim3 getFlatLaunchParams(int deviceId, int *xShapeInfo, int *yShapeInfo, cudaFun
 	int blockThreshold = getDeviceBlockThreshold(deviceId);
 	int shmemThreshold = getDeviceSharedThreshold(deviceId);
 
-	int xLength = shape::length(xShapeInfo);
+	auto xLength = shape::length(xShapeInfo);
 	int effective_block_limit =  countMP * blockThreshold;
 
 	// for flat calls we just want as much concurrent blocks, as possible, and we're not tied to TAD here
@@ -384,7 +384,7 @@ dim3 getFlatLaunchParams(int deviceId, int *xShapeInfo, int *yShapeInfo, cudaFun
  * @param reductionSize
  * @return
  */
-dim3 getReduceLaunchParams(int deviceId, int *xShapeInfo, int *tadShapeInfo, cudaFuncAttributes funcAttr, int dimensionLength, int elementSize, int reductionSize) {
+dim3 getReduceLaunchParams(int deviceId, Nd4jLong *xShapeInfo, Nd4jLong *tadShapeInfo, cudaFuncAttributes funcAttr, int dimensionLength, int elementSize, int reductionSize) {
 
 	int tadLength = 0;
 	int numTads = 0;
@@ -426,7 +426,7 @@ dim3 getReduceLaunchParams(int deviceId, int *xShapeInfo, int *tadShapeInfo, cud
  */
 template <typename T>
 dim3 getOptimalLaunchParameters(Nd4jPointer *extraPointers, cudaFuncAttributes attributes, cudaDeviceProp properties) {
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	Nd4jLong *hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 	Nd4jLong n = shape::length(hostXShapeInfo);
 
 	dim3 launchDims = getOptimalDimensions<T>(n,attributes, properties);
@@ -437,9 +437,9 @@ dim3 getOptimalLaunchParameters(Nd4jPointer *extraPointers, cudaFuncAttributes a
 	return launchDims;
 }
 
-nd4j::buffer::Buffer<int> * createScalarBuffer(cudaStream_t stream) {
-	int *scalarShapeInfo = shape::createScalarShapeInfo();
-	nd4j::buffer::Buffer<int> *buff = nd4j::buffer::createBuffer(scalarShapeInfo,shape::shapeInfoLength(2), stream);
+nd4j::buffer::Buffer<Nd4jLong> * createScalarBuffer(cudaStream_t stream) {
+	Nd4jLong *scalarShapeInfo = shape::createScalarShapeInfo();
+	nd4j::buffer::Buffer<Nd4jLong> *buff = nd4j::buffer::createBuffer(scalarShapeInfo,shape::shapeInfoLength(2), stream);
 	nd4j::buffer::copyDataToGpu(&buff, stream);
 	return buff;
 }
@@ -447,13 +447,13 @@ nd4j::buffer::Buffer<int> * createScalarBuffer(cudaStream_t stream) {
 
 class ScalarShapeInformation {
 private:
-	nd4j::buffer::Buffer<int> *scalarDimension;
-	nd4j::buffer::Buffer<int> *scalarShapeInfo;
+	nd4j::buffer::Buffer<Nd4jLong> *scalarDimension;
+	nd4j::buffer::Buffer<Nd4jLong> *scalarShapeInfo;
 //	std::thread::id threadId;
 
 public:
 	ScalarShapeInformation(cudaStream_t stream) {
-		int *scalarDimensionBuff = (int *) malloc(sizeof(int));
+		Nd4jLongint *scalarDimensionBuff = (Nd4jLong *) malloc(sizeof(Nd4jLong));
 
 		CHECK_ALLOC(scalarDimensionBuff, "Failed to allocate ShapeInfoBuffer");	
 
@@ -469,19 +469,19 @@ public:
 	}
 
 
-	int *getShapeInfoHostPointer() {
+	Nd4jLong *getShapeInfoHostPointer() {
 		return scalarShapeInfo->data;
 	}
 
-	int * getShapeInfoGpuPointer() {
+	Nd4jLong * getShapeInfoGpuPointer() {
 		return scalarShapeInfo->gData;
 	}
 
-	int * getDimensionHostPointer() {
+	Nd4jLong * getDimensionHostPointer() {
 		return scalarDimension->data;
 	}
 
-	int  * getDimensionGpuPointer() {
+	Nd4jLong  * getDimensionGpuPointer() {
 		return scalarDimension->gData;
 	}
 
@@ -518,7 +518,7 @@ public:
 	 * Get the device shape information
 	 * representing a scalar
 	 */
-	 int *getDeviceShapeInfo() {
+	 Nd4jLong *getDeviceShapeInfo() {
 		return shapeInfo->getShapeInfoGpuPointer();
 	}
 
@@ -532,7 +532,7 @@ public:
 	 /**
 	  * Get the infinite dimension device pointer
 	  */
-	 int *getDimensionDevicePointer() {
+	  Nd4jLong *getDimensionDevicePointer() {
 		 return shapeInfo->getDimensionGpuPointer();
 	 }
 
@@ -552,14 +552,14 @@ public:
  */
 double   NativeOps::execIndexReduceScalarDouble(Nd4jPointer *extraPointers,int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	Nd4jLong *hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	Nd4jLong *hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	Nd4jLong *deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
@@ -601,18 +601,18 @@ void   NativeOps::execIndexReduceDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		iNd4jLongnt *xShapeInfo,
 		double *extraParams,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension, int dimensionLength) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	Nd4jLong *hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	Nd4jLong *hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	Nd4jLong *hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	Nd4jLong *deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
@@ -650,24 +650,24 @@ void   NativeOps::execIndexReduceDouble(
 void   NativeOps::execBroadcastDouble(Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension, int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
-	int *deviceTADShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *deviceTADOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfoZ = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto deviceTADOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -696,11 +696,11 @@ void   NativeOps::execPairwiseTransformDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *dx,
-		int xStride,
+		Nd4jLong xStride,
 		double *y,
-		int yStride,
+		Nd4jLong yStride,
 		double *result,
-		int resultStride,
+		Nd4jLong resultStride,
 		double *extraParams, Nd4jLong n) {
 
     dim3 launchDims(512, 512, 2048);
@@ -727,15 +727,15 @@ void NativeOps::execPairwiseTransformDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		double *extraParams,
-		int *xIndexes,
-		int *yIndexes,
-		int *resultIndexes) {
+		Nd4jLong *xIndexes,
+		Nd4jLong *yIndexes,
+		Nd4jLong *resultIndexes) {
 	///
 }
 /**
@@ -754,11 +754,11 @@ void NativeOps::execPairwiseTransformDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		double *extraParams) {
 
 	dim3 launchDims(512, 512, 2048);
@@ -779,19 +779,19 @@ void   NativeOps::execReduceDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *result,
-		int *resultShapeInfo) {
+		Nd4jLong *resultShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D7 opNum:[%i]\n", opNum);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	double *reductionPointer = reinterpret_cast<double *>(extraPointers[4]);
 
@@ -821,19 +821,19 @@ void   NativeOps::execReduceDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *result,
-		int *resultShapeInfo,
-		int *dimension,
+		Nd4jLong *resultShapeInfo,
+		Nd4jLong *dimension,
 		int dimensionLength) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D8 opNum:[%i]\n", opNum);
@@ -875,14 +875,14 @@ double NativeOps::execReduceScalarDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D9 opNum:[%i]\n", opNum);
@@ -926,21 +926,21 @@ void   NativeOps::execReduce3Double(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		double *result,
-		int *resultShapeInfo) {
+		Nd4jLong *resultShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D10 opNum:[%i]\n", opNum);
@@ -978,28 +978,28 @@ double   NativeOps::execReduce3ScalarDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *y,
-		int *yShapeInfo){
+		Nd4jLong *yShapeInfo){
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D11 opNum:[%i]\n", opNum);
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-	double *resultPointer = reinterpret_cast<double *>(extraPointers[5]);
-	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
+	auto resultPointer = reinterpret_cast<double *>(extraPointers[5]);
+	auto allocationPointer = reinterpret_cast<Nd4jLong *>(extraPointers[3]);
 
     double *reductionPointer = reinterpret_cast<double *>(extraPointers[4]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	dim3 launchDims = getBasicLaunchParams(getDeviceId(extraPointers[2]), shape::length(hostXShapeInfo), 16, funcAttributes[21]);
 
@@ -1039,12 +1039,12 @@ void   NativeOps::execReduce3Double(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
@@ -1052,15 +1052,15 @@ void   NativeOps::execReduce3Double(
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D12 opNum:[%i]\n", opNum);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
+	int *allocationPointer = reinterpret_cast<Nd4jLong *>(extraPointers[3]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
 	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	dim3 launchDims = getBasicLaunchParams(getDeviceId(extraPointers[2]), shape::length(hostXShapeInfo), 16, funcAttributes[21]);
@@ -1095,16 +1095,16 @@ void   NativeOps::execScalarDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int xStride,
+		Nd4jLong xStride,
 		double *result,
-		int resultStride,
+		Nd4jLong resultStride,
 		double scalar,
 		double *extraParams,
 		Nd4jLong n) {
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<auto *>(extraPointers[0]);
 
 	int *allocPointer = reinterpret_cast<int *>(extraPointers[3]);
 
@@ -1130,15 +1130,15 @@ void NativeOps::execScalarDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		double scalar,
 		double *extraParams){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
 	int *allocPointer = reinterpret_cast<int *>(extraPointers[3]);
 
@@ -1169,14 +1169,14 @@ void NativeOps::execScalarDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		double scalar,
 		double *extraParams,
 		Nd4jLong n,
-		int *xIndexes,
-		int *resultIndexes){
+		Nd4jLong *xIndexes,
+		Nd4jLong *resultIndexes){
 
 
     printf("Unsupported operation: scalarIndices\n");
@@ -1192,15 +1192,15 @@ double   NativeOps::execSummaryStatsScalarDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	double *resultPointer = reinterpret_cast<double *>(extraPointers[5]);
 
@@ -1227,22 +1227,22 @@ void   NativeOps::execSummaryStatsDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *result,
-		int *resultShapeInfo,bool biasCorrected) {
+		Nd4jLong *resultShapeInfo,bool biasCorrected) {
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D17 opNum:[%i]\n", opNum);
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	double *reductionPointer = reinterpret_cast<double *>(extraPointers[4]);
@@ -1269,20 +1269,20 @@ void   NativeOps::execSummaryStatsDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *extraParams,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension, int dimensionLength,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	double *reductionPointer = reinterpret_cast<double *>(extraPointers[4]);
@@ -1308,14 +1308,14 @@ void   NativeOps::execTransformDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *dx,
-		int xStride,
+		Nd4jLong xStride,
 		double *z,
-		int zStride,
+		Nd4jLong zStride,
 		double *extraParams,
 		Nd4jLong n) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D19 opNum:[%i]\n", opNum);
@@ -1342,18 +1342,18 @@ void   NativeOps::execTransformDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *dx,
-		int *xShapeInfo,
+		Nd4jLongxShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLongresultShapeInfo,
 		double *extraParams){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D20 opNum:[%i]\n", opNum);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
 
 	int *allocPointer = reinterpret_cast<int *>(extraPointers[3]);
 	double *reductionPointer = reinterpret_cast<double *>(extraPointers[4]);
@@ -1366,12 +1366,12 @@ void   NativeOps::execTransformDouble(
 
 	int *dimension = (int *) specialPointer;
 	int *maxDimension = dimension + 1;
-	int *maxShapeBuffer = (int *) maxDimension + 1;
+	auto maxShapeBuffer = (Nd4jLong *) maxDimension + 1;
 	double * special = (double *) maxShapeBuffer + (MAX_RANK * 2 + 4);
 
 
-    int *devTadShapeInfo = reinterpret_cast<int *> (extraPointers[10]);
-    Nd4jLong *devTadOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
+    auto devTadShapeInfo = reinterpret_cast<Nd4jLong *> (extraPointers[10]);
+    auto devTadOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
 
 
     /**
@@ -1398,7 +1398,7 @@ void   NativeOps::execTransformDouble(
 			// going for blockwise specials
 			// we'll do some pointers mangling here, and execute kernels one by one
 
-			int *shape = shape::shapeOf(hostXShapeInfo);
+			auto shape = shape::shapeOf(hostXShapeInfo);
 			switch (opNum) {
 				case 40: // LogSoftMax
 				case 39: // SoftMax Derivative
@@ -1421,8 +1421,8 @@ void   NativeOps::execTransformDouble(
 					tempPointers[15] = extraPointers[15];
 
 
-					int maxShape[2] = {shape::shapeOf(hostXShapeInfo)[0], 1};
-					int *hostMaxShapeBuffer = shape::shapeBuffer(2, maxShape);
+					auto maxShape[2] = {shape::shapeOf(hostXShapeInfo)[0], 1};
+					auto hostMaxShapeBuffer = shape::shapeBuffer(2, maxShape);
 					tempPointers[7] = (Nd4jPointer) hostMaxShapeBuffer;
 					tempPointers[8] = (Nd4jPointer) hostMaxShapeBuffer;
 
@@ -1507,8 +1507,8 @@ void   NativeOps::execTransformDouble(
 
 						fillIsMaxDouble<<< 1, 128, 0, *stream >>>(result, shape::length(hostXShapeInfo), targetIdx);
 					} else {
-						int *tadMaxShapeInfo = reinterpret_cast<int *> (extraPointers[10]);
-                        Nd4jLong *tadMaxOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
+						auto tadMaxShapeInfo = reinterpret_cast<Nd4jLong *> (extraPointers[10]);
+                        auto tadMaxOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
 						int *dimension = reinterpret_cast<int *> (extraPointers[15]);
                         special = reinterpret_cast<double *>(extraPointers[17]);
                         int dimensionLength = getDeviceId(extraPointers[18]);
@@ -1585,12 +1585,12 @@ void   NativeOps::execTransformDouble(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		double *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		double *extraParams,
-		int *xIndexes,
-		int *resultIndexes) {
+		Nd4jLong *xIndexes,
+		Nd4jLong *resultIndexes) {
     //
 }
 
@@ -1605,21 +1605,21 @@ float   NativeOps::execIndexReduceScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams){
 	if (nd4j::Environment::getInstance()->isDebug())
 		printf("F1 opNum:[%i]\n", opNum);
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	float *resultPointer = reinterpret_cast<float *>(extraPointers[5]);
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
@@ -1651,19 +1651,19 @@ float   NativeOps::execIndexReduceScalarHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams){
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H1 opNum:[%i]\n", opNum);
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	float16 *resultPointer = reinterpret_cast<float16 *>(extraPointers[5]);
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
@@ -1704,21 +1704,21 @@ void   NativeOps::execIndexReduceFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F2 opNum:[%i]\n", opNum);
@@ -1746,21 +1746,21 @@ void   NativeOps::execIndexReduceHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H2 opNum:[%i]\n", opNum);
@@ -1800,11 +1800,11 @@ void   NativeOps::execBroadcastFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension, int dimensionLength){
 /*
     cudaEvent_t start;
@@ -1816,15 +1816,15 @@ void   NativeOps::execBroadcastFloat(
 */
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
-	int *deviceTADShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *deviceTADOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfoZ = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto deviceTADOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F3 opNum:[%i]\n", opNum);
@@ -1843,23 +1843,23 @@ void   NativeOps::execBroadcastHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension, int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
-	int *deviceTADShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *deviceTADOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfoZ = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto deviceTADOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -1888,11 +1888,11 @@ void   NativeOps::execPairwiseTransformFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *dx,
-		int xStride,
+		Nd4jLong xStride,
 		float *y,
-		int yStride,
+		Nd4jLong yStride,
 		float *result,
-		int resultStride,
+		Nd4jLong resultStride,
 		float *extraParams, Nd4jLong n){
     dim3 launchDims(512, 512, 2048);
 
@@ -1903,11 +1903,11 @@ void   NativeOps::execPairwiseTransformHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *dx,
-		int xStride,
+		Nd4jLong xStride,
 		float16 *y,
-		int yStride,
+		Nd4jLong yStride,
 		float16 *result,
-		int resultStride,
+		Nd4jLong resultStride,
 		float16 *extraParams, Nd4jLong n){
     dim3 launchDims(512, 512, 2048);
 
@@ -1933,15 +1933,15 @@ void NativeOps::execPairwiseTransformFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float *extraParams,
-		int *xIndexes,
-		int *yIndexes,
-		int *resultIndexes){
+		Nd4jLong *xIndexes,
+		Nd4jLong *yIndexes,
+		Nd4jLong *resultIndexes){
     ///
 }
 
@@ -1950,15 +1950,15 @@ void NativeOps::execPairwiseTransformHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float16 *extraParams,
-		int *xIndexes,
-		int *yIndexes,
-		int *resultIndexes){
+		Nd4jLong *xIndexes,
+		Nd4jLong *yIndexes,
+		Nd4jLong *resultIndexes){
 
     ///
 }
@@ -1980,11 +1980,11 @@ void NativeOps::execPairwiseTransformFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float *extraParams){
     dim3 launchDims(512, 512, 2048);
 
@@ -1996,11 +1996,11 @@ void NativeOps::execPairwiseTransformHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float16 *extraParams){
     dim3 launchDims(512, 512, 2048);
 
@@ -2021,16 +2021,16 @@ void   NativeOps::execReduceFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *result,
-		int *resultShapeInfo) {
+		Nd4jLong *resultShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F7 opNum:[%i]\n", opNum);
@@ -2057,16 +2057,16 @@ void   NativeOps::execReduceHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *result,
-		int *resultShapeInfo) {
+		Nd4jLong *resultShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H7 opNum:[%i]\n", opNum);
@@ -2103,18 +2103,18 @@ void   NativeOps::execReduceFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F8 opNum:[%i]\n", opNum);
@@ -2146,18 +2146,18 @@ void   NativeOps::execReduceHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H8 opNum:[%i]\n", opNum);
@@ -2200,12 +2200,12 @@ float NativeOps::execReduceScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F9 opNum:[%i]\n", opNum);
@@ -2244,9 +2244,9 @@ float NativeOps::execReduceScalarHalf(
 		float16 *extraParams){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H9 opNum:[%i]\n", opNum);
@@ -2291,21 +2291,21 @@ void   NativeOps::execReduce3Float(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float *result,
-		int *resultShapeInfo){
+		Nd4jLong *resultShapeInfo){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F10 opNum:[%i]\n", opNum);
@@ -2338,21 +2338,21 @@ void   NativeOps::execReduce3Half(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float16 *result,
-		int *resultShapeInfo){
+		Nd4jLong *resultShapeInfo){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H10 opNum:[%i]\n", opNum);
@@ -2394,19 +2394,19 @@ float   NativeOps::execReduce3ScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *y,
-		int *yShapeInfo) {
+		iNd4jLongnt *yShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F11 opNum:[%i]\n", opNum);
@@ -2444,19 +2444,19 @@ float   NativeOps::execReduce3ScalarHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *y,
-		int *yShapeInfo) {
+		Nd4jLong *yShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H11 opNum:[%i]\n", opNum);
@@ -2507,24 +2507,24 @@ void   NativeOps::execReduce3Float(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F12 opNum:[%i]\n", opNum);
@@ -2571,24 +2571,24 @@ void   NativeOps::execReduce3Half(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *y,
-		int *yShapeInfo,
+		Nd4jLong *yShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
-    int *yDeviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[12]);
-	Nd4jLong *yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
+    auto yDeviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[12]);
+	auto yDeviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H12 opNum:[%i]\n", opNum);
@@ -2647,16 +2647,16 @@ void   NativeOps::execScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int xStride,
+		Nd4jLong xStride,
 		float *result,
-		int resultStride,
+		Nd4jLong resultStride,
 		float scalar,
 		float *extraParams,
 		Nd4jLong n){
 
         cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-        int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+        auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
         int *allocPointer = reinterpret_cast<int *>(extraPointers[3]);
 
@@ -2673,15 +2673,15 @@ void   NativeOps::execScalarHalf(
         Nd4jPointer *extraPointers,
         int opNum,
         float16 *x,
-        int xStride,
+        Nd4jLong xStride,
         float16 *result,
-        int resultStride,
+        Nd4jLong resultStride,
         float scalar,
         float16 *extraParams,
         Nd4jLong n){
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     int *allocPointer = reinterpret_cast<int *>(extraPointers[3]);
 
@@ -2710,13 +2710,13 @@ void NativeOps::execScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float scalar,
 		float *extraParams){
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
@@ -2744,17 +2744,17 @@ void NativeOps::execScalarHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float scalarF,
 		float16 *extraParams){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	Nd4jLong n = shape::length(hostXShapeInfo);
+	auto n = shape::length(hostXShapeInfo);
 
 	//if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 	//	printf("H14 opNum:[%i]\n", opNum);
@@ -2793,18 +2793,18 @@ void NativeOps::execScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float scalar,
 		float *extraParams,
-		int *xIndexes,
-		int *resultIndexes){
+		Nd4jLong *xIndexes,
+		Nd4jLong *resultIndexes){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	Nd4jLong n = shape::length(hostXShapeInfo);
+	auto n = shape::length(hostXShapeInfo);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F15 opNum:[%i]\n", opNum);
@@ -2829,20 +2829,20 @@ float   NativeOps::execSummaryStatsScalarFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	float *resultPointer = reinterpret_cast<float *>(extraPointers[5]);
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	float *reductionPointer = reinterpret_cast<float *>(extraPointers[4]);
 
-    Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+    auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	dim3 launchDims = getReduceLaunchParams(getDeviceId(extraPointers[2]), hostXShapeInfo, hostTADShapeInfo, funcAttributes[1], 1, sizeof(float), 8);
 
@@ -2857,14 +2857,14 @@ float   NativeOps::execSummaryStatsScalarHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
 
 	float16 *resultPointer = reinterpret_cast<float16 *>(extraPointers[5]);
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
@@ -2893,18 +2893,18 @@ void   NativeOps::execSummaryStatsFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *result,
-		int *resultShapeInfo,bool biasCorrected){
+		Nd4jLong *resultShapeInfo,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	float *reductionPointer = reinterpret_cast<float *>(extraPointers[4]);
@@ -2922,18 +2922,18 @@ void   NativeOps::execSummaryStatsHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *result,
-		int *resultShapeInfo,bool biasCorrected){
+		Nd4jLong *resultShapeInfo,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	float16 *reductionPointer = reinterpret_cast<float16 *>(extraPointers[4]);
@@ -2962,20 +2962,20 @@ void   NativeOps::execSummaryStatsFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *extraParams,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	float *reductionPointer = reinterpret_cast<float *>(extraPointers[4]);
@@ -2994,20 +2994,20 @@ void   NativeOps::execSummaryStatsHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *x,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *extraParams,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		int *dimension,
 		int dimensionLength,bool biasCorrected){
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
-	int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
-	int *deviceTADShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-	Nd4jLong *deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+	auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
+	auto deviceTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+	auto deviceTADOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 	int *allocationPointer = reinterpret_cast<int *>(extraPointers[3]);
 	float16 *reductionPointer = reinterpret_cast<float16 *>(extraPointers[4]);
@@ -3036,14 +3036,14 @@ void   NativeOps::execTransformFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *dx,
-		int xStride,
+		Nd4jLong xStride,
 		float *z,
-		int zStride,
+		Nd4jLong zStride,
 		float *extraParams,
 		Nd4jLong n) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F19 opNum:[%i]\n", opNum);
@@ -3065,14 +3065,14 @@ void   NativeOps::execTransformHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *dx,
-		int xStride,
+		Nd4jLong xStride,
 		float16 *z,
-		int zStride,
+		Nd4jLong zStride,
 		float16 *extraParams,
 		Nd4jLong n) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H19 opNum:[%i]\n", opNum);
@@ -3101,14 +3101,14 @@ void   NativeOps::execTransformHalf(
  */
 void   NativeOps::execTransformFloat(Nd4jPointer *extraPointers,int opNum,
 		float *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float *extraParams) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F20 opNum:[%i]\n", opNum);
@@ -3121,12 +3121,12 @@ void   NativeOps::execTransformFloat(Nd4jPointer *extraPointers,int opNum,
 
 	int *dimension = (int *) specialPointer;
 	int *maxDimension = dimension + 1;
-	int *maxShapeBuffer = (int *) maxDimension + 1;
+	auto maxShapeBuffer = (Nd4jLong *) maxDimension + 1;
 	float * special = (float *) maxShapeBuffer + (MAX_RANK * 2 + 4);
 
     int *maskedAllocPointer = allocPointer;
 
-    int *devTadShapeInfo = reinterpret_cast<int *> (extraPointers[10]);
+    auto devTadShapeInfo = reinterpret_cast<Nd4jLong *> (extraPointers[10]);
     Nd4jLong *devTadOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
 
 
@@ -3176,8 +3176,8 @@ void   NativeOps::execTransformFloat(Nd4jPointer *extraPointers,int opNum,
 					tempPointers[15] = extraPointers[15];
 
 
-					int maxShape[2] = {shape::shapeOf(hostXShapeInfo)[0], 1};
-					int *hostMaxShapeBuffer = shape::shapeBuffer(2, maxShape);
+					Nd4jLong maxShape[2] = {shape::shapeOf(hostXShapeInfo)[0], 1};
+					auto hostMaxShapeBuffer = shape::shapeBuffer(2, maxShape);
 
 					tempPointers[7] = (Nd4jPointer) hostMaxShapeBuffer;
 					tempPointers[8] = (Nd4jPointer) hostMaxShapeBuffer;
@@ -3276,8 +3276,8 @@ void   NativeOps::execTransformFloat(Nd4jPointer *extraPointers,int opNum,
                         nd4j::DebugHelper::checkErrorCode(stream, "Legacy IsMax(...) failed");
 					} else {
 						// going for dimension-based IsMax
-						int *tadMaxShapeInfo = reinterpret_cast<int *> (extraPointers[10]);
-                        Nd4jLong *tadMaxOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
+						auto tadMaxShapeInfo = reinterpret_cast<Nd4jLong *> (extraPointers[10]);
+                        auto tadMaxOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
 						int *dimension = reinterpret_cast<int *> (extraPointers[15]);
                         special = reinterpret_cast<float *>(extraPointers[17]);
                         int dimensionLength = getDeviceId(extraPointers[18]);
@@ -3346,14 +3346,14 @@ void   NativeOps::execTransformFloat(Nd4jPointer *extraPointers,int opNum,
 
 void   NativeOps::execTransformHalf(Nd4jPointer *extraPointers,int opNum,
 									 float16 *dx,
-									 int *xShapeInfo,
+									 Nd4jLong *xShapeInfo,
 									 float16 *result,
-									 int *resultShapeInfo,
+									 Nd4jLong *resultShapeInfo,
 									 float16 *extraParams) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
-	int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
+	auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H20 opNum:[%i]\n", opNum);
@@ -3366,7 +3366,7 @@ void   NativeOps::execTransformHalf(Nd4jPointer *extraPointers,int opNum,
 
 	int *dimension = (int *) specialPointer;
 	int *maxDimension = dimension + 1;
-	int *maxShapeBuffer = (int *) maxDimension + 1;
+	auto maxShapeBuffer = (Nd4jLong *) maxDimension + 1;
 	float16 * special = (float16 *) maxShapeBuffer + (MAX_RANK * 2 + 4);
 
 	dim3 launchDims = getFlatLaunchParams(getDeviceId(extraPointers[2]), hostXShapeInfo, hostZShapeInfo, funcAttributes[1]);
@@ -3374,8 +3374,8 @@ void   NativeOps::execTransformHalf(Nd4jPointer *extraPointers,int opNum,
 	if (nd4j::Environment::getInstance()->isVerbose() && launchDims.x == 1)
 		printf("AH20 opNum:[%i]\n", opNum);
 
-    int *devTadShapeInfo = reinterpret_cast<int *> (extraPointers[10]);
-    Nd4jLong *devTadOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
+    auto devTadShapeInfo = reinterpret_cast<Nd4jLong *> (extraPointers[10]);
+    auto devTadOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
 
 
     // simple trick to get workaround over reductions into scalar
@@ -3418,8 +3418,8 @@ void   NativeOps::execTransformHalf(Nd4jPointer *extraPointers,int opNum,
 					tempPointers[15] = extraPointers[15];
 
 
-					int maxShape[2] = {shape::shapeOf(hostXShapeInfo)[0], 1};
-					int *hostMaxShapeBuffer = shape::shapeBuffer(2, maxShape);
+					Nd4jLong maxShape[2] = {shape::shapeOf(hostXShapeInfo)[0], 1};
+					auto hostMaxShapeBuffer = shape::shapeBuffer(2, maxShape);
 
 					tempPointers[7] = (Nd4jPointer) hostMaxShapeBuffer;
 					tempPointers[8] = (Nd4jPointer) hostMaxShapeBuffer;
@@ -3524,8 +3524,8 @@ void   NativeOps::execTransformHalf(Nd4jPointer *extraPointers,int opNum,
 						fillIsMaxHalf<<< 1, 128, 1536, *stream >>>(result, shape::length(hostXShapeInfo), targetIdx);
 					} else {
 						// going for dimension-based IsMax
-						int *tadMaxShapeInfo = reinterpret_cast<int *> (extraPointers[10]);
-                        Nd4jLong *tadMaxOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
+						auto tadMaxShapeInfo = reinterpret_cast<Nd4jLong *> (extraPointers[10]);
+                        auto tadMaxOffsets = reinterpret_cast<Nd4jLong *> (extraPointers[11]);
 						int *dimension = reinterpret_cast<int *> (extraPointers[15]);
                         special = reinterpret_cast<float16 *>(extraPointers[17]);
                         int dimensionLength = getDeviceId(extraPointers[18]);
@@ -3601,12 +3601,12 @@ void   NativeOps::execTransformFloat(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float *extraParams,
-		int *xIndexes,
-		int *resultIndexes) {
+		Nd4jLong *xIndexes,
+		Nd4jLong *resultIndexes) {
     ///
 }
 
@@ -3615,12 +3615,12 @@ void   NativeOps::execTransformHalf(
 		Nd4jPointer *extraPointers,
 		int opNum,
 		float16 *dx,
-		int *xShapeInfo,
+		Nd4jLong *xShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float16 *extraParams,
-		int *xIndexes,
-		int *resultIndexes) {
+		Nd4jLong *xIndexes,
+		Nd4jLong *resultIndexes) {
     ///
 }
 
@@ -3629,9 +3629,9 @@ template <typename T>
 __device__ void flattenKernelGeneric(int dOffset,
 					char order,
 					T *result,
-					int *resultShapeInfo,
+					Nd4jLong *resultShapeInfo,
 					T *input,
-					int *inputShapeInfo, int *allocationPointer) {
+					Nd4jLong *inputShapeInfo, int *allocationPointer) {
 
 	__shared__ UnifiedSharedMemory *manager;
 
@@ -3642,20 +3642,20 @@ __device__ void flattenKernelGeneric(int dOffset,
 	}
 	__syncthreads();
 
-	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	Nd4jLong tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-	int *zShape = shape::shapeOf(resultShapeInfo);
-	int *zStride = shape::stride(resultShapeInfo);
+	auto zShape = shape::shapeOf(resultShapeInfo);
+	auto zStride = shape::stride(resultShapeInfo);
 
 
-	int *yShape = shape::shapeOf(inputShapeInfo);
-	int *yStride = shape::stride(inputShapeInfo);
-	char yOrder = shape::order(inputShapeInfo);
+	auto yShape = shape::shapeOf(inputShapeInfo);
+	auto yStride = shape::stride(inputShapeInfo);
+	auto yOrder = shape::order(inputShapeInfo);
 
-	int len = shape::length(inputShapeInfo);
+	auto len = shape::length(inputShapeInfo);
 
-	int resultEWS = shape::elementWiseStride(resultShapeInfo);
-	int inputEWS = shape::elementWiseStride(inputShapeInfo);
+	auto resultEWS = shape::elementWiseStride(resultShapeInfo);
+	auto inputEWS = shape::elementWiseStride(inputShapeInfo);
 	if (yOrder == order) {
 		if (resultEWS >= 1 && inputEWS >= 1) {
 			for (int i = tid; i < len; i+= gridDim.x * blockDim.x) {
@@ -3667,14 +3667,14 @@ __device__ void flattenKernelGeneric(int dOffset,
 			int coord[MAX_RANK];
 
 			if(order == 'f') {
-				for(int i = tid; i < len; i+= gridDim.x * blockDim.x) {
+				for(auto i = tid; i < len; i+= gridDim.x * blockDim.x) {
 					shape::ind2sub(rank,yShape,i,coord);
 					int offset = shape::getOffset(0,yShape,yStride,coord,rank);
 					result[i + dOffset] = input[offset];
 				}
 			}
 			else {
-				for(int i = tid; i < len; i+= gridDim.x * blockDim.x) {
+				for(auto i = tid; i < len; i+= gridDim.x * blockDim.x) {
 					shape::ind2subC(rank,yShape,i,coord);
 					int offset = shape::getOffset(0,yShape,yStride,coord,rank);
 					result[i + dOffset] = input[offset];
@@ -3683,19 +3683,19 @@ __device__ void flattenKernelGeneric(int dOffset,
 		}
 	} else {
 		int rank = shape::rank(inputShapeInfo);
-		int coord[MAX_RANK];
+		Nd4jLong coord[MAX_RANK];
 
 		if(order == 'f') {
 			for(int i = tid; i < len; i+= gridDim.x * blockDim.x) {
 				shape::ind2sub(rank,yShape,i,coord);
-				int offset = shape::getOffset(0,yShape,yStride,coord,rank);
+				auto offset = shape::getOffset(0,yShape,yStride,coord,rank);
 				result[i+dOffset] = input[offset];
 			}
 		}
 		else {
 			for(int i = tid; i < len; i+= gridDim.x * blockDim.x) {
 				shape::ind2subC(rank,yShape,i,coord);
-				int offset = shape::getOffset(0,yShape,yStride,coord,rank);
+				auto offset = shape::getOffset(0,yShape,yStride,coord,rank);
 				result[i+dOffset] = input[offset];
 			}
 		}
@@ -3706,9 +3706,9 @@ __device__ void flattenKernelGeneric(int dOffset,
 extern "C" __global__ void flattenKernelDouble(int offset,
 											  char order,
 											  double *result,
-											  int *resultShapeInfo,
+											  Nd4jLong *resultShapeInfo,
 											  double *input,
-											  int *inputShapeInfo, int *allocationPointer) {
+											  Nd4jLong *inputShapeInfo, int *allocationPointer) {
 	flattenKernelGeneric<double>(
 			offset,
 			order, result,
@@ -3721,9 +3721,9 @@ extern "C" __global__ void flattenKernelDouble(int offset,
 extern "C" __global__ void flattenKernelFloat(int offset,
 											  char order,
 											  float *result,
-											  int *resultShapeInfo,
+											  Nd4jLong *resultShapeInfo,
 											  float *input,
-											  int *inputShapeInfo, int *allocationPointer) {
+											  Nd4jLong *inputShapeInfo, int *allocationPointer) {
 
 	flattenKernelGeneric<float>(
 			offset,
@@ -3738,9 +3738,9 @@ extern "C" __global__ void flattenKernelFloat(int offset,
 extern "C" __global__ void flattenKernelHalf(int offset,
 											  char order,
 											  float16 *result,
-											  int *resultShapeInfo,
+											  Nd4jLong *resultShapeInfo,
 											  float16 *input,
-											  int *inputShapeInfo, int *allocationPointer) {
+											  Nd4jLong *inputShapeInfo, int *allocationPointer) {
 
 	flattenKernelGeneric<float16>(
 			offset,
@@ -3768,12 +3768,12 @@ void NativeOps::flattenFloat(
 		int offset,
 		char order,
 		float *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float *input,
-		int *inputShapeInfo) {
+		Nd4jLong *inputShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("F22 opNum:[7]\n");
@@ -3796,12 +3796,12 @@ void NativeOps::flattenHalf(
 		int offset,
 		char order,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		float16 *input,
-		int *inputShapeInfo) {
+		Nd4jLong *inputShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("H22 opNum:[7]\n");
@@ -3834,12 +3834,12 @@ void NativeOps::flattenDouble(
 		int offset,
 		char order,
 		double *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		double *input,
-		int *inputShapeInfo) {
+		Nd4jLong *inputShapeInfo) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostYShapeInfo = reinterpret_cast<int *>(extraPointers[7]);
+	auto hostYShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[7]);
 
 	if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 		printf("D30 opNum:[7]\n");
@@ -4423,15 +4423,15 @@ const char * NativeOps::getDeviceName(Nd4jPointer ptrToDeviceId) {
         Nd4jPointer *data,
         Nd4jPointer *inputShapeInfo,
         float *result,
-        int *resultShapeInfo,
+        Nd4jLong *resultShapeInfo,
 		Nd4jPointer *tadPointers,
 		Nd4jPointer *offsetPointers) {
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int **hostShapePointers = reinterpret_cast<int **>(extraPointers[9]);
+	auto hostShapePointers = reinterpret_cast<Nd4jLong **>(extraPointers[9]);
 
 	// numArrays will be used as number of TADs, so each block process 1 input
 
@@ -4504,8 +4504,8 @@ const char * NativeOps::getDeviceName(Nd4jPointer ptrToDeviceId) {
 
 		//smem = nd4j::math::nd4j_max<int>(funcAttributes[31].sharedSizeBytes + 768, 1280);
 
-        int *devZTadShape = reinterpret_cast<int *>(extraPointers[10]);
-		Nd4jLong *devZOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+        auto devZTadShape = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+		auto devZOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 		concatKernelFloat<<< 512, 512, 4096, *stream>>> (dimension, numArrays, (Nd4jPointer *) data[0], (Nd4jPointer *) inputShapeInfo[0], result, resultShapeInfo, (Nd4jPointer *) tadPointers[0], (Nd4jPointer *) offsetPointers[0], devZTadShape, devZOffsets);
 	}
@@ -4525,15 +4525,15 @@ void NativeOps::concatHalf(
 		Nd4jPointer *data,
 		Nd4jPointer *inputShapeInfo,
 		float16 *result,
-		int *resultShapeInfo,
+		Nd4jLong *resultShapeInfo,
 		Nd4jPointer *tadPointers,
 		Nd4jPointer *offsetPointers) {
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int **hostShapePointers = reinterpret_cast<int **>(extraPointers[9]);
+	auto hostShapePointers = reinterpret_cast<Nd4jLong **>(extraPointers[9]);
 
 	// numArrays will be used as number of TADs, so each block process 1 input
 
@@ -4605,8 +4605,8 @@ void NativeOps::concatHalf(
 
 		//smem = nd4j::math::nd4j_max<int>(funcAttributes[31].sharedSizeBytes + 768, 1280);
 
-        int *devZTadShape = reinterpret_cast<int *>(extraPointers[10]);
-		Nd4jLong *devZOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+        auto devZTadShape = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+		auto devZOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 		concatKernelHalf<<< 512, 128, 4096, *stream>>> (dimension, numArrays, (Nd4jPointer *) data[0], (Nd4jPointer *) inputShapeInfo[0], result, resultShapeInfo, (Nd4jPointer *) tadPointers[0], (Nd4jPointer *) offsetPointers[0], devZTadShape, devZOffsets);
 	}
@@ -4625,7 +4625,7 @@ void NativeOps::specialConcatFloat(
         Nd4jPointer *data,
         Nd4jPointer *inputShapeInfo,
         float *result,
-        int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers) {
+        Nd4jLong *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers) {
     nd4j::SpecialMethods<float>::concatCpuGeneric(
             dimension,
             numArrays,
@@ -4644,7 +4644,7 @@ void NativeOps::specialConcatHalf(
         Nd4jPointer *data,
         Nd4jPointer *inputShapeInfo,
         float16 *result,
-        int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers) {
+        Nd4jLong *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers) {
     nd4j::SpecialMethods<float16>::concatCpuGeneric(
             dimension,
             numArrays,
@@ -4664,7 +4664,7 @@ void NativeOps::specialConcatDouble(
         Nd4jPointer *data,
         Nd4jPointer *inputShapeInfo,
         double *result,
-        int *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers) {
+        Nd4jLong *resultShapeInfo, Nd4jPointer *tadPointers, Nd4jPointer *offsetPointers) {
     nd4j::SpecialMethods<double>::concatCpuGeneric(
             dimension,
             numArrays,
@@ -4687,15 +4687,15 @@ void NativeOps::concatDouble(
         Nd4jPointer *data,
         Nd4jPointer *inputShapeInfo,
         double *result,
-        int *resultShapeInfo,
+        Nd4jLong *resultShapeInfo,
 		Nd4jPointer *tadPointers,
 		Nd4jPointer *offsetPointers) {
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-	int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+	auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-	int **hostShapePointers = reinterpret_cast<int **>(extraPointers[9]);
+	auto hostShapePointers = reinterpret_cast<Nd4jLong **>(extraPointers[9]);
 
 	// numArrays will be used as number of TADs, so each block process 1 input
 
@@ -4765,8 +4765,8 @@ void NativeOps::concatDouble(
 		if (nd4j::Environment::getInstance()->isDebugAndVerbose())
 			printf("Going generic concat\n");
 
-        int *devZTadShape = reinterpret_cast<int *>(extraPointers[10]);
-        Nd4jLong *devZOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
+        auto devZTadShape = reinterpret_cast<Nd4jLong *>(extraPointers[10]);
+        auto devZOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
 
 		concatKernelDouble<<< 512, 128, 4096, *stream>>> (dimension, numArrays, (Nd4jPointer *) data[0], (Nd4jPointer *) inputShapeInfo[0], result, resultShapeInfo, (Nd4jPointer *) tadPointers[0], (Nd4jPointer *) offsetPointers[0], devZTadShape, devZOffsets);
 	}
@@ -4780,7 +4780,7 @@ void NativeOps::concatDouble(
 /**
  * This method saves
  */
-void NativeOps::tadOnlyShapeInfo(int *xShapeInfo, int *dimension, int dimensionLength, int *target, Nd4jLong *offsets) {
+void NativeOps::tadOnlyShapeInfo(Nd4jLong *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *target, Nd4jLong *offsets) {
 	shape::TAD *tad = new shape::TAD();
 	tad->init(xShapeInfo, dimension, dimensionLength);
 	//tad->setOutputBuffer(target);
@@ -4788,13 +4788,9 @@ void NativeOps::tadOnlyShapeInfo(int *xShapeInfo, int *dimension, int dimensionL
 	tad->createOffsets();
 
 
-	std::memcpy((void *) target, tad->tadOnlyShapeInfo, (tad->tadOnlyShapeInfo[0] * 2 + 4) * sizeof(int));
+	std::memcpy((void *) target, tad->tadOnlyShapeInfo, (tad->tadOnlyShapeInfo[0] * 2 + 4) * sizeof(Nd4jLong));
 	std::memcpy((void *) offsets, tad->tadOffsets, tad->numTads * sizeof(Nd4jLong));
-/*
-	shape::printShapeInfoLinear(hostXShapeInfo);
-	shape::printShapeInfoLinear(tad->tadOnlyShapeInfo);
-	shape::printShapeInfoLinear(target);
-*/
+
 	delete tad;
 }
 
@@ -4841,7 +4837,7 @@ Nd4jPointer NativeOps::getConstantSpace() {
 	return dConstAddr;
 }
 
-void NativeOps::pullRowsHalf(Nd4jPointer *extraPointers, float16 *x, int *xShapeInfo, float16 *z, int *zShapeInfo, int n, int *indexes, int *tadShapeInfo, Nd4jLong *tadOffsets, int *zTadShapeInfo, Nd4jLong *zTadOffsets) {
+void NativeOps::pullRowsHalf(Nd4jPointer *extraPointers, float16 *x, Nd4jLong *xShapeInfo, float16 *z, Nd4jLong *zShapeInfo, Nd4jLong n, Nd4jLong *indexes, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, Nd4jLong *zTadShapeInfo, Nd4jLong *zTadOffsets) {
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
@@ -4851,7 +4847,7 @@ void NativeOps::pullRowsHalf(Nd4jPointer *extraPointers, float16 *x, int *xShape
 }
 
 
-void NativeOps::pullRowsFloat(Nd4jPointer *extraPointers, float *x, int *xShapeInfo, float *z, int *zShapeInfo, int n, int *indexes, int *tadShapeInfo, Nd4jLong *tadOffsets, int *zTadShapeInfo, Nd4jLong *zTadOffsets) {
+void NativeOps::pullRowsFloat(Nd4jPointer *extraPointers, float *x, Nd4jLong *xShapeInfo, float *z, Nd4jLong *zShapeInfo, Nd4jLong n, Nd4jLong *indexes, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, Nd4jLong *zTadShapeInfo, Nd4jLong *zTadOffsets) {
 
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
@@ -4860,7 +4856,7 @@ void NativeOps::pullRowsFloat(Nd4jPointer *extraPointers, float *x, int *xShapeI
 	DEBUG_KERNEL(stream, -1);
 }
 
-void NativeOps::pullRowsDouble(Nd4jPointer *extraPointers, double *x, int *xShapeInfo, double *z, int *zShapeInfo, int n, int *indexes, int *tadShapeInfo, Nd4jLong *tadOffsets, int *zTadShapeInfo, Nd4jLong *zTadOffsets) {
+void NativeOps::pullRowsDouble(Nd4jPointer *extraPointers, double *x, Nd4jLong *xShapeInfo, double *z, Nd4jLong *zShapeInfo, Nd4jLong n, Nd4jLong *indexes, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, Nd4jLong *zTadShapeInfo, Nd4jLong *zTadOffsets) {
 	cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
 	pullRowsKernelDouble<<<64, 256, 1024, *stream>>>(x, xShapeInfo, z, zShapeInfo, n, indexes, tadShapeInfo, tadOffsets, zTadShapeInfo, zTadOffsets);
@@ -5001,10 +4997,10 @@ void NativeOps::shuffleDouble(Nd4jPointer *extras, Nd4jPointer *dx, Nd4jPointer 
 
     double **x = reinterpret_cast<double **>(dx);
     double **z = reinterpret_cast<double **>(dz);
-    int **xShape = reinterpret_cast<int **>(xShapeInfo);
-    int **zShape = reinterpret_cast<int **>(zShapeInfo);
-    int **tadOnlyShapeInfo = reinterpret_cast<int **>(tadShapeInfo);
-    Nd4jLong **tadOffset = reinterpret_cast<Nd4jLong **>(tadOffsets);
+    auto xShape = reinterpret_cast<Nd4jLong **>(xShapeInfo);
+    auto Shape = reinterpret_cast<Nd4jLong **>(zShapeInfo);
+    auto tadOnlyShapeInfo = reinterpret_cast<Nd4jLong **>(tadShapeInfo);
+    auto tadOffset = reinterpret_cast<Nd4jLong **>(tadOffsets);
 
 
     shuffleKernelDouble<<<32, 128, 2048, *stream>>>(x, xShape, z, zShape, N, shuffleMap, tadOnlyShapeInfo, tadOffset);
@@ -5017,10 +5013,10 @@ void NativeOps::shuffleFloat(Nd4jPointer *extras, Nd4jPointer *dx, Nd4jPointer *
 
     float **x = reinterpret_cast<float **>(dx);
     float **z = reinterpret_cast<float **>(dz);
-    int **xShape = reinterpret_cast<int **>(xShapeInfo);
-    int **zShape = reinterpret_cast<int **>(zShapeInfo);
-    int **tadOnlyShapeInfo = reinterpret_cast<int **>(tadShapeInfo);
-    Nd4jLong **tadOffset = reinterpret_cast<Nd4jLong **>(tadOffsets);
+    auto xShape = reinterpret_cast<Nd4jLong **>(xShapeInfo);
+    auto zShape = reinterpret_cast<Nd4jLong **>(zShapeInfo);
+    auto tadOnlyShapeInfo = reinterpret_cast<Nd4jLong **>(tadShapeInfo);
+    auto tadOffset = reinterpret_cast<Nd4jLong **>(tadOffsets);
 
     shuffleKernelFloat<<<32, 128, 2048, *stream>>>(x, xShape, z, zShape, N, shuffleMap, tadOnlyShapeInfo, tadOffset);
 
@@ -5032,66 +5028,37 @@ void NativeOps::shuffleHalf(Nd4jPointer *extras, Nd4jPointer *dx, Nd4jPointer *x
 
     float16 **x = reinterpret_cast<float16 **>(dx);
     float16 **z = reinterpret_cast<float16 **>(dz);
-    int **xShape = reinterpret_cast<int **>(xShapeInfo);
-    int **zShape = reinterpret_cast<int **>(zShapeInfo);
-    int **tadOnlyShapeInfo = reinterpret_cast<int **>(tadShapeInfo);
-    Nd4jLong **tadOffset = reinterpret_cast<Nd4jLong **>(tadOffsets);
+    auto xShape = reinterpret_cast<Nd4jLong **>(xShapeInfo);
+    auto zShape = reinterpret_cast<Nd4jLong **>(zShapeInfo);
+    auto tadOnlyShapeInfo = reinterpret_cast<Nd4jLong **>(tadShapeInfo);
+    auto tadOffset = reinterpret_cast<Nd4jLong **>(tadOffsets);
 
     shuffleKernelHalf<<<32, 128, 2048, *stream>>>(x, xShape, z, zShape, N, shuffleMap, tadOnlyShapeInfo, tadOffset);
 
 	DEBUG_KERNEL(stream, 0);
 }
 
-void NativeOps::execMetaPredicateStridedFloat(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, long N, float *dx, int xStride, float *dy, int yStride, float *dz, int zStride, float *extraA, float *extraB, float scalarA, float scalarB) {
+void NativeOps::execMetaPredicateStridedFloat(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, Nd4jLong N, float *dx, Nd4jLong xStride, float *dy, Nd4jLong yStride, float *dz, Nd4jLong zStride, float *extraA, float *extraB, float scalarA, float scalarB) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
 
-//    metaPredicateStridedFloat<<<256, 256, 1024, *stream>>>(opTypeA, opNumA, opTypeB, opNumB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB);
-
-    /*
-	if (opTypeA == 2) {
-		if (opTypeB == 0) {
-            DISPATCH_METAOP(invertedMetaPairwiseStrided_Pairwise_Scalar, PARAMS(opTypeA, opTypeB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB), float, OPS_A(PAIRWISE_TRANSFORM_OPS), OPS_B(SCALAR_OPS));
-		}
-	}
-*/
     functions::grid::GRIDStrided<float>::execMetaPredicateStrided(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB);
-
-
 
 	DEBUG_KERNEL(stream, opNumA);
 }
 
-void NativeOps::execMetaPredicateStridedDouble(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, long N, double *dx, int xStride, double *dy, int yStride, double *dz, int zStride, double *extraA, double *extraB, double scalarA, double scalarB) {
+void NativeOps::execMetaPredicateStridedDouble(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, Nd4jLong N, double *dx, Nd4jLong xStride, double *dy, Nd4jLong yStride, double *dz, Nd4jLong zStride, double *extraA, double *extraB, double scalarA, double scalarB) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
 
-//    metaPredicateStridedDouble<<<256, 256, 1024, *stream>>>(opTypeA, opNumA, opTypeB, opNumB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB);
-/*
-    if (opTypeA == 2) {
-        if (opTypeB == 0) {
-            DISPATCH_METAOP(invertedMetaPairwiseStrided_Pairwise_Scalar, PARAMS(opTypeA, opTypeB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB), double, OPS_A(PAIRWISE_TRANSFORM_OPS), OPS_B(SCALAR_OPS));
-        }
-    }
-*/
     functions::grid::GRIDStrided<double>::execMetaPredicateStrided(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB);
 
 	DEBUG_KERNEL(stream, opNumA);
 }
 
-void NativeOps::execMetaPredicateStridedHalf(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, long N, float16 *dx, int xStride, float16 *dy, int yStride, float16 *dz, int zStride, float16 *extraA, float16 *extraB, float scalarA, float scalarB) {
+void NativeOps::execMetaPredicateStridedHalf(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, Nd4jLong N, float16 *dx, Nd4jLong xStride, float16 *dy, Nd4jLong yStride, float16 *dz, Nd4jLong zStride, float16 *extraA, float16 *extraB, float scalarA, float scalarB) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
-
-//    metaPredicateStridedHalf<<<256, 256, 1024, *stream>>>(opTypeA, opNumA, opTypeB, opNumB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB);
 
     float16 scalA = (float16) scalarA;
     float16 scalB = (float16) scalarB;
-
-    /*
-    if (opTypeA == 2) {
-        if (opTypeB == 0) {
-            DISPATCH_METAOP(invertedMetaPairwiseStrided_Pairwise_Scalar, PARAMS(opTypeA, opTypeB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalA, scalB), float16, OPS_A(PAIRWISE_TRANSFORM_OPS), OPS_B(SCALAR_OPS));
-        }
-    }
-    */
 
     functions::grid::GRIDStrided<float16>::execMetaPredicateStrided(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xStride, dy, yStride, dz, zStride, extraA, extraB, scalarA, scalarB);
 
@@ -5099,7 +5066,7 @@ void NativeOps::execMetaPredicateStridedHalf(Nd4jPointer *extras, const int opTy
 }
 
 
-void NativeOps::execMetaPredicateReduceFloat(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, float *dx, int *xShapeInfo, float *dy, int *yShapeInfo, float *dz, int *zShapeInfo, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, float *extraA, float *extraB, float scalarA, float scalarB, bool scalarReturned) {
+void NativeOps::execMetaPredicateReduceFloat(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, float *dx, Nd4jLong *xShapeInfo, float *dy, Nd4jLong *yShapeInfo, float *dz, Nd4jLong *zShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, float *extraA, float *extraB, float scalarA, float scalarB, bool scalarReturned) {
     // no-op
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
@@ -5116,59 +5083,28 @@ float *dx, int *xShapeInfo, float *dy, int *yShapeInfo, float *dz, int *zShapeIn
 
 
 
-void NativeOps::execMetaPredicateShapeDouble(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, long N, double *dx, int *xShapeInfo, double *dy, int *yShapeInfo, double *dz, int *zShapeInfo, double *extraA, double *extraB, double scalarA, double scalarB) {
-    // no-op;
-
+void NativeOps::execMetaPredicateShapeDouble(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, Nd4jLong N, double *dx, Nd4jLong *xShapeInfo, double *dy, Nd4jLong *yShapeInfo, double *dz, Nd4jLong *zShapeInfo, double *extraA, double *extraB, double scalarA, double scalarB) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
-
-    /*
-    if (opTypeA == 2) {
-        if (opTypeB == 0) {
-            DISPATCH_METAOP(invertedMetaPairwiseShaped_Pairwise_Scalar, PARAMS(opTypeA, opTypeB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalarA, scalarB), double, OPS_A(PAIRWISE_TRANSFORM_OPS), OPS_B(SCALAR_OPS));
-        }
-    }
-     */
 
     functions::grid::GRIDShaped<double>::execMetaPredicateShaped(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalarA, scalarB);
 
 	DEBUG_KERNEL(stream, opNumA);
 }
 
-void NativeOps::execMetaPredicateShapeHalf(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, long N, float16 *dx, int *xShapeInfo, float16 *dy, int *yShapeInfo, float16 *dz, int *zShapeInfo, float16 *extraA, float16 *extraB, float scalarA, float scalarB) {
-    // no-op;
-
+void NativeOps::execMetaPredicateShapeHalf(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, Nd4jLong N, float16 *dx, Nd4jLong *xShapeInfo, float16 *dy, Nd4jLong *yShapeInfo, float16 *dz, Nd4jLong *zShapeInfo, float16 *extraA, float16 *extraB, float scalarA, float scalarB) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
 
 	// we have to converf float -> fp16 prior to kernel call
     float16 scalA = (float16) scalarA;
     float16 scalB = (float16) scalarB;
 
-    /*
-	if (opTypeA == 2) {
-		if (opTypeB == 0) {
-			DISPATCH_METAOP(invertedMetaPairwiseShaped_Pairwise_Scalar, PARAMS(opTypeA, opTypeB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalA, scalB), float16, OPS_A(PAIRWISE_TRANSFORM_OPS), OPS_B(SCALAR_OPS));
-		}
-	}
-     */
-
-    functions::grid::GRIDShaped<float16>::execMetaPredicateShaped(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalarA, scalarB);
-
+	functions::grid::GRIDShaped<float16>::execMetaPredicateShaped(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalarA, scalarB);
 
 	DEBUG_KERNEL(stream, opNumA);
 }
 
-void NativeOps::execMetaPredicateShapeFloat(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, long N, float *dx, int *xShapeInfo, float *dy, int *yShapeInfo, float *dz, int *zShapeInfo, float *extraA, float *extraB, float scalarA, float scalarB) {
-    // no-op;
-
+void NativeOps::execMetaPredicateShapeFloat(Nd4jPointer *extras, const int opTypeA, const int opNumA, const int opTypeB, const int opNumB, Nd4jLong N, float *dx, Nd4jLong *xShapeInfo, float *dy, Nd4jLong *yShapeInfo, float *dz, Nd4jLong *zShapeInfo, float *extraA, float *extraB, float scalarA, float scalarB) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
-
-    /*
-    if (opTypeA == 2) {
-        if (opTypeB == 0) {
-            DISPATCH_METAOP(invertedMetaPairwiseShaped_Pairwise_Scalar, PARAMS(opTypeA, opTypeB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalarA, scalarB), float, OPS_A(PAIRWISE_TRANSFORM_OPS), OPS_B(SCALAR_OPS));
-        }
-    }
-    */
 
     functions::grid::GRIDShaped<float>::execMetaPredicateShaped(stream, extras, opTypeA, opNumA, opTypeB, opNumB, N, dx, xShapeInfo, dy, yShapeInfo, dz, zShapeInfo, extraA, extraB, scalarA, scalarB);
 
@@ -5202,23 +5138,20 @@ void NativeOps::setTADThreshold(int num) {
 
 void NativeOps::execScalarFloat(Nd4jPointer *extraPointers,int opNum,
 					 float *x,
-					 int *xShapeInfo,
+					 Nd4jLong *xShapeInfo,
 					 float *z,
-					 int *zShapeInfo,
+					 Nd4jLong *zShapeInfo,
 					 float *scalars,
 					 float *extraParams,
 					 int *dimension,
 					 int dimensionLength) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-    int *hostTadShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+    auto hostTadShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
 
     //dim3 launchDims = getReduceLaunchParams(getDeviceId(extraPointers[2]),hostXShapeInfo, hostTadShapeInfo, funcAttributes[47] ,dimensionLength, sizeof(float), 0);
     dim3 launchDims = dim3(256, 256, 1024);
-
-	// this macro builds bunch of IF/ELSE selectors for kernel launc	h
-    //DISPATCH_SIMPLE(scalarAlongDimension, float, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
 
     functions::scalar::ScalarTransform<float>::executeCudaAlongDimension(launchDims, extraPointers, opNum, x, xShapeInfo, z, zShapeInfo, scalars, extraParams, dimension, dimensionLength);
 
@@ -5227,9 +5160,9 @@ void NativeOps::execScalarFloat(Nd4jPointer *extraPointers,int opNum,
 
 void NativeOps::execScalarDouble(Nd4jPointer *extraPointers,int opNum,
                                 double *x,
-                                int *xShapeInfo,
+                                Nd4jLong *xShapeInfo,
                                 double *z,
-                                int *zShapeInfo,
+                                Nd4jLong *zShapeInfo,
                                 double *scalars,
                                 double *extraParams,
                                 int *dimension,
@@ -5237,34 +5170,22 @@ void NativeOps::execScalarDouble(Nd4jPointer *extraPointers,int opNum,
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
     dim3 launchDims = dim3(256, 256, 1024);
 
-	// this macro builds bunch of IF/ELSE selectors for kernel launch
-    //DISPATCH_SIMPLE(scalarAlongDimension, double, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
-
-    functions::scalar::ScalarTransform<double>::executeCudaAlongDimension(launchDims, extraPointers, opNum, x, xShapeInfo, z, zShapeInfo, scalars, extraParams, dimension, dimensionLength);
+	functions::scalar::ScalarTransform<double>::executeCudaAlongDimension(launchDims, extraPointers, opNum, x, xShapeInfo, z, zShapeInfo, scalars, extraParams, dimension, dimensionLength);
 
 	DEBUG_KERNEL(stream, opNum);
 }
 
 void NativeOps::execScalarHalf(Nd4jPointer *extraPointers,int opNum,
                                 float16 *x,
-                                int *xShapeInfo,
+                                Nd4jLong *xShapeInfo,
                                 float16 *z,
-                                int *zShapeInfo,
+                                Nd4jLong *zShapeInfo,
                                 float16 *scalars,
                                 float16 *extraParams,
                                 int *dimension,
                                 int dimensionLength) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
     dim3 launchDims = dim3(256, 256, 1024);
-
-    /*
-    int *tadShapeInfo = reinterpret_cast<int *>(extraPointers[10]);
-    Nd4jLong *tadOffsets = reinterpret_cast<Nd4jLong *>(extraPointers[11]);
-    int *tadShapeInfoZ = reinterpret_cast<int *>(extraPointers[12]);
-    Nd4jLong *tadOffsetsZ = reinterpret_cast<Nd4jLong *>(extraPointers[13]);
-*/
-	// this macro builds bunch of IF/ELSE selectors for kernel launch
-    //DISPATCH_SIMPLE(scalarAlongDimension, float16, PARAMS(x, xShapeInfo, extraParams, z, zShapeInfo, scalars, dimension, dimensionLength, tadShapeInfo, tadOffsets, tadShapeInfoZ, tadOffsetsZ), OPS_A(SCALAR_OPS))
 
     functions::scalar::ScalarTransform<float16>::executeCudaAlongDimension(launchDims, extraPointers, opNum, x, xShapeInfo, z, zShapeInfo, scalars, extraParams, dimension, dimensionLength);
 
@@ -5274,7 +5195,7 @@ void NativeOps::execScalarHalf(Nd4jPointer *extraPointers,int opNum,
 void NativeOps::execAggregateFloat(Nd4jPointer *extraPointers,int opNum,
                                    float **arguments,
                                    int numArguments,
-                                   int **shapes,
+                                   Nd4jLong **shapes,
                                    int numShapes,
                                    int *indexArguments,
                                    int numIndexArguments,
@@ -5300,7 +5221,7 @@ void NativeOps::execAggregateFloat(Nd4jPointer *extraPointers,int opNum,
 void NativeOps::execAggregateDouble(Nd4jPointer *extraPointers,int opNum,
                                    double **arguments,
                                    int numArguments,
-                                   int **shapes,
+                                   Nd4jLong **shapes,
                                    int numShapes,
                                    int *indexArguments,
                                    int numIndexArguments,
@@ -5325,7 +5246,7 @@ void NativeOps::execAggregateDouble(Nd4jPointer *extraPointers,int opNum,
 void NativeOps::execAggregateHalf(Nd4jPointer *extraPointers,int opNum,
                                    float16 **arguments,
                                    int numArguments,
-                                   int **shapes,
+                                   Nd4jLong **shapes,
                                    int numShapes,
                                    int *indexArguments,
                                    int numIndexArguments,
@@ -5392,7 +5313,7 @@ void NativeOps::execAggregateBatchHalf(Nd4jPointer *extraPointers, int numAggreg
 	DEBUG_KERNEL(stream, opNum);
 }
 
-void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, float *z, int *zShapeBuffer, float *extraArguments) {
+void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, float *z, Nd4jLong *zShapeBuffer, float *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(float)) );
@@ -5400,14 +5321,14 @@ void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPoint
     functions::random::RandomFunction<float>::executeCudaSingle(launchDims, extraPointers, opNum, stateHost, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, float *x, int *xShapeBuffer, float *y, int *yShapeBuffer, float *z, int *zShapeBuffer, float *extraArguments) {
+void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, float *x, Nd4jLong *xShapeBuffer, float *y, Nd4jLong *yShapeBuffer, float *z, Nd4jLong *zShapeBuffer, float *extraArguments) {
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(float)) );
 
     functions::random::RandomFunction<float>::executeCudaTriple(launchDims, extraPointers, opNum, stateHost, x, xShapeBuffer, y, yShapeBuffer, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, float *x, int *xShapeBuffer, float *z, int *zShapeBuffer, float *extraArguments) {
+void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, float *x, Nd4jLong *xShapeBuffer, float *z, Nd4jLong *zShapeBuffer, float *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(float)) );
@@ -5415,7 +5336,7 @@ void NativeOps::execRandomFloat(Nd4jPointer *extraPointers, int opNum, Nd4jPoint
     functions::random::RandomFunction<float>::executeCudaDouble(launchDims, extraPointers, opNum, stateHost, x, xShapeBuffer, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, double *z, int *zShapeBuffer, double *extraArguments) {
+void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, double *z, Nd4jLong *zShapeBuffer, double *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(double)));
@@ -5423,7 +5344,7 @@ void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPoin
     functions::random::RandomFunction<double>::executeCudaSingle(launchDims, extraPointers, opNum, state, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, double *x, int *xShapeBuffer, double *y, int *yShapeBuffer, double *z, int *zShapeBuffer, double *extraArguments) {
+void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, double *x, Nd4jLong *xShapeBuffer, double *y, Nd4jLong *yShapeBuffer, double *z, Nd4jLong *zShapeBuffer, double *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(double)));
@@ -5431,7 +5352,7 @@ void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPoin
     functions::random::RandomFunction<double>::executeCudaTriple(launchDims, extraPointers, opNum, state, x, xShapeBuffer, y, yShapeBuffer, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, double *x, int *xShapeBuffer, double *z, int *zShapeBuffer, double *extraArguments) {
+void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, double *x, Nd4jLong *xShapeBuffer, double *z, Nd4jLong *zShapeBuffer, double *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(double)));
@@ -5439,7 +5360,7 @@ void NativeOps::execRandomDouble(Nd4jPointer *extraPointers, int opNum, Nd4jPoin
     functions::random::RandomFunction<double>::executeCudaDouble(launchDims, extraPointers, opNum, state, x, xShapeBuffer, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, float16 *z, int *zShapeBuffer, float16 *extraArguments) {
+void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, float16 *z, Nd4jLong *zShapeBuffer, float16 *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(float16)));
@@ -5447,7 +5368,7 @@ void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointe
     functions::random::RandomFunction<float16>::executeCudaSingle(launchDims, extraPointers, opNum, state, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, float16 *x, int *xShapeBuffer, float16 *y, int *yShapeBuffer, float16 *z, int *zShapeBuffer, float16 *extraArguments) {
+void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, float16 *x, Nd4jLong *xShapeBuffer, float16 *y, Nd4jLong *yShapeBuffer, float16 *z, Nd4jLong *zShapeBuffer, float16 *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(float16)));
@@ -5455,7 +5376,7 @@ void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointe
     functions::random::RandomFunction<float16>::executeCudaTriple(launchDims, extraPointers, opNum, state, x, xShapeBuffer, y, yShapeBuffer, z, zShapeBuffer, extraArguments);
 }
 
-void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, float16 *x, int *xShapeBuffer, float16 *z, int *zShapeBuffer, float16 *extraArguments) {
+void NativeOps::execRandomHalf(Nd4jPointer *extraPointers, int opNum, Nd4jPointer state, float16 *x, Nd4jLong *xShapeBuffer, float16 *z, Nd4jLong *zShapeBuffer, float16 *extraArguments) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
     dim3 launchDims = dim3(512, 512, sizeof(nd4j::random::RandomBuffer) + (560 * sizeof(float16)));
@@ -5551,7 +5472,7 @@ Nd4jPointer NativeOps::shapeBufferForNumpy(Nd4jPointer npyArray) {
         shape[i] = arr.shape[i];
     }
 
-    int *shapeBuffer = shape::shapeBufferOfNpy(arr.shape.size(),
+    auto shapeBuffer = shape::shapeBufferOfNpy(arr.shape.size(),
                                                shape,
                                                arr.fortranOrder);
     delete[] shape;
@@ -5641,7 +5562,7 @@ Nd4jPointer NativeOps::pointerForAddress(Nd4jLong address) {
 	return reinterpret_cast<Nd4jPointer >(address);
 }
 
-void NativeOps::tearDouble(Nd4jPointer *extras, double *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+void NativeOps::tearDouble(Nd4jPointer *extras, double *x, Nd4jLong *xShapeInfo, Nd4jPointer *targets, Nd4jLong *zShapeInfo, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
 
     tearKernelDouble<<<512, 512, 512, *stream>>>(x, xShapeInfo, targets, zShapeInfo, tadShapeInfo, tadOffsets);
@@ -5649,7 +5570,7 @@ void NativeOps::tearDouble(Nd4jPointer *extras, double *x, int *xShapeInfo, Nd4j
     nd4j::DebugHelper::checkErrorCode(stream, "tearDouble(...) failed");
 }
 
-void NativeOps::tearFloat(Nd4jPointer *extras, float *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+void NativeOps::tearFloat(Nd4jPointer *extras, float *x, Nd4jLong *xShapeInfo, Nd4jPointer *targets, Nd4jLong *zShapeInfo, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
 
     tearKernelFloat<<<512, 512, 512, *stream>>>(x, xShapeInfo, targets, zShapeInfo, tadShapeInfo, tadOffsets);
@@ -5657,7 +5578,7 @@ void NativeOps::tearFloat(Nd4jPointer *extras, float *x, int *xShapeInfo, Nd4jPo
     nd4j::DebugHelper::checkErrorCode(stream, "tearFloat(...) failed");
 }
 
-void NativeOps::tearHalf(Nd4jPointer *extras, float16 *x, int *xShapeInfo, Nd4jPointer *targets, int *zShapeInfo, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+void NativeOps::tearHalf(Nd4jPointer *extras, float16 *x, Nd4jLong *xShapeInfo, Nd4jPointer *targets, Nd4jLong *zShapeInfo, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extras[1]);
 
     tearKernelHalf<<<512, 512, 512, *stream>>>(x, xShapeInfo, targets, zShapeInfo, tadShapeInfo, tadOffsets);
@@ -5785,24 +5706,24 @@ void NativeOps::decodeThresholdHalf(Nd4jPointer *extraPointers, void *dx, Nd4jLo
 void NativeOps::execReduce3AllDouble(Nd4jPointer *extraPointers,
 									 int opNum,
 									 double *x,
-									 int *xInfo,
+									 Nd4jLong *xInfo,
 									 double *extraParamsVals,
 									 double *y,
-									 int *yInfo,
+									 Nd4jLong *yInfo,
 									 double *result,
-									 int *resultShapeInfoBuffer,
+									 Nd4jLong *resultShapeInfoBuffer,
 									 int *dimension,
 									 int dimensionLength,
-									 int *xTadShapeInfo,
+									 Nd4jLong *xTadShapeInfo,
                                      Nd4jLong *xOffsets,
-									 int *yTadShapeInfo,
+									 Nd4jLong *yTadShapeInfo,
                                      Nd4jLong *yOffsets) {
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-    int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
-    int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+    auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
+    auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
 
 
     if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -5835,24 +5756,24 @@ void NativeOps::execReduce3AllDouble(Nd4jPointer *extraPointers,
 void NativeOps::execReduce3AllFloat(Nd4jPointer *extraPointers,
 									int opNum,
 									float *x,
-									int *xInfo,
+									Nd4jLong *xInfo,
 									float *extraParamsVals,
 									float *y,
-									int *yInfo,
+									Nd4jLong *yInfo,
 									float *result,
-									int *resultShapeInfoBuffer,
+									Nd4jLong *resultShapeInfoBuffer,
 									int *dimension,
 									int dimensionLength,
-									int *xTadShapeInfo,
+									Nd4jLong *xTadShapeInfo,
                                     Nd4jLong *xOffsets,
-									int *yTadShapeInfo,
+									Nd4jLong *yTadShapeInfo,
                                     Nd4jLong *yOffsets) {
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-    int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
-    int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+    auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
+    auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
 
 
     if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -5885,24 +5806,24 @@ void NativeOps::execReduce3AllFloat(Nd4jPointer *extraPointers,
 void NativeOps::execReduce3AllHalf(Nd4jPointer *extraPointers,
 								   int opNum,
 								   float16 *x,
-								   int *xInfo,
+								   Nd4jLong *xInfo,
 								   float16 *extraParamsVals,
 								   float16 *y,
-								   int *yInfo,
+								   Nd4jLong *yInfo,
 								   float16 *result,
-								   int *resultShapeInfoBuffer,
+								   Nd4jLong *resultShapeInfoBuffer,
 								   int *dimension,
 								   int dimensionLength,
-								   int *xTadShapeInfo,
+								   Nd4jLong *xTadShapeInfo,
                                    Nd4jLong *xOffsets,
-								   int *yTadShapeInfo,
+								   Nd4jLong *yTadShapeInfo,
                                    Nd4jLong *yOffsets) {
 
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
-    int *hostZShapeInfo = reinterpret_cast<int *>(extraPointers[8]);
-    int *hostTADShapeInfo = reinterpret_cast<int *>(extraPointers[9]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
+    auto hostZShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[8]);
+    auto hostTADShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[9]);
 
 
     if (nd4j::Environment::getInstance()->isDebugAndVerbose())
@@ -5932,12 +5853,12 @@ void NativeOps::execReduce3AllHalf(Nd4jPointer *extraPointers,
 	DEBUG_KERNEL(stream, opNum);
 }
 
-void NativeOps::sortFloat(Nd4jPointer *extraPointers, float *x, int *xShapeInfo, bool descending) {
+void NativeOps::sortFloat(Nd4jPointer *extraPointers, float *x, Nd4jLong *xShapeInfo, bool descending) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[     1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-    int xLength = shape::length(hostXShapeInfo);
-    int xEWS = shape::elementWiseStride(hostXShapeInfo);
+    auto xLength = shape::length(hostXShapeInfo);
+    auto xEWS = shape::elementWiseStride(hostXShapeInfo);
 
     // check if xLength is a power of 2, and use bitonic sort, if that's the case
     if ((xLength != 0) && ((xLength & (xLength - 1)) == 0) && (xLength <= 1024 * 1024 * 10)) {
@@ -6002,12 +5923,12 @@ void NativeOps::sortFloat(Nd4jPointer *extraPointers, float *x, int *xShapeInfo,
 }
 
 
-void NativeOps::sortDouble(Nd4jPointer *extraPointers, double *x, int *xShapeInfo, bool descending) {
+void NativeOps::sortDouble(Nd4jPointer *extraPointers, double *x, Nd4jLong *xShapeInfo, bool descending) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
-    int xLength = shape::length(hostXShapeInfo);
-    int xEWS = shape::elementWiseStride(hostXShapeInfo);
+    auto xLength = shape::length(hostXShapeInfo);
+    auto xEWS = shape::elementWiseStride(hostXShapeInfo);
 
     // check if xLength is a power of 2, and use bitonic sort, if that's the case
     if ((xLength != 0) && ((xLength & (xLength - 1)) == 0) && (xLength <= 1024 * 1024 * 10)) {
@@ -6071,9 +5992,9 @@ void NativeOps::sortDouble(Nd4jPointer *extraPointers, double *x, int *xShapeInf
 }
 
 
-void NativeOps::sortHalf(Nd4jPointer *extraPointers, float16 *x, int *xShapeInfo, bool descending) {
+void NativeOps::sortHalf(Nd4jPointer *extraPointers, float16 *x, Nd4jLong *xShapeInfo, bool descending) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     int xLength = shape::length(hostXShapeInfo);
 
@@ -6122,52 +6043,52 @@ void NativeOps::sortHalf(Nd4jPointer *extraPointers, float16 *x, int *xShapeInfo
     nd4j::DebugHelper::checkErrorCode(stream, "sortHalf(...) failed");
 }
 
-void NativeOps::sortTadFloat(Nd4jPointer *extraPointers, float *x, int *xShapeInfo, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
+void NativeOps::sortTadFloat(Nd4jPointer *extraPointers, float *x, Nd4jLong *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
     // to be implemented
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     cudaSortTadFloat<<<512, 512, 1088 * sizeof(float), *stream>>>(x, xShapeInfo, dimension, dimensionLength, tadShapeInfo, tadOffsets, descending);
 
     nd4j::DebugHelper::checkErrorCode(stream, "sortTadFloat(...) failed");
 }
 
-void NativeOps::sortTadHalf(Nd4jPointer *extraPointers, float16 *x, int *xShapeInfo, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
+void NativeOps::sortTadHalf(Nd4jPointer *extraPointers, float16 *x, Nd4jLong *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
     // to be implemented
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     cudaSortTadHalf<<<512, 512, 1088 * sizeof(float16), *stream>>>(x, xShapeInfo, dimension, dimensionLength, tadShapeInfo, tadOffsets, descending);
 
     nd4j::DebugHelper::checkErrorCode(stream, "sortTadHalf(...) failed");
 }
 
-void NativeOps::sortTadDouble(Nd4jPointer *extraPointers, double *x, int *xShapeInfo, int *dimension, int dimensionLength, int *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
+void NativeOps::sortTadDouble(Nd4jPointer *extraPointers, double *x, Nd4jLong *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
     // to be implemented
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     cudaSortTadDouble<<<512, 512, 1088 * sizeof(double), *stream>>>(x, xShapeInfo, dimension, dimensionLength, tadShapeInfo, tadOffsets, descending);
 
     nd4j::DebugHelper::checkErrorCode(stream, "sortTadDouble(...) failed");
 }
 
-void NativeOps::sortCooIndicesFloat(Nd4jPointer *extraPointers, int *indices, float *values, Nd4jLong length, int rank) {
-
+void NativeOps::sortCooIndicesFloat(Nd4jPointer *extraPointers, Nd4jLong *indices, float *values, Nd4jLong length, int rank) {
+	throw std::runtime_error("Not implemented yet");
 }
 
-void NativeOps::sortCooIndicesDouble(Nd4jPointer *extraPointers, int *indices, double *values, Nd4jLong length, int rank) {
-
+void NativeOps::sortCooIndicesDouble(Nd4jPointer *extraPointers, Nd4jLong *indices, double *values, Nd4jLong length, int rank) {
+	throw std::runtime_error("Not implemented yet");
 }
 
-void NativeOps::sortCooIndicesHalf(Nd4jPointer *extraPointers, int *indices, float16 *values, Nd4jLong length, int rank) {
-
+void NativeOps::sortCooIndicesHalf(Nd4jPointer *extraPointers, Nd4jLong *indices, float16 *values, Nd4jLong length, int rank) {
+	throw std::runtime_error("Not implemented yet");
 }
 
 
 Nd4jLong NativeOps::encodeBitmapFloat(Nd4jPointer *extraPointers, float *dx, Nd4jLong N, int *dz, float threshold) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto *hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     int *resultPointer = reinterpret_cast<int *>(extraPointers[2]);
     int *reductionPointer = reinterpret_cast<int *>(extraPointers[3]);
@@ -6184,7 +6105,7 @@ Nd4jLong NativeOps::encodeBitmapFloat(Nd4jPointer *extraPointers, float *dx, Nd4
 
 Nd4jLong NativeOps::encodeBitmapDouble(Nd4jPointer *extraPointers, double *dx, Nd4jLong N, int *dz, float threshold) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     int *resultPointer = reinterpret_cast<int *>(extraPointers[2]);
     int *reductionPointer = reinterpret_cast<int *>(extraPointers[3]);
@@ -6201,7 +6122,7 @@ Nd4jLong NativeOps::encodeBitmapDouble(Nd4jPointer *extraPointers, double *dx, N
 
 Nd4jLong NativeOps::encodeBitmapHalf(Nd4jPointer *extraPointers, float16 *dx, Nd4jLong N, int *dz, float threshold) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     int *resultPointer = reinterpret_cast<int *>(extraPointers[2]);
     int *reductionPointer = reinterpret_cast<int *>(extraPointers[3]);
@@ -6218,7 +6139,7 @@ Nd4jLong NativeOps::encodeBitmapHalf(Nd4jPointer *extraPointers, float16 *dx, Nd
 
 void NativeOps::decodeBitmapFloat(Nd4jPointer *extraPointers, void *dx, Nd4jLong N, float *dz) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     cudaDecodeBitmapFloat<<<512, 512, 512 * sizeof(float) + 384, *stream>>>(dx, N, dz);
 
@@ -6228,7 +6149,7 @@ void NativeOps::decodeBitmapFloat(Nd4jPointer *extraPointers, void *dx, Nd4jLong
 
 void NativeOps::decodeBitmapDouble(Nd4jPointer *extraPointers, void *dx, Nd4jLong N, double *dz) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     cudaDecodeBitmapDouble<<<512, 512, 512 * sizeof(double) + 384, *stream>>>(dx, N, dz);
 
@@ -6238,7 +6159,7 @@ void NativeOps::decodeBitmapDouble(Nd4jPointer *extraPointers, void *dx, Nd4jLon
 
 void NativeOps::decodeBitmapHalf(Nd4jPointer *extraPointers, void *dx, Nd4jLong N, float16 *dz) {
     cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
-    int *hostXShapeInfo = reinterpret_cast<int *>(extraPointers[0]);
+    auto hostXShapeInfo = reinterpret_cast<Nd4jLong *>(extraPointers[0]);
 
     cudaDecodeBitmapHalf<<<512, 512, 512 * sizeof(float16) + 384, *stream>>>(dx, N, dz);
 
@@ -6282,7 +6203,7 @@ const char* NativeOps::getAllCustomOps() {
 
 
 template<typename T>
-nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::DeclarableOp<T>* op, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, T* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::DeclarableOp<T>* op, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, T* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
     nd4j::graph::VariableSpace<T> varSpace;
     Context<T> block(2, &varSpace);
     nd4j::ShapeList inShapes;
@@ -6294,7 +6215,7 @@ nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::D
         block.getTArguments()->push_back(tArgs[e]);
 
     for (int e = 0; e < numInputShapes; e++) {
-        auto shape_ = (int *) inputShapes[e];
+        auto shape_ = static_cast<Nd4jLong *>(inputShapes[e]);
         auto buffer_ = (T *) inputBuffers[e];
         auto array = new nd4j::NDArray<T>(buffer_, shape_);
         array->triggerAllocationFlag(false, false);
@@ -6314,19 +6235,19 @@ nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::D
     return shapeList;
 }
 
-nd4j::ShapeList* NativeOps::calculateOutputShapesFloat(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, float* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* NativeOps::calculateOutputShapesFloat(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, float* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
     auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationFloat(hash);
 
     return _calculateOutputShapes<float>(extraPointers, op, inputBuffers, inputShapes, numInputShapes, tArgs, numTArgs, iArgs, numIArgs);
 }
 
-nd4j::ShapeList* NativeOps::calculateOutputShapesHalf(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, float16* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* NativeOps::calculateOutputShapesHalf(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, float16* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
     auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationHalf(hash);
 
     return _calculateOutputShapes<float16>(extraPointers, op, inputBuffers, inputShapes, numInputShapes, tArgs, numTArgs, iArgs, numIArgs);
 }
 
-nd4j::ShapeList* NativeOps::calculateOutputShapesDouble(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, double* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* NativeOps::calculateOutputShapesDouble(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputShapes, double* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
     auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationDouble(hash);
 
     return _calculateOutputShapes<double>(extraPointers, op, inputBuffers, inputShapes, numInputShapes, tArgs, numTArgs, iArgs, numIArgs);
@@ -6334,7 +6255,7 @@ nd4j::ShapeList* NativeOps::calculateOutputShapesDouble(Nd4jPointer* extraPointe
 
 
 template<typename T>
-nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::DeclarableOp<T>* op, Nd4jPointer* inputShapes, int numInputShapes, T* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::DeclarableOp<T>* op, Nd4jPointer* inputShapes, int numInputShapes, T* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
     nd4j::graph::Context<T> block(1);
 	nd4j::ShapeList inShapes;
 
@@ -6345,26 +6266,26 @@ nd4j::ShapeList* _calculateOutputShapes(Nd4jPointer* extraPointers, nd4j::ops::D
 		block.getTArguments()->push_back(tArgs[e]);
 
 	for (int e = 0; e < numInputShapes; e++)
-		inShapes.push_back((int *) inputShapes[e]);
+		inShapes.push_back(static_cast<Nd4jLong *>(inputShapes[e]));
 
 	auto shapeList = op->calculateOutputShape(&inShapes, block);
 
 	return shapeList;
 }
 
-nd4j::ShapeList* NativeOps::calculateOutputShapesFloat(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputShapes, int numInputShapes, float* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* NativeOps::calculateOutputShapesFloat(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputShapes, int numInputShapes, float* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
 	auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationFloat(hash);
 
 	return _calculateOutputShapes<float>(extraPointers, op, inputShapes, numInputShapes, tArgs, numTArgs, iArgs, numIArgs);
 }
 
-nd4j::ShapeList* NativeOps::calculateOutputShapesHalf(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputShapes, int numInputShapes, float16* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* NativeOps::calculateOutputShapesHalf(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputShapes, int numInputShapes, float16* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
 	auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationHalf(hash);
 
 	return _calculateOutputShapes<float16>(extraPointers, op, inputShapes, numInputShapes, tArgs, numTArgs, iArgs, numIArgs);
 }
 
-nd4j::ShapeList* NativeOps::calculateOutputShapesDouble(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputShapes, int numInputShapes, double* tArgs, int numTArgs, int *iArgs, int numIArgs) {
+nd4j::ShapeList* NativeOps::calculateOutputShapesDouble(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputShapes, int numInputShapes, double* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs) {
 	auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationDouble(hash);
 
 	return _calculateOutputShapes<double>(extraPointers, op, inputShapes, numInputShapes, tArgs, numTArgs, iArgs, numIArgs);
@@ -6380,12 +6301,12 @@ static FORCEINLINE Nd4jStatus realExec(nd4j::ops::DeclarableOp<T>* op, Nd4jPoint
 	std::vector<nd4j::NDArray<T>*> inputs(numInputs);
 	std::vector<nd4j::NDArray<T>*> outputs(numOutputs);
 	std::vector<T> ttArgs(numTArgs);
-	std::vector<int> iiArgs(numIArgs);
+	std::vector<Nd4jLong> iiArgs(numIArgs);
 
 	// filling block now with inputs
 	for (int e = 0; e < numInputs; e++) {
 		auto buffer = (T *) inputBuffers[e];
-		auto shape = (int *) inputShapes[e];
+		auto shape = static_cast<Nd4jLong *>(inputShapes[e]);
 
 		inputs[e] = new nd4j::NDArray<T>(buffer, shape);
 	}
@@ -6397,7 +6318,7 @@ static FORCEINLINE Nd4jStatus realExec(nd4j::ops::DeclarableOp<T>* op, Nd4jPoint
 			auto buffer = (T *) outputBuffers[e];
 
 			// we want to keep original output shape intact
-			auto shape = shape::copyShape((int *) outputShapes[e]);
+			auto shape = shape::copyShape(static_cast<Nd4jLong *>(outputShapes[e]));
 
 			auto array = new nd4j::NDArray<T>(buffer, shape);
 			outputs[e] = array;
@@ -6426,8 +6347,8 @@ static FORCEINLINE Nd4jStatus realExec(nd4j::ops::DeclarableOp<T>* op, Nd4jPoint
 			//outputs[e]->printIndexedBuffer("C++ raw output");
 			//outputs[e]->printBuffer("C++ indexed output");
 
-			if (outputs[e]->ordering() != shape::order((int *) outputShapes[e]))
-				outputs[e]->streamline(shape::order((int *) outputShapes[e]));
+			if (outputs[e]->ordering() != shape::order(static_cast<Nd4jLong *>(outputShapes[e])))
+				outputs[e]->streamline(shape::order(static_cast<Nd4jLong *>(outputShapes[e])));
 		}
 
 /*
@@ -6468,19 +6389,19 @@ static FORCEINLINE Nd4jStatus realExec(nd4j::ops::DeclarableOp<T>* op, Nd4jPoint
 }
 
 
-int NativeOps::execCustomOpFloat(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputs, Nd4jPointer* outputBuffers, Nd4jPointer* outputShapes, int numOutputs, float* tArgs, int numTArgs, int *iArgs, int numIArgs, bool isInplace) {
+int NativeOps::execCustomOpFloat(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputs, Nd4jPointer* outputBuffers, Nd4jPointer* outputShapes, int numOutputs, float* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs, bool isInplace) {
 	auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationFloat(hash);
 
 	return realExec<float>(op, extraPointers, hash, inputBuffers, inputShapes, numInputs, outputBuffers, outputShapes, numOutputs, tArgs, numTArgs, iArgs, numIArgs, isInplace);
 }
 
-int NativeOps::execCustomOpDouble(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputs, Nd4jPointer* outputBuffers, Nd4jPointer* outputShapes, int numOutputs, double* tArgs, int numTArgs, int *iArgs, int numIArgs, bool isInplace) {
+int NativeOps::execCustomOpDouble(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputs, Nd4jPointer* outputBuffers, Nd4jPointer* outputShapes, int numOutputs, double* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs, bool isInplace) {
 	auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationDouble(hash);
 
 	return realExec<double>(op, extraPointers, hash, inputBuffers, inputShapes, numInputs, outputBuffers, outputShapes, numOutputs, tArgs, numTArgs, iArgs, numIArgs, isInplace);
 }
 
-int NativeOps::execCustomOpHalf(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputs, Nd4jPointer* outputBuffers, Nd4jPointer* outputShapes, int numOutputs, float16* tArgs, int numTArgs, int *iArgs, int numIArgs, bool isInplace) {
+int NativeOps::execCustomOpHalf(Nd4jPointer* extraPointers, Nd4jLong hash, Nd4jPointer* inputBuffers, Nd4jPointer* inputShapes, int numInputs, Nd4jPointer* outputBuffers, Nd4jPointer* outputShapes, int numOutputs, float16* tArgs, int numTArgs, Nd4jLong *iArgs, int numIArgs, bool isInplace) {
 	auto op = nd4j::ops::OpRegistrator::getInstance()->getOperationHalf(hash);
 
 	return realExec<float16>(op, extraPointers, hash, inputBuffers, inputShapes, numInputs, outputBuffers, outputShapes, numOutputs, tArgs, numTArgs, iArgs, numIArgs, isInplace);
@@ -6521,7 +6442,7 @@ static VariablesSet<T>* executeStoredGraphT(Nd4jPointer *extraPointers, Nd4jLong
 		auto idx = inputIndices[e];
 
 		// we'll delete this array later, together with cloned VariableSpace
-		auto array = new nd4j::NDArray<T>((T *) inputBuffers[e], (int *) inputShapes[e]);
+		auto array = new nd4j::NDArray<T>((T *) inputBuffers[e], static_cast<Nd4jLong *>(inputShapes[e]));
 		handles.emplace_back(array);
 
 		if (varSpace->hasVariable(idx)) {
@@ -6582,7 +6503,12 @@ void NativeOps::deletePointerArray(Nd4jPointer pointer) {
 }
 
 void NativeOps::deleteIntArray(Nd4jPointer pointer) {
-	int *ptr = reinterpret_cast<int *>(pointer);
+	auto ptr = reinterpret_cast<int *>(pointer);
+	delete[] ptr;
+}
+
+void NativeOps::deleteLongArray(Nd4jPointer pointer) {
+	auto ptr = reinterpret_cast<Nd4jLong *>(pointer);
 	delete[] ptr;
 }
 
@@ -6659,7 +6585,7 @@ Nd4jStatus execCustomOpWithScope(Nd4jPointer *extraPointers, nd4j::graph::GraphS
     // mapping inputs
     for (int e = 0; e < numInputs; e++) {
         auto buffer = (T *) inputBuffers[e];
-        auto shapeInfo = (int *) inputShapes[e];
+        auto shapeInfo = reinterpret_cast<Nd4jLong *>(inputShapes[e]);
 
         auto array = new nd4j::NDArray<T>(buffer, shapeInfo, varSpace->workspace());
 
@@ -6687,7 +6613,7 @@ Nd4jStatus execCustomOpWithScope(Nd4jPointer *extraPointers, nd4j::graph::GraphS
 
     for (int e = 0; e < numOutputs; e++) {
         auto buffer = (T *) outputBuffers[e];
-        auto shapeInfo = (int *) outputShapes[e];
+        auto shapeInfo = reinterpret_cast<Nd4jLong *>(outputShapes[e]);
 
         nd4j::NDArray<T> array(buffer, shapeInfo, varSpace->workspace());
 

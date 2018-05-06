@@ -43,7 +43,7 @@ namespace nd4j {
         printf("%s: {", format);
         for(int e = 0; e < vec.size(); e++) {
             auto v = vec[e];
-            printf("%lld", v);
+            printf("%lld", (long long) v);
             if (e < vec.size() - 1)
                 printf(", ");
         }

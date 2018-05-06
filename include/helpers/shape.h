@@ -46,10 +46,7 @@ namespace shape {
  * the information on an ndarray
  */
     struct ND4J_EXPORT ShapeInformation {
-#ifdef __CUDACC__
-        __host__ __device__
-#endif
-        ShapeInformation(Nd4jLong *shape_ = nullptr, Nd4jLong *stride_ = nullptr, char order_ = 0, int rank_ = 0, int offset_ = 0, int elementWiseStride_ = 0)
+        _CUDA_HD ShapeInformation(Nd4jLong *shape_ = nullptr, Nd4jLong *stride_ = nullptr, char order_ = 0, int rank_ = 0, int offset_ = 0, int elementWiseStride_ = 0)
                 : shape(shape_), stride(stride_), order(order_), rank(rank_), offset(offset_), elementWiseStride(elementWiseStride_)
         {}
 
@@ -75,124 +72,59 @@ namespace shape {
 
 
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool shapeEquals(int shape1Rank,Nd4jLong *shape1,int shape2Rank,Nd4jLong *shape2);
+    ND4J_EXPORT _CUDA_HD bool shapeEquals(int shape1Rank,Nd4jLong *shape1,int shape2Rank,Nd4jLong *shape2);
 
-#ifdef __CUDACC__
-    __host__
-#endif
-    ND4J_EXPORT Nd4jLong* detachShape(Nd4jLong *originalShape);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* detachShape(Nd4jLong *originalShape);
 
-#ifdef __CUDACC__
-    __host__
-#endif
-    ND4J_EXPORT Nd4jLong* copyShape(Nd4jLong *originalShape);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* copyShape(Nd4jLong *originalShape);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool shapeEquals(Nd4jLong *shapeInfo1,Nd4jLong *shapeInfo2);
+    ND4J_EXPORT _CUDA_HD bool shapeEquals(Nd4jLong *shapeInfo1,Nd4jLong *shapeInfo2);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool strideEquals(int shape1Rank,Nd4jLong *shape1,int shape2Rank,Nd4jLong *shape2);
+    ND4J_EXPORT _CUDA_HD bool strideEquals(int shape1Rank,Nd4jLong *shape1,int shape2Rank,Nd4jLong *shape2);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool strideEquals(Nd4jLong *shapeInfo1,Nd4jLong *shapeInfo2);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool strideEquals(Nd4jLong *stride1,int rank1,Nd4jLong *stride2,int rank2);
+    ND4J_EXPORT _CUDA_HD bool strideEquals(Nd4jLong *shapeInfo1,Nd4jLong *shapeInfo2);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool equalsSoft(Nd4jLong *shapeA, Nd4jLong *shapeB);
+    ND4J_EXPORT _CUDA_HD bool strideEquals(Nd4jLong *stride1,int rank1,Nd4jLong *stride2,int rank2);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool equalsStrict(Nd4jLong *shapeA, Nd4jLong *shapeB);
+    ND4J_EXPORT _CUDA_HD bool equalsSoft(Nd4jLong *shapeA, Nd4jLong *shapeB);
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-    ND4J_EXPORT int sizeAt(Nd4jLong *shape, int dim);
+    ND4J_EXPORT _CUDA_HD bool equalsStrict(Nd4jLong *shapeA, Nd4jLong *shapeB);
+
+    ND4J_EXPORT _CUDA_HD int sizeAt(Nd4jLong *shape, int dim);
 
     template <typename T>
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void fill(T* buffer, T value, Nd4jLong length);
+    ND4J_EXPORT _CUDA_HD void fill(T* buffer, T value, Nd4jLong length);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void traceNew(int id);
+    ND4J_EXPORT _CUDA_HD void traceNew(int id);
 
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD int tadIndexForLinear(int linearIndex, int tadLength);
 
-    ND4J_EXPORT int tadIndexForLinear(int linearIndex, int tadLength);
+    ND4J_EXPORT _CUDA_HD int tadLength(Nd4jLong *shapeInfo, int *dimension, int dimensionLength);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT int tadLength(Nd4jLong *shapeInfo, int *dimension, int dimensionLength);
+    ND4J_EXPORT _CUDA_HD bool canReshape(const int oldRank, Nd4jLong* oldShape, const int newRank, Nd4jLong* newShape, bool isFOrder);
 
-#ifdef __CUDACC__
-    __host__
-#endif
-    ND4J_EXPORT bool canReshape(const int oldRank, Nd4jLong* oldShape, const int newRank, Nd4jLong* newShape, bool isFOrder);
-
-#ifdef __CUDACC__
-    __host__
-#endif
-    ND4J_EXPORT bool reshapeCF(const int oldRank, Nd4jLong* oldShape, const int newRank, Nd4jLong* newShape, bool isFOrder, Nd4jLong* target);
-/**
- * Get the shape info buffer
- * for the given rank and shape.
- */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeBuffer(int rank, Nd4jLong *shape);
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeBuffer(int rank, Nd4jLong *shape, Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD bool reshapeCF(const int oldRank, Nd4jLong* oldShape, const int newRank, Nd4jLong* newShape, bool isFOrder, Nd4jLong* target);
 
     /**
- * Get the shape info buffer
- * for the given rank and shape.
- */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeBufferFortran(int rank, Nd4jLong *shape);
+    * Get the shape info buffer
+    * for the given rank and shape.
+    */
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeBuffer(int rank, Nd4jLong *shape);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeBufferFortran(int rank, Nd4jLong *shape, Nd4jLong *output);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeBuffer(int rank, Nd4jLong *shape, Nd4jLong *buffer);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void doPermuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange, Nd4jLong *tmpBuffer);
+    /**
+    * Get the shape info buffer
+    * for the given rank and shape.
+     */
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeBufferFortran(int rank, Nd4jLong *shape);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void doPermuteShapeBuffer(int rank, Nd4jLong *shapeBuffer, int *rearrange, Nd4jLong *tmpBuffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeBufferFortran(int rank, Nd4jLong *shape, Nd4jLong *output);
+
+    ND4J_EXPORT _CUDA_HD void doPermuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange, Nd4jLong *tmpBuffer);
+
+    ND4J_EXPORT _CUDA_HD void doPermuteShapeBuffer(int rank, Nd4jLong *shapeBuffer, int *rearrange, Nd4jLong *tmpBuffer);
 
 #ifdef __CUDACC__
     template <typename T>
@@ -211,15 +143,9 @@ __host__ __device__
  * @param startNum the start number for the strides
  * @return the strides for a matrix of n dimensions
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong * calcStridesFortran(Nd4jLong *shape, int rank);
+    ND4J_EXPORT _CUDA_HD Nd4jLong * calcStridesFortran(Nd4jLong *shape, int rank);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong * calcStridesFortran(Nd4jLong *shape, int rank, Nd4jLong* ret);
+    ND4J_EXPORT _CUDA_HD Nd4jLong * calcStridesFortran(Nd4jLong *shape, int rank, Nd4jLong* ret);
 
 /**
  * Computes the standard packed array strides for a given shape.
@@ -228,27 +154,16 @@ __host__ __device__
  * @param startNum the start number for the strides
  * @return the strides for a matrix of n dimensions
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* calcStrides(Nd4jLong *shape, int rank);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* calcStrides(Nd4jLong *shape, int rank, Nd4jLong* ret);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* calcStrides(Nd4jLong *shape, int rank);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void updateStrides(Nd4jLong *shape, const char order);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* calcStrides(Nd4jLong *shape, int rank, Nd4jLong* ret);
+
+    ND4J_EXPORT _CUDA_HD void updateStrides(Nd4jLong *shape, const char order);
 
 
 // check whether input dimensions are permuted, not permuted dimensions order have to be 0,....,rank-1
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool isDimPermuted(const Nd4jLong* dimensions, const int dimSize);
+    ND4J_EXPORT _CUDA_HD bool isDimPermuted(const Nd4jLong* dimensions, const int dimSize);
 
 /**
  * Computes the standard packed array strides for a given shape.
@@ -257,15 +172,9 @@ __host__ __device__
  * @param startNum the start number for the strides
  * @return the strides for a matrix of n dimensions
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* calcStridesFortran(Nd4jLong *shape, int rank, int startNum);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* calcStridesFortran(Nd4jLong *shape, int rank, int startNum);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* calcStridesFortran(Nd4jLong *shape, int rank, int startNum, Nd4jLong* ret);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* calcStridesFortran(Nd4jLong *shape, int rank, int startNum, Nd4jLong* ret);
 
 /**
  * Computes the standard packed array strides for a given shape.
@@ -274,31 +183,18 @@ __host__ __device__
  * @param startNum the start number for the strides
  * @return the strides for a matrix of n dimensions
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* calcStrides(Nd4jLong *shape, int rank, int startNum);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* calcStrides(Nd4jLong *shape, int rank, int startNum);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* calcStrides(Nd4jLong *shape, int rank, int startNum, Nd4jLong* ret);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* calcStrides(Nd4jLong *shape, int rank, int startNum, Nd4jLong* ret);
 
 /**
  * @param toCopy the shape to copy
  * @return a copy of the original struct
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT ShapeInformation *shapeCopy( ShapeInformation *toCopy);
+    ND4J_EXPORT _CUDA_HD ShapeInformation *shapeCopy( ShapeInformation *toCopy);
 
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT bool strideDescendingCAscendingF(Nd4jLong *shapeBuffer);
+    ND4J_EXPORT _CUDA_HD bool strideDescendingCAscendingF(Nd4jLong *shapeBuffer);
 
 /**
  * Compute the element wise stride
@@ -311,10 +207,7 @@ __host__ __device__
  * @return -1 if there is no element wise stride the
  * element wise stride of reshape(1,length) otherwise
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT int computeElementWiseStride(int rank, Nd4jLong *shape, Nd4jLong *stride, int isFOrder);
+    ND4J_EXPORT _CUDA_HD int computeElementWiseStride(int rank, Nd4jLong *shape, Nd4jLong *stride, int isFOrder);
 
 /**
  * Compute the element wise stride
@@ -327,20 +220,11 @@ __host__ __device__
  * @return -1 if there is no element wise stride the
  * element wise stride of reshape(1,length) otherwise
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT int computeElementWiseStride(int rank, Nd4jLong *shape, Nd4jLong *stride, int isFOrder,
-                                           Nd4jLong *dimension, int dimensionLength);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeInfoOnlyShapeAndStride(Nd4jLong *shapeInfo, Nd4jLong *dimension, int dimensionLength,bool reverseCopyStride);
+    ND4J_EXPORT _CUDA_HD int computeElementWiseStride(int rank, Nd4jLong *shape, Nd4jLong *stride, int isFOrder, Nd4jLong *dimension, int dimensionLength);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeInfoOnlyShapeAndStride(Nd4jLong *shapeInfo, Nd4jLong *dimension, int dimensionLength,bool reverseCopyStride, Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeInfoOnlyShapeAndStride(Nd4jLong *shapeInfo, Nd4jLong *dimension, int dimensionLength,bool reverseCopyStride);
+
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeInfoOnlyShapeAndStride(Nd4jLong *shapeInfo, Nd4jLong *dimension, int dimensionLength,bool reverseCopyStride, Nd4jLong *buffer);
 /**
  *
  * @param length
@@ -348,11 +232,7 @@ __host__ __device__
  * @param rearrange
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *doPermuteSwap(int length, Nd4jLong *shape, int* rearrange);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *doPermuteSwap(int length, Nd4jLong *shape, int* rearrange);
 
 
 
@@ -362,40 +242,17 @@ __host__ __device__
  * @param shape
  * @param rearrange
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD void doPermuteSwap(int length, Nd4jLong **shape, int* rearrange);
 
-    ND4J_EXPORT void doPermuteSwap(int length, Nd4jLong **shape, int* rearrange);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *permuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD void permuteShapeBufferInPlace(Nd4jLong *shapeBuffer, int* rearrange, Nd4jLong *out);
 
-    ND4J_EXPORT Nd4jLong *permuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange);
+    ND4J_EXPORT _CUDA_HD void doPermuteShapeInfo(Nd4jLong *shapeBuffer, const int *rearrange);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void permuteShapeBufferInPlace(Nd4jLong *shapeBuffer, int* rearrange, Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void doPermuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT void doPermuteShapeInfo(Nd4jLong *shapeBuffer, const int *rearrange);
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT void doPermuteShapeBuffer(Nd4jLong *shapeBuffer, int* rearrange);
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT void doPermuteShapeBuffer(int rank,Nd4jLong *shapeBuffer, int* rearrange);
+    ND4J_EXPORT _CUDA_HD void doPermuteShapeBuffer(int rank,Nd4jLong *shapeBuffer, int* rearrange);
     /**
      * Rearrange the permute indexes
      * according to which  dimensions are specified.
@@ -411,25 +268,16 @@ __host__ __device__
      * wise stride.
      */
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *createPermuteIndexes(int originalRank,Nd4jLong *dimension,int dimensionLength);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *createPermuteIndexes(int originalRank,Nd4jLong *dimension,int dimensionLength);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *computeResultShape(Nd4jLong *originalShapeBuffer,Nd4jLong *dimension,int dimensionLength);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *computeResultShape(Nd4jLong *originalShapeBuffer,Nd4jLong *dimension,int dimensionLength);
 
     /**
      * This method does inplace transpose of given shapeBuffer
      *
      * @param shapeBuffer
      */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void transposeInplace(Nd4jLong *shapeBuffer);
+    ND4J_EXPORT _CUDA_HD void transposeInplace(Nd4jLong *shapeBuffer);
 
 
 /**
@@ -440,11 +288,7 @@ __host__ __device__
  * @param elementStride
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT char getOrder(int length, Nd4jLong *shape, Nd4jLong *stride, int elementStride);
+    ND4J_EXPORT _CUDA_HD char getOrder(int length, Nd4jLong *shape, Nd4jLong *stride, int elementStride);
 
 /**
  * Ensure that every value in the re arrange
@@ -464,11 +308,7 @@ __host__ __device__
  * @param rearrange the order to re arrange
  * @param rank the rank of the rearrange array
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT void permute(ShapeInformation **info, Nd4jLong *rearrange, int rank);
+    ND4J_EXPORT _CUDA_HD void permute(ShapeInformation **info, Nd4jLong *rearrange, int rank);
 
 /**
  * Returns whether the
@@ -476,75 +316,39 @@ __host__ __device__
  * @param shape the shape of the array
  * @param rank the rank of cthe shape
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int isVector(Nd4jLong *shape, int rank);
+    ND4J_EXPORT _CUDA_HD int isVector(Nd4jLong *shape, int rank);
 
 
     /**
      * When 1 dimension is the whole length of the
      * array
      */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD int oneDimEqualToLength(Nd4jLong *shape, int rank);
 
-    ND4J_EXPORT int oneDimEqualToLength(Nd4jLong *shape, int rank);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD int oneDimEqualToLength(Nd4jLong *shapeInfo);
 
-    ND4J_EXPORT int oneDimEqualToLength(Nd4jLong *shapeInfo);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD int isVector(Nd4jLong *shapeInfo);
 
-    ND4J_EXPORT int isVector(Nd4jLong *shapeInfo);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 
-ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD bool isRowVector(Nd4jLong *shapeInfo);
 
-
-    ND4J_EXPORT bool isRowVector(Nd4jLong *shapeInfo);
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT bool isColumnVector(Nd4jLong *shapeInfo);
+    ND4J_EXPORT _CUDA_HD bool isColumnVector(Nd4jLong *shapeInfo);
     /**
  * Returns whether the
  * given shape is a vector or not
  * @param shape the shape of the array
  * @param rank the rank of the shape
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    ND4J_EXPORT int isMatrix(Nd4jLong *shape, int rank);
+    ND4J_EXPORT _CUDA_HD int isMatrix(Nd4jLong *shape, int rank);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF int isMatrix(Nd4jLong *shapeInfo);
+    INLINEDEF _CUDA_HD int isMatrix(Nd4jLong *shapeInfo);
 /**
  * Returns the shape portion of an information
  * buffer
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *shapeOf(Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeOf(Nd4jLong *buffer);
 
 /**
  * Return a copy of a buffer.
@@ -571,10 +375,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 * This buffer allocates memory
 * that must be freed elsewhere.
 */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void copyTo(int length, Nd4jLong *from, Nd4jLong *to, Nd4jLong *indexes);
+    ND4J_EXPORT _CUDA_HD void copyTo(int length, Nd4jLong *from, Nd4jLong *to, Nd4jLong *indexes);
 
 /**
  * Permute the given strides
@@ -585,27 +386,16 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * and all must be filled in)
  * @return the rearranged array
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *permutedStrides(Nd4jLong *toPermute, int shapeRank, Nd4jLong *rearrange);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *permutedStrides(Nd4jLong *toPermute, int shapeRank, Nd4jLong *rearrange);
 
 /**
  * Return the slice (shape + 1 in pointer arithmetic)
  * @param shape the shape to take the slice of
  * @return the shape array - the first entry
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD Nd4jLong *slice(Nd4jLong *shape);
 
-    ND4J_EXPORT Nd4jLong *slice(Nd4jLong *shape);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int slices(Nd4jLong *shapeBuffer);
+    ND4J_EXPORT _CUDA_HD int slices(Nd4jLong *shapeBuffer);
 
     ND4J_EXPORT _CUDA_HD Nd4jLong *sliceOfShapeBuffer(Nd4jLong sliceIdx, Nd4jLong *shapeBuffer);
 /**
@@ -616,41 +406,19 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * info length for
  * @return rank * 2 + 4
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD int shapeInfoLength(int rank);
 
-    ND4J_EXPORT int shapeInfoLength(int rank);
+    ND4J_EXPORT _CUDA_HD int shapeInfoLength(Nd4jLong* shapeInfo);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD size_t shapeInfoByteLength(int rank);
 
-    ND4J_EXPORT int shapeInfoLength(Nd4jLong* shapeInfo);
-
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT size_t shapeInfoByteLength(int rank);
-
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT size_t shapeInfoByteLength(Nd4jLong* shapeInfo);
+    ND4J_EXPORT _CUDA_HD size_t shapeInfoByteLength(Nd4jLong* shapeInfo);
 
 /**
  * Returns the rank portion of
  * an information buffer
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int rank( Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD int rank( Nd4jLong *buffer);
 
 /**
  * Converts a raw int buffer of the layout:
@@ -662,77 +430,41 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  *
  * where shape and stride are both straight int pointers
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT ShapeInformation *infoFromBuffer(Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD ShapeInformation *infoFromBuffer(Nd4jLong *buffer);
 
 /**
  * Returns the stride portion of an information
  * buffer
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *stride(Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *stride(Nd4jLong *buffer);
 
 /**
  * Compute the length of the given shape
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD Nd4jLong length(Nd4jLong *shapeInfo);
 
-    ND4J_EXPORT Nd4jLong length(Nd4jLong *shapeInfo);
+    ND4J_EXPORT _CUDA_HD Nd4jLong length(std::initializer_list<int>& shape);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong length(std::initializer_list<int>& shape);
-
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong length(std::initializer_list<Nd4jLong>& shape);
+    ND4J_EXPORT _CUDA_HD Nd4jLong length(std::initializer_list<Nd4jLong>& shape);
 
 /***
  * Returns the offset portion of an information buffer
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD Nd4jLong offset(Nd4jLong *buffer);
 
-    ND4J_EXPORT Nd4jLong offset(Nd4jLong *buffer);
-
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong& extra(Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong& extra(Nd4jLong *buffer);
 
 /**
  * Returns the ordering
  * for this shape information buffer
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT char order(Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD char order(Nd4jLong *buffer);
 
 /**
  * Returns the element wise stride for this information
  * buffer
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong elementWiseStride(Nd4jLong *buffer);
+   ND4J_EXPORT _CUDA_HD Nd4jLong elementWiseStride(Nd4jLong *buffer);
 
 
     /**
@@ -740,21 +472,14 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * buffer
      * relative to a dimension and ordering for a reduction index
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong reductionIndexElementWiseStride(Nd4jLong *buffer, Nd4jLong *dimension, int dimensionLength);
+    ND4J_EXPORT _CUDA_HD Nd4jLong reductionIndexElementWiseStride(Nd4jLong *buffer, Nd4jLong *dimension, int dimensionLength);
 
 /**
  * Returns whether
  * the given shape info buffer
  * represents a scalar shape
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT int isScalar(Nd4jLong *info);
+    ND4J_EXPORT _CUDA_HD int isScalar(Nd4jLong *info);
 
 /**
  * Returns whether
@@ -762,11 +487,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * represents a scalar
  * shape or not
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int isScalar(volatile ShapeInformation *info);
+    ND4J_EXPORT _CUDA_HD int isScalar(volatile ShapeInformation *info);
 
 /**
  * Return a copy of this array with the
@@ -780,11 +501,8 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  *
  * item
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T1, typename T2>
-    ND4J_EXPORT void removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T1 *out);
+    ND4J_EXPORT _CUDA_HD void removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T1 *out);
 
     /**
  * Return a copy of this array with the
@@ -798,11 +516,9 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  *
  * item
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+
     template <typename T1, typename T2>
-    ND4J_EXPORT T1* removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength);
+    ND4J_EXPORT _CUDA_HD T1* removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength);
 
     /**
      * Iterate over a given set of indexes
@@ -815,10 +531,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
      * indexes should be the indexes to exclude
      * indexes length should be the length of indexes
      */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* everyIndexBut(Nd4jLong *indexes,int indexesLength,int begin,int end);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* everyIndexBut(Nd4jLong *indexes,int indexesLength,int begin,int end);
 
 /**
  * Computes the offset for accessing
@@ -838,21 +551,11 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * for the shape to be returned as
  * @return the new shape
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD Nd4jLong* ensureVectorShape(Nd4jLong *shape);
 
-    ND4J_EXPORT Nd4jLong* ensureVectorShape(Nd4jLong *shape);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* createScalarShapeInfo();
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* createScalarShapeInfo();
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* createScalarShapeInfo(Nd4jLong *ret);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* createScalarShapeInfo(Nd4jLong *ret);
 
 /**
  * Generate an int buffer
@@ -860,31 +563,19 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * at the specified increment
  *
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *range(int from, int to, int increment);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *range(int from, int to, int increment);
 
 /**
  * Range between from and two with an
  * increment of 1
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *range(int from, int to);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *range(int from, int to);
 
 /**
  * Keep the given indexes
  * in the data
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *keep(volatile Nd4jLong *data, int* index, int indexLength, int dataLength);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *keep(volatile Nd4jLong *data, int* index, int indexLength, int dataLength);
 
 /**
  * Generate reverse copy of the data
@@ -912,11 +603,8 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param arr2Length
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T>
-    ND4J_EXPORT T* concat(T* arr1, Nd4jLong arr1Length, T* arr2, Nd4jLong arr2Length);
+    ND4J_EXPORT _CUDA_HD T* concat(T* arr1, Nd4jLong arr1Length, T* arr2, Nd4jLong arr2Length);
 
 /**
  *
@@ -926,11 +614,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param lengths
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *concat(int numArrays, int numTotalElements, Nd4jLong **arr, Nd4jLong *lengths);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *concat(int numArrays, int numTotalElements, Nd4jLong **arr, Nd4jLong *lengths);
 
 /**
  * Get the length per slice of the
@@ -944,11 +628,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @return the length per slice of the given shape
  * along the given dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int lengthPerSlice(int rank, Nd4jLong *shape, Nd4jLong *dimension, int dimensionLength);
+    ND4J_EXPORT _CUDA_HD int lengthPerSlice(int rank, Nd4jLong *shape, Nd4jLong *dimension, int dimensionLength);
 
 /**
  * calculates the offset for a tensor
@@ -957,11 +637,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param tensorShape
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int sliceOffsetForTensor(int rank,
+    ND4J_EXPORT _CUDA_HD int sliceOffsetForTensor(int rank,
                                        int index,
                                        Nd4jLong *shape,
                                        Nd4jLong *tensorShape,
@@ -976,11 +652,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param tensorShape
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int sliceOffsetForTensor(int index,int tensorLength,int lengthPerSlice2);
+    ND4J_EXPORT _CUDA_HD int sliceOffsetForTensor(int index,int tensorLength,int lengthPerSlice2);
 /**
  * Computes the tensor along dimension
  * offset
@@ -1005,11 +677,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * of tensors along
  * a given dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int tensorsAlongDimension(int rank,
+    ND4J_EXPORT _CUDA_HD int tensorsAlongDimension(int rank,
                                         volatile int length,
                                         volatile Nd4jLong *shape,
                                         Nd4jLong *dimension,
@@ -1020,11 +688,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * of tensors along
  * a given dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int tensorsAlongDimension(Nd4jLong *shapeInfo, Nd4jLong *dimension, int dimensionLength);
+    ND4J_EXPORT _CUDA_HD int tensorsAlongDimension(Nd4jLong *shapeInfo, Nd4jLong *dimension, int dimensionLength);
 
 
 
@@ -1036,21 +700,13 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param i
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int tadForBlockIndex(int blockSize, int blockIdx, int i);
+    ND4J_EXPORT _CUDA_HD int tadForBlockIndex(int blockSize, int blockIdx, int i);
 
 /**
  * Computes the number of tads per block
  *
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int tadsPerBlock(int blockSize, int tads);
+    ND4J_EXPORT _CUDA_HD int tadsPerBlock(int blockSize, int tads);
 
 //#ifdef __CUDACC__
 //    __host__ __device__
@@ -1063,17 +719,9 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * Returns a shape buffer
  * for the shape information metadata.
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD Nd4jLong *toShapeBuffer( ShapeInformation *info);
 
-    ND4J_EXPORT Nd4jLong *toShapeBuffer( ShapeInformation *info);
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT Nd4jLong *toShapeBuffer( ShapeInformation *info, Nd4jLong* ret);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *toShapeBuffer( ShapeInformation *info, Nd4jLong* ret);
 
 /**
  * Returns the number of elements per thread
@@ -1124,10 +772,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param numElementsPerTad the number of elements
  * per tad
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT int tadIndex(int i, int elementWiseStride, int numElementsPerTad);
+    ND4J_EXPORT _CUDA_HD int tadIndex(int i, int elementWiseStride, int numElementsPerTad);
 
 /**
  * Map a tad to a
@@ -1137,11 +782,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param tadsForReduced the number of tads for the shrunk down problem (eg: 2,3)
  * @param tadsForOriginal the number of tads for the smaller problem (eg: 3)
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int reductionIndexForTad(int tadIndexForOriginal, int tadsForReduced,
+    ND4J_EXPORT _CUDA_HD int reductionIndexForTad(int tadIndexForOriginal, int tadsForReduced,
                              int tadsForOriginal);
 
 /**
@@ -1149,11 +790,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * per reduce index for the
  * reduction tad.
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int tadsPerReduceIndex(int tadsForReduce, int tadsForOriginal);
+    ND4J_EXPORT _CUDA_HD int tadsPerReduceIndex(int tadsForReduce, int tadsForOriginal);
 
 /**
  * Maps a linear index to a reduction index
@@ -1163,26 +800,16 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param tadNum the number of tads for the shrunken problem
  * @param originalTadNum the tad number for the reduced version of the problem
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    ND4J_EXPORT int reductionIndexForLinear(int i, int elementWiseStride, int numElementsPerTad,
+    ND4J_EXPORT _CUDA_HD int reductionIndexForLinear(int i, int elementWiseStride, int numElementsPerTad,
                                 int tadNum, int originalTadNum);
 
 /**
  * Returns the prod of the data
  * up to the given length
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
+    ND4J_EXPORT _CUDA_HD int prod(Nd4jLong *data, int length);
 
-    ND4J_EXPORT int prod(Nd4jLong *data, int length);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong prodLong( Nd4jLong *data, int length);
+    ND4J_EXPORT _CUDA_HD Nd4jLong prodLong( Nd4jLong *data, int length);
 
     /**
      * Returns the rear most left over item not present in
@@ -1215,19 +842,11 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 * @param indices the indices to iterate over
 * @return the double at the specified index
 */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong getOffset(Nd4jLong baseOffset,  Nd4jLong *shape,  Nd4jLong *stride,  Nd4jLong *indices,int rank);
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* createShapeInfo(Nd4jLong *shape, Nd4jLong *stride, int rank);
+    ND4J_EXPORT _CUDA_HD Nd4jLong getOffset(Nd4jLong baseOffset,  Nd4jLong *shape,  Nd4jLong *stride,  Nd4jLong *indices,int rank);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* createShapeInfo(Nd4jLong *shape, Nd4jLong *stride, int rank, Nd4jLong *buffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* createShapeInfo(Nd4jLong *shape, Nd4jLong *stride, int rank);
+
+    ND4J_EXPORT _CUDA_HD Nd4jLong* createShapeInfo(Nd4jLong *shape, Nd4jLong *stride, int rank, Nd4jLong *buffer);
 
     /**
  * Convert a linear index to
@@ -1237,16 +856,9 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param numIndices the number of total indices (typically prod of shape(
  * @return the mapped indexes along each dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* ind2sub(int rank,  Nd4jLong *shape,int index,int numIndices);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* ind2sub(int rank,  Nd4jLong *shape,int index,int numIndices);
 
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *ind2sub(int rank,  Nd4jLong *shape,int index);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *ind2sub(int rank,  Nd4jLong *shape,int index);
 
     /**
      * Convert a linear index to
@@ -1256,10 +868,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
      * @param numIndices the number of total indices (typically prod of shape(
      * @return the mapped indexes along each dimension
      */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void  ind2sub(int rank,Nd4jLong *shape,int index,int numIndices,Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void  ind2sub(int rank,Nd4jLong *shape,int index,int numIndices,Nd4jLong *out);
 
 /**
      * Convert a linear index to
@@ -1270,10 +879,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
      * @param index the index to map
      * @return the mapped indexes along each dimension
      */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void ind2sub(int rank, Nd4jLong *shape, int index, Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void ind2sub(int rank, Nd4jLong *shape, int index, Nd4jLong *out);
 
     /**
   * Convert a linear index to
@@ -1283,10 +889,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
   * @param numIndices the number of total indices (typically prod of shape(
   * @return the mapped indexes along each dimension
   */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* ind2subC(int rank, Nd4jLong *shape, int index);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* ind2subC(int rank, Nd4jLong *shape, int index);
     /**
   * Convert a linear index to
   * the equivalent nd index
@@ -1295,10 +898,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
   * @param numIndices the number of total indices (typically prod of shape(
   * @return the mapped indexes along each dimension
   */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* ind2subC(int rank, Nd4jLong *shape, int index, int numIndices);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* ind2subC(int rank, Nd4jLong *shape, int index, int numIndices);
 
     /**
    * Convert a linear index to
@@ -1308,10 +908,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
    * @param numIndices the number of total indices (typically prod of shape(
    * @return the mapped indexes along each dimension
    */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void  ind2subC(int rank, Nd4jLong *shape, int index, int numIndices, Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void  ind2subC(int rank, Nd4jLong *shape, int index, int numIndices, Nd4jLong *out);
 
 /**
      * Convert a linear index to
@@ -1322,10 +919,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
      * @param index the index to map
      * @return the mapped indexes along each dimension
      */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void ind2subC(int rank, Nd4jLong *shape, int index, Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void ind2subC(int rank, Nd4jLong *shape, int index, Nd4jLong *out);
 
     /**
   * Convert the given index (such as 1,1)
@@ -1335,28 +929,19 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
   * @return the linear index given the shape
   * and indices
   */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT int sub2Ind(int rank, Nd4jLong *shape, Nd4jLong *indices);
+    ND4J_EXPORT _CUDA_HD int sub2Ind(int rank, Nd4jLong *shape, Nd4jLong *indices);
 
     /**
    * Compute the real linear indices for the given shape and stride
    */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *computeIndices(int rank,  Nd4jLong *shape,  Nd4jLong *stride);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *computeIndices(int rank,  Nd4jLong *shape,  Nd4jLong *stride);
 
     /**
    * Compute the real linear indices for the
      * given shape buffer. Shape,stride and rank are derived
      * from the buffer
    */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *computeIndices( Nd4jLong *shapeBuffer);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *computeIndices( Nd4jLong *shapeBuffer);
 
     /**
  * Convert a linear index to
@@ -1366,10 +951,7 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param numIndices the number of total indices (typically prod of shape(
  * @return the mapped indexes along each dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void  ind2subOrder(Nd4jLong *shapeInfo,int index,int numIndices,Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void  ind2subOrder(Nd4jLong *shapeInfo,int index,int numIndices,Nd4jLong *out);
 
     /**
  * Convert a linear index to
@@ -1379,52 +961,23 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
  * @param numIndices the number of total indices (typically prod of shape(
  * @return the mapped indexes along each dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void  ind2subOrder(Nd4jLong *shapeInfo,int index,Nd4jLong *out);
+    ND4J_EXPORT _CUDA_HD void  ind2subOrder(Nd4jLong *shapeInfo,int index,Nd4jLong *out);
 
+    ND4J_EXPORT _CUDA_HD void printShapeInfo(Nd4jLong *shapeInfo);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void printShapeInfo(Nd4jLong *shapeInfo);
+    ND4J_EXPORT _CUDA_HD void printShapeInfoLinear(Nd4jLong *shapeInfo);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void printShapeInfoLinear(Nd4jLong *shapeInfo);
+    ND4J_EXPORT _CUDA_HD void printShapeInfoLinear(const char *msg, Nd4jLong *shapeInfo);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void printShapeInfoLinear(const char *msg, Nd4jLong *shapeInfo);
+    ND4J_EXPORT _CUDA_HD void printShapeInfoLinear(const char *msg, int rank, Nd4jLong *shape, Nd4jLong *strides);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void printShapeInfoLinear(const char *msg, int rank, Nd4jLong *shape, Nd4jLong *strides);
+    ND4J_EXPORT _CUDA_HD void printIntArray(Nd4jLong *arr,int length);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void printIntArray(Nd4jLong *arr,int length);
+    ND4J_EXPORT _CUDA_HD void printArray(float *arr,int length);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void printArray(float *arr,int length);
+    ND4J_EXPORT _CUDA_HD Nd4jLong* shapeBufferOfNpy(int rank, unsigned int *shape,bool fortranOrder);
 
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong* shapeBufferOfNpy(int rank, unsigned int *shape,bool fortranOrder);
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT Nd4jLong *shapeBufferOfNpy(cnpy::NpyArray arr);
+    ND4J_EXPORT _CUDA_HD Nd4jLong *shapeBufferOfNpy(cnpy::NpyArray arr);
 
 
 
@@ -1435,36 +988,20 @@ ND4J_EXPORT bool isLikeVector(Nd4jLong *shapeInfo, int& posOfNonUnityDim);
 //    ND4J_EXPORT Nd4jLong *shapeBufferOfNpyBuffer(char *buffer);
 
 
-#ifdef __CUDACC__
-    __host__
-#endif
-    // this function checks the consistence of dimensions with array rank (negative dimensions, too large dimensions, too big number of dimensions)
+   // this function checks the consistence of dimensions with array rank (negative dimensions, too large dimensions, too big number of dimensions)
     // also sort input array of dimensions, this operation is also necessary for creating TAD object
-    ND4J_EXPORT void checkDimensions(const int rank, std::vector<int>& dimensions);
+    ND4J_EXPORT _CUDA_HD void checkDimensions(const int rank, std::vector<int>& dimensions);
 
 
-#ifdef __CUDACC__
-    __host__
-#endif
-    // return absolute index of array min, min is sub-array of max, index to be returned is min index and corresponds to maxIdx of max array 
-    ND4J_EXPORT Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx);
+    // return absolute index of array min, min is sub-array of max, index to be returned is min index and corresponds to maxIdx of max array
+    ND4J_EXPORT _CUDA_HD Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx);
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void shapeScalar(Nd4jLong* const buffer);
+    ND4J_EXPORT _CUDA_HD void shapeScalar(Nd4jLong* const buffer);
+
+    ND4J_EXPORT _CUDA_HD void shapeVector(const int length, Nd4jLong* const buffer);
 
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void shapeVector(const int length, Nd4jLong* const buffer);
-
-
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    ND4J_EXPORT void shapeOldScalar(Nd4jLong* const buffer, const char order);
+    ND4J_EXPORT _CUDA_HD void shapeOldScalar(Nd4jLong* const buffer, const char order);
 
 
 
@@ -1511,10 +1048,7 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 * Length of a tad given
 * the shape information
 */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    INLINEDEF int tadLength(Nd4jLong *shapeInfo, int *dimension, int dimensionLength) {
+    INLINEDEF _CUDA_HD int tadLength(Nd4jLong *shapeInfo, int *dimension, int dimensionLength) {
         if(dimensionLength == 1) {
             return shape::shapeOf(shapeInfo)[dimension[0]];
         }
@@ -1963,11 +1497,8 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 
 
 // check whether input dimensions are permuted, not permuted dimensions order have to be 0,....,rank-1
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T>
-    INLINEDEF bool isDimPermuted(const T* dimensions, const Nd4jLong dimSize ) {
+    INLINEDEF _CUDA_HD bool isDimPermuted(const T* dimensions, const Nd4jLong dimSize ) {
         for(int i=0; i<dimSize-1; ++i)
             if(dimensions[i] > dimensions[i+1])
                 return true;
@@ -2327,10 +1858,7 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 
 
 template <typename T>
-#ifdef __CUDACC__
-__host__ __device__
-#endif
- INLINEDEF void fill(T* buffer, T value, Nd4jLong length) {
+ INLINEDEF _CUDA_HD void fill(T* buffer, T value, Nd4jLong length) {
 
 #pragma omp simd
      for (int e = 0; e < length; e++)
@@ -3552,11 +3080,8 @@ __host__ __device__
  *
  * item
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T1, typename T2>
-    INLINEDEF void removeIndex(T1* data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T1 *ret) {
+    INLINEDEF _CUDA_HD void removeIndex(T1* data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength, T1 *ret) {
 
         int count = 0;
         int absLength = dataLength - indexesLength;
@@ -3588,12 +3113,9 @@ __host__ __device__
  *
  * item
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T1, typename T2>
-    INLINEDEF T1* removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength) {
-        int lengthOfArr = dataLength - indexesLength;
+    INLINEDEF _CUDA_HD T1* removeIndex(T1 *data, T2 *indexes, Nd4jLong dataLength, Nd4jLong indexesLength) {
+        auto lengthOfArr = dataLength - indexesLength;
         if(lengthOfArr < 0) {
             printf("Remove index call created a <= 0 length array. This was likely not intended.");
         }
@@ -3604,10 +3126,7 @@ __host__ __device__
         return ret;
     }
 
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-    INLINEDEF Nd4jLong* everyIndexBut(Nd4jLong *indexes,int indexesLength,int begin,int end) {
+    INLINEDEF _CUDA_HD Nd4jLong* everyIndexBut(Nd4jLong *indexes,int indexesLength,int begin,int end) {
         int len = end - indexesLength;
 
         traceNew(20);
@@ -3762,11 +3281,8 @@ __host__ __device__
  * at the specified increment
  *
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T>
-    INLINEDEF T* range(int from, int to, int increment) {
+    INLINEDEF _CUDA_HD T* range(int from, int to, int increment) {
         int diff = nd4j::math::nd4j_abs<int>(from - to);
         int retLength = diff / increment;
         T *ret;
@@ -3804,12 +3320,9 @@ __host__ __device__
  * @param to the end
  * @return the int array starting at from and ending at to
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
     template <typename T>
-    INLINEDEF T* range(int from, int to) {
+    INLINEDEF _CUDA_HD T* range(int from, int to) {
         return range<T>(from, to, 1);
     }
 
@@ -3821,11 +3334,7 @@ __host__ __device__
  * @param dataLength
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF Nd4jLong *keep(volatile Nd4jLong *data, int* index, int indexLength, int dataLength) {
+    INLINEDEF _CUDA_HD Nd4jLong *keep(volatile Nd4jLong *data, int* index, int indexLength, int dataLength) {
 
         traceNew(23);
 
@@ -3899,11 +3408,8 @@ __host__ __device__
  * @param arr2Length
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T>
-    INLINEDEF T* concat(T* arr1, Nd4jLong arr1Length, T* arr2, Nd4jLong arr2Length) {
+    INLINEDEF _CUDA_HD T* concat(T* arr1, Nd4jLong arr1Length, T* arr2, Nd4jLong arr2Length) {
 
         traceNew(25);
 
@@ -3921,11 +3427,8 @@ __host__ __device__
  * @param lengths
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
     template <typename T>
-    INLINEDEF T *concat(Nd4jLong numArrays, Nd4jLong numTotalElements, T **arr, Nd4jLong *lengths) {
+    INLINEDEF _CUDA_HD T *concat(Nd4jLong numArrays, Nd4jLong numTotalElements, T **arr, Nd4jLong *lengths) {
 
         T* ret = new T[numTotalElements];
         Nd4jLong count = 0;
@@ -3951,11 +3454,7 @@ __host__ __device__
  * @return the length per slice of the given shape
  * along the given dimension
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF int lengthPerSlice(int rank, Nd4jLong *shape, int* dimension, int dimensionLength) {
+    INLINEDEF _CUDA_HD int lengthPerSlice(int rank, Nd4jLong *shape, int* dimension, int dimensionLength) {
         if(shape::isVector(shape,rank)) {
             //return total length for row vectors
             if(dimensionLength == 1 && shape[0] == 1) {
@@ -3979,11 +3478,7 @@ __host__ __device__
  * @param tensorShape
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
-
-    INLINEDEF Nd4jLong sliceOffsetForTensor(int rank, int index, Nd4jLong *shape, Nd4jLong *tensorShape, int tensorShapeLength, int* dimension, int dimensionLength) {
+    INLINEDEF _CUDA_HD Nd4jLong sliceOffsetForTensor(int rank, int index, Nd4jLong *shape, Nd4jLong *tensorShape, int tensorShapeLength, int* dimension, int dimensionLength) {
         auto tensorLength = prodLong(tensorShape, tensorShapeLength);
         auto lengthPerSlice2 = lengthPerSlice(rank, shape, dimension, dimensionLength);
         if (lengthPerSlice2 <= 0) {
@@ -4001,11 +3496,8 @@ __host__ __device__
  * @param tensorShape
  * @return
  */
-#ifdef __CUDACC__
-    __host__ __device__
-#endif
 
-    INLINEDEF int sliceOffsetForTensor(int index,int tensorLength,int lengthPerSlice2) {
+    INLINEDEF _CUDA_HD int sliceOffsetForTensor(int index,int tensorLength,int lengthPerSlice2) {
         int offset = index * tensorLength / lengthPerSlice2;
         return offset;
     }
@@ -4013,7 +3505,7 @@ __host__ __device__
 
 #ifdef __CUDACC__
 
-    /**
+/**
 * Computes the offset for accessing
 * a global element given the shape information
 * and the offset to be read.
