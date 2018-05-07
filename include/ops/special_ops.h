@@ -50,10 +50,10 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
 			__shared__ int kH;
 			__shared__ int kW;
@@ -434,10 +434,10 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 			/*kernel[0], kernel[1], stride[0], stride[1], padding[0], padding[1], 0, false*/
 			int kernelHeight = (int)extraParams[0];
 			int kernelWidth = (int)extraParams[1];
@@ -450,12 +450,12 @@ namespace simdOps {
 			int kSize = kernelWidth * kernelHeight;
 			T zeroPadVal = (T)extraParams[9];	//Value to use when value is padding. Usually 0 but not always
 
-			int *outShape = shape::shapeOf(resultShapeBuffer);
-			char resultOrder = shape::order(resultShapeBuffer);
-			int *outStride = shape::stride(resultShapeBuffer);
+			auto outShape = shape::shapeOf(resultShapeBuffer);
+			auto resultOrder = shape::order(resultShapeBuffer);
+			auto outStride = shape::stride(resultShapeBuffer);
 
-			int *inShape = shape::shapeOf(xShapeBuffer);
-			int *inStride = shape::stride(xShapeBuffer);
+			auto inShape = shape::shapeOf(xShapeBuffer);
+			auto inStride = shape::stride(xShapeBuffer);
 
 			int samples = inShape[0];
 			int depth = inShape[1];
@@ -707,10 +707,10 @@ namespace simdOps {
 #ifdef __CUDACC__
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
             int numBins = (int) extraParams[0];
             T min_val = extraParams[1];
@@ -889,12 +889,12 @@ namespace simdOps {
 
 		static inline __device__ void execSpecialCuda(
 			T *dx,
-			int *xShapeBuffer,
+			Nd4jLong *xShapeBuffer,
 			T *result,
-			int *resultShapeBuffer,
-			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets) {
-			int *inShape = shape::shapeOf(xShapeBuffer);
-			int *inStride = shape::stride(xShapeBuffer);
+			Nd4jLong *resultShapeBuffer,
+			T *extraParams, int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
+			auto inShape = shape::shapeOf(xShapeBuffer);
+			auto inStride = shape::stride(xShapeBuffer);
 
 			int strideex = inStride[0];
 			int stridech = inStride[1];
@@ -917,9 +917,9 @@ namespace simdOps {
 			int dY = (int)extraParams[6];			//Dilation in height/y dimension
             int dX = (int)extraParams[7];			//Dilation in width/x dimension
 
-			int *outShape = shape::shapeOf(resultShapeBuffer);
-			char resultOrder = shape::order(resultShapeBuffer);
-			int *outStride = shape::stride(resultShapeBuffer);
+			auto outShape = shape::shapeOf(resultShapeBuffer);
+			auto resultOrder = shape::order(resultShapeBuffer);
+			auto outStride = shape::stride(resultShapeBuffer);
 
 			int samples = outShape[0];
 			int depth = outShape[1];
@@ -1211,8 +1211,8 @@ namespace simdOps {
                     }
                 } else {
                     __shared__ int xRank;
-                    __shared__ int *xShape;
-                    __shared__ int *xStride;
+                    __shared__ Nd4jLong *xShape;
+                    __shared__ Nd4jLong *xStride;
 
                     if (threadIdx.x == 0) {
 				        xRank = shape::rank(xShapeBuffer);
@@ -1262,12 +1262,12 @@ namespace simdOps {
                     }
                 } else {
                     __shared__ int xRank;
-                    __shared__ int *xShape;
-                    __shared__ int *xStride;
+                    __shared__ Nd4jLong *xShape;
+                    __shared__ Nd4jLong *xStride;
 
 					__shared__ int zRank;
-					__shared__ int *zShape;
-                    __shared__ int *zStride;
+					__shared__ Nd4jLong *zShape;
+                    __shared__ Nd4jLong *zStride;
 
                     if (threadIdx.x == 0) {
 				        xRank = shape::rank(xShapeBuffer);
@@ -1293,8 +1293,8 @@ namespace simdOps {
                         }
 
 
-                        Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                        Nd4jLong zOffset = shape::getOffset(0, xShape, xStride, zCoord, xRank);
+                        auto xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                        auto zOffset = shape::getOffset(0, xShape, xStride, zCoord, xRank);
 
                         result[zOffset] = dx[xOffset];
                     }
@@ -1348,8 +1348,8 @@ namespace simdOps {
                             shape::ind2sub(xRank, xShape, sLength - e, zCoord);
                         }
 
-                        Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                        Nd4jLong zOffset = shape::getOffset(0, xShape, xStride, zCoord, xRank);
+                        auto xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                        auto zOffset = shape::getOffset(0, xShape, xStride, zCoord, xRank);
 
                         result[zOffset] = dx[xOffset];
                     }
@@ -1395,8 +1395,8 @@ namespace simdOps {
                         else
                         	shape::ind2sub(zRank, zShape, (sLength - e), zCoord);
 
-						Nd4jLong xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
-                        Nd4jLong zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
+						auto xOffset = shape::getOffset(0, xShape, xStride, xCoord, xRank);
+                        auto zOffset = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
 						result[zOffset] = dx[xOffset];
 					}
@@ -1429,17 +1429,17 @@ namespace simdOps {
 
 			auto shape = shape::shapeOf(xShapeBuffer);
 			__shared__ T maxResult;
-			__shared__ int *maxResultShapeBuffer;
+			__shared__ Nd4jLong *maxResultShapeBuffer;
 
-			int length = shape::length(xShapeBuffer);
+			auto length = shape::length(xShapeBuffer);
 
-			int *stride = shape::stride(xShapeBuffer);
+			auto stride = shape::stride(xShapeBuffer);
 			//compute the row wise maxes
 
-			__shared__ int maxShape[2];
+			__shared__ Nd4jLong maxShape[2];
 
 			// it's always 2d here
-			__shared__ int tempBuffer[8];
+			__shared__ Nd4jLong tempBuffer[8];
 
 			if (threadIdx.x == 0) {
 			    maxResult = (T) 0.0;
@@ -1583,7 +1583,7 @@ namespace simdOps {
 			//iterate along rows
 
 			__shared__ T maxResult;
-			__shared__ int *maxResultShapeBuffer;
+			__shared__ Nd4jLong *maxResultShapeBuffer;
 			if (threadIdx.x == 0) {
 
 				maxResult = (T) 0.0;
@@ -1591,11 +1591,12 @@ namespace simdOps {
 			__syncthreads();
 			//compute the row wise maxes
 
-			int maxShape[2] = { shape[0], 1 };
-			__shared__ int tempBuffer[8];
+			Nd4jLong maxShape[2] = { shape[0], 1 };
+			__shared__ Nd4jLong tempBuffer[8];
 
 			if (threadIdx.x == 0)
 				maxResultShapeBuffer = shape::shapeBuffer(2, maxShape, tempBuffer);
+			__syncthreads();
 
 			functions::reduce::ReduceFunction<T>::template execScalarCuda<simdOps::Max<T>>(dx, xShapeBuffer, extraParams, &maxResult, maxResultShapeBuffer, reductionPointer, manager, nullptr);
 			__syncthreads();
@@ -1738,12 +1739,12 @@ namespace simdOps {
 			T *extraParams,
 			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets) {
 
-			int *shape = shape::shapeOf(xShapeBuffer);
+			auto shape = shape::shapeOf(xShapeBuffer);
 			__shared__ T maxResult;
-			__shared__ int *maxResultShapeBuffer;
-			__shared__ int resultEWS;
+			__shared__ Nd4jLong *maxResultShapeBuffer;
+			__shared__ Nd4jLong resultEWS;
 
-			int length = shape::length(xShapeBuffer);
+			auto length = shape::length(xShapeBuffer);
 
 			if (threadIdx.x == 0) {
 				resultEWS = shape::elementWiseStride(resultShapeBuffer);
@@ -1752,13 +1753,14 @@ namespace simdOps {
 			}
 			__syncthreads();
 
-			int *stride = shape::stride(xShapeBuffer);
-			int maxShape[2] = { shape[0], 1 };
+			auto tride = shape::stride(xShapeBuffer);
+			Nd4jLong maxShape[2] = { shape[0], 1 };
 
-			__shared__ int tempBuffer[8];
+			__shared__ Nd4jLong tempBuffer[8];
 
 			if (threadIdx.x == 0)
 				maxResultShapeBuffer = shape::shapeBuffer(2, maxShape, tempBuffer);
+			__syncthreads();
 
 			functions::reduce::ReduceFunction<T>::template execScalarCuda<simdOps::Max<T>>(dx, xShapeBuffer, extraParams, &maxResult, maxResultShapeBuffer, reductionPointer, manager, nullptr);
 			__syncthreads();

@@ -440,15 +440,15 @@ namespace shape {
         Nd4jLong *sub;
         if (ptrManager != nullptr) {
             UnifiedSharedMemory *manager = (UnifiedSharedMemory *) ptrManager;
-            ret = manager->getTempRankBuffer1();
-            tadShape = manager->getTempRankBuffer2();
-            leftOverIndexes = manager->getTempRankBuffer3();
-            sub = manager->getTempRankBuffer4();
+            ret = (Nd4jLong *) manager->getTempRankBuffer1();
+            tadShape = (Nd4jLong *) manager->getTempRankBuffer2();
+            leftOverIndexes = (Nd4jLong *) manager->getTempRankBuffer3();
+            sub =  (Nd4jLong *) manager->getTempRankBuffer4();
         } else {
-            ret = new int[rank];
-            tadShape = new int[leftOverIndexLen];
-            leftOverIndexes = new int[leftOverIndexLen];
-            sub = new int[rank];
+            ret = new Nd4jLong[rank];
+            tadShape = new Nd4jLong[leftOverIndexLen];
+            leftOverIndexes = new Nd4jLong[leftOverIndexLen];
+            sub = new Nd4jLong[rank];
         }
 #else
         Nd4jLong *ret = new Nd4jLong[rank];
@@ -632,15 +632,15 @@ namespace shape {
 
         if (ptrManager != nullptr) {
                 UnifiedSharedMemory *manager = (UnifiedSharedMemory *) ptrManager;
-                ret = manager->getTempRankBuffer1();
-                tadShape = manager->getTempRankBuffer2();
-                leftOverIndexes = manager->getTempRankBuffer3();
-                sub = manager->getTempRankBuffer4();
+                ret = (Nd4jLong *) manager->getTempRankBuffer1();
+                tadShape = (Nd4jLong *) manager->getTempRankBuffer2();
+                leftOverIndexes = (Nd4jLong *) manager->getTempRankBuffer3();
+                sub = (Nd4jLong *) manager->getTempRankBuffer4();
             } else {
                 ret = new Nd4jLong[rank];
                 //shape of the tad
                 leftOverIndexes = new Nd4jLong[leftOverIndexLen];
-                sub = Nd4jLong int[rank];
+                sub = new Nd4jLong[rank];
                 tadShape = new Nd4jLong[leftOverIndexLen];
             }
 #else

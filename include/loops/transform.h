@@ -53,7 +53,7 @@ namespace functions {
 			T *params,
 			T *result,
 			Nd4jLong *resultShapeInfo,
-			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets);
+			int *allocationPointer, T *reductionPointer, UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets);
 
 	template<typename OpType>
 	static  __device__ void transformCuda(
@@ -74,7 +74,7 @@ namespace functions {
 			Nd4jLong *resultShapeInfo,
 			int *allocationPointer,
 			T *reductionPointer,
-			UnifiedSharedMemory *manager, int *tadShapeInfo, Nd4jLong *tadOffsets);
+			UnifiedSharedMemory *manager, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets);
 
 
 	static  __device__ void transformCuda(

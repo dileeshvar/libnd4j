@@ -40,7 +40,9 @@ __device__ void pairWiseTransformGeneric(
 		T *result,
 		Nd4jLong *xShapeInfo, int xRank,
 		Nd4jLong *yShapeInfo, int yRank,
-		Nd4jLong *resultShapeInfo, int zRank, int *allocationPointer, int *tadOnlyShapeInfo) {
+		Nd4jLong *resultShapeInfo, int zRank, 
+		int *allocationPointer, 
+		Nd4jLong *tadOnlyShapeInfo) {
 
 	functions::pairwise_transforms::PairWiseTransform<T>::template transformCuda<opType>(
 	    dx,
@@ -319,7 +321,7 @@ __device__ void pairWiseTransformStridedGeneric(
 		Nd4jLong incy,
 		T *params,
 		T *result,
-		Nd4jLong incz, int *allocationPointer, int *tadOnlyShapeInfo) {
+		Nd4jLong incz, int *allocationPointer, Nd4jLong *tadOnlyShapeInfo) {
 
 	functions::pairwise_transforms::PairWiseTransform<T>::template transformCuda<opType>(
 		n,

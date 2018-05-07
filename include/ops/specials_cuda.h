@@ -279,7 +279,7 @@ extern "C" __global__ void cudaSortTadFloat(float *x, Nd4jLong *xShapeInfo, int 
     oes_tad<float>(x, xShapeInfo, dimension, dimensionLength, tadShapeInfo, tadOffsets,  descending);
 }
 
-extern "C" __global__ void cudaSortTadDouble(double *x,Nd4jLongint *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
+extern "C" __global__ void cudaSortTadDouble(double *x,Nd4jLong *xShapeInfo, int *dimension, int dimensionLength, Nd4jLong *tadShapeInfo, Nd4jLong *tadOffsets, bool descending) {
     //bitonic_sort_step<float>(x, xShapeInfo, j, k, descending);
     oes_tad<double>(x, xShapeInfo, dimension, dimensionLength, tadShapeInfo, tadOffsets, descending);
 }

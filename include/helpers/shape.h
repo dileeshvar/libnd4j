@@ -990,7 +990,7 @@ namespace shape {
 
    // this function checks the consistence of dimensions with array rank (negative dimensions, too large dimensions, too big number of dimensions)
     // also sort input array of dimensions, this operation is also necessary for creating TAD object
-    ND4J_EXPORT _CUDA_HD void checkDimensions(const int rank, std::vector<int>& dimensions);
+    ND4J_EXPORT _CUDA_H void checkDimensions(const int rank, std::vector<int>& dimensions);
 
 
     // return absolute index of array min, min is sub-array of max, index to be returned is min index and corresponds to maxIdx of max array
@@ -4396,12 +4396,9 @@ template <typename T>
         return true;
     }
 
-#ifdef __CUDACC__
-    __host__
-#endif
     // this function checks the consistence of dimensions with array rank (negative dimensions, too large dimensions, too big number of dimensions)
     // also it sorts input array of dimensions, this operation is also necessary for creating TAD object
-    INLINEDEF void checkDimensions(const int rank, std::vector<int>& dimensions) {
+    INLINEDEF _CUDA_H void checkDimensions(const int rank, std::vector<int>& dimensions) {
 
         int dimSize = dimensions.size();
         if(dimSize == 0)
@@ -4428,11 +4425,9 @@ template <typename T>
     }
 
 
-#ifdef __CUDACC__
-    __host__
-#endif
+
 // return absolute index of array min, min is sub-array of max, index to be returned is min's index and corresponds to maxIdx of max array 
-INLINEDEF Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx) {
+INLINEDEF _CUDA_H Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx) {
 
     Nd4jLong *idxPerRank = new Nd4jLong[maxShapeInfo[0]];
     ind2subC(maxShapeInfo[0], const_cast<Nd4jLong*>(maxShapeInfo)+1, const_cast<int&>(maxIdx), idxPerRank);    

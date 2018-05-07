@@ -59,7 +59,7 @@ namespace functions {
      * @param extraParams
      */
 template<typename OpType>
-			static __inline__ __device__ void aggregatePartials(T **sPartialsRef, Nd4jLong tid, Nd4jLongint numItems, T *extraParamsRef) {
+			static __inline__ __device__ void aggregatePartials(T **sPartialsRef, Nd4jLong tid, Nd4jLong numItems, T *extraParamsRef) {
 				// start the shared memory loop on the next power of 2 less
 				// than the block size.  If block size is not a power of 2,
 				// accumulate the intermediate sums in the remainder range.
@@ -117,12 +117,13 @@ template<typename OpType>
 				sPartials[threadIdx.x] = startingVal;
 				__syncthreads();
 
-                int idx[MAX_RANK];
+                Nd4jLong idx[MAX_RANK];
 
 				for(Nd4jLong i = blockIdx.x * gridDim.x + threadIdx.x; i < n; i += gridDim.x * blockDim.x) {
 					shape::ind2subC(rank,shape::shapeOf(xShapeInfo),i, idx);
-					Nd4jLong offset = shape::getOffset(0,shape::shapeOf(xShapeInfo),shape::stride(xShapeInfo),idx,rank);
-					Nd4jLong yOffset = shape::getOffset(0,shape::shapeOf(yShapeInfo),shape::stride(yShapeInfo),idx,rank);
+					auto offset = shape::getOffset(0,shape::shapeOf(xShapeInfo),shape::stride(xShapeInfo),idx,rank);
+					auto yOffset = shape::getOffset(0,shape::shapeOf(yShapeInfo),shape::stride(yShapeInfo),idx,rank);
+					
 					sPartials[threadIdx.x] = update(sPartials[threadIdx.x], this->opAtomic(dx[offset], dy[yOffset], extraZ), extraZ);
 				}
 

@@ -49,7 +49,7 @@ namespace functions {
 	 * @param extraParams
 	 */
     template<typename OpType>
-	static __device__ void aggregatePartials(IndexValue<T> **sPartialsRef,int tid,int numElements,T *extraParams);
+	static __device__ void aggregatePartials(IndexValue<T> **sPartialsRef, Nd4jLong tid, Nd4jLong numElements,T *extraParams);
 
 	/**
 	 * @param n n is the number of

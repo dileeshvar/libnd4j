@@ -329,7 +329,7 @@ namespace functions {
                 UnifiedSharedMemory *manager,
                 Nd4jLong *tadOnlyShapeInfo,
                 Nd4jLong *tadOffsets){
-            /**
+            /**int
              * Gpu information for the problem
              */
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -402,7 +402,7 @@ namespace functions {
                 __syncthreads();
 
                 if (dimensionLength > 1 || tadEWS < 1) {
-                    int xCoord[MAX_RANK];
+                    Nd4jLong xCoord[MAX_RANK];
 
                     for (int r = blockIdx.x; r < numTads; r += gridDim.x) {
                         Nd4jLong tadOffsetForBlock = tadOffsets[r];
@@ -412,7 +412,7 @@ namespace functions {
                         for(int i = threadIdx.x;i < tadLength; i += blockDim.x) {
                             shape::ind2subC(tadRank,tadShape, i, xCoord);
 
-                            Nd4jLong xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
+                            auto xOffset = shape::getOffset(tadOffsetForBlock, tadShape, tadStride, xCoord, tadRank);
                             IndexValue<T> comp {dx[xOffset], i};
 
                             sPartials[threadIdx.x] = OpType::update(sPartials[threadIdx.x], comp, extraParams);

@@ -55,7 +55,7 @@ namespace functions {
 
             template<typename OpType>
             __device__
-            static void transformCuda(T scalar, T *dy, Nd4jLong *shapeInfo, T *params, T *result,Nd4jLongint *resultShapeInfo, Nd4jLong *allocationBuffer, UnifiedSharedMemory *manager);
+            static void transformCuda(T scalar, T *dy, Nd4jLong *shapeInfo, T *params, T *result,Nd4jLong *resultShapeInfo, int *allocationBuffer, UnifiedSharedMemory *manager);
 
 
             template<typename OpType>

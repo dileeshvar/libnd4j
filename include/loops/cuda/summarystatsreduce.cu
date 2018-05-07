@@ -232,8 +232,8 @@ namespace functions {
                 if (resultLength == 1)
                     resultScalar = 1;
 
-                int *xStride = shape::stride(xShapeInfo);
-                char xOrder = shape::order(xShapeInfo);
+                auto xStride = shape::stride(xShapeInfo);
+                auto xOrder = shape::order(xShapeInfo);
 
                 if (dimension != nullptr && (dimension[0] != MAX_DIMENSION && dimensionLength == 1)) {
                     xElementWiseStride = xStride[dimension[0]];
@@ -254,8 +254,8 @@ namespace functions {
                 __shared__ int tadEWS;
                 __shared__ int tadRank;
                 __shared__ int numTads;
-                __shared__ int *tadShape;
-                __shared__ int *tadStride;
+                __shared__ Nd4jLong *tadShape;
+                __shared__ Nd4jLong *tadStride;
 
                 if (threadIdx.x == 0) {
                     tadLength = shape::tadLength(xShapeInfo, dimension, dimensionLength);
@@ -432,7 +432,7 @@ namespace functions {
 
 
         template <typename T>
-        _CUDA_D void SummaryStatsReduce<T>::transform(const int opNum, T *dx, int *xShapeInfo, T *extraParams, T *result, int *resultShapeInfo, int *dimension, int dimensionLength, int postProcessOrNot, int *allocationBuffer, T *reductionBuffer, UnifiedSharedMemory *manager, int *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
+        _CUDA_D void SummaryStatsReduce<T>::transform(const int opNum, T *dx, Nd4jLong *xShapeInfo, T *extraParams, T *result, Nd4jLong *resultShapeInfo, int *dimension, int dimensionLength, int postProcessOrNot, int *allocationBuffer, T *reductionBuffer, UnifiedSharedMemory *manager, Nd4jLong *tadOnlyShapeInfo, Nd4jLong *tadOffsets) {
             DISPATCH_BY_OPNUM(transform, PARAMS(dx, xShapeInfo, extraParams, result, resultShapeInfo, dimension, dimensionLength, postProcessOrNot, allocationBuffer, reductionBuffer, manager, tadOnlyShapeInfo, tadOffsets), SUMMARY_STATS_OPS);
         };
 

@@ -121,13 +121,13 @@ namespace randomOps {
                 for (Nd4jLong i = tid; i < zLength; i+=blockDim.x * gridDim.x) {
                     shape::ind2sub(zRank, zShape, i, zCoord);
 
-                    Nd4jLong zOffset2 = shape::getOffset(zOffset, zShape, zStride, zCoord, zRank);
+                    Nd4jLong zOffset2 = shape::getOffset(0, zShape, zStride, zCoord, zRank);
 
                     T prob = buffer->relativeT<T>(i);
                     T cumProb = (T) 0.0f;
                     for (Nd4jLong f = 0; f < yLength; f++) {
                         shape::ind2sub(yRank, yShape, i, yCoord);
-                        Nd4jLong yOffset2 = shape::getOffset(yOffset, yShape, yStride, yCoord, yRank);
+                        Nd4jLong yOffset2 = shape::getOffset(0, yShape, yStride, yCoord, yRank);
 
                         T relProb = y[yOffset2];
                         cumProb += relProb;

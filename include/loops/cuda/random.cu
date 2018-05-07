@@ -352,7 +352,7 @@ namespace functions {
         }
 
         template <>
-        _CUDA_H void RandomFunction<double>::executeCudaDouble(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, double *x,Nd4jLongint *xShapeBuffer, double *z, Nd4jLong *zShapeBuffer, double *extraArguments) {
+        _CUDA_H void RandomFunction<double>::executeCudaDouble(dim3& launchDims, Nd4jPointer *extraPointers, int opNum, Nd4jPointer stateHost, double *x, Nd4jLong *xShapeBuffer, double *z, Nd4jLong *zShapeBuffer, double *extraArguments) {
             cudaStream_t *stream = reinterpret_cast<cudaStream_t *>(&extraPointers[1]);
 
             nd4j::random::RandomBuffer *buffer = reinterpret_cast<nd4j::random::RandomBuffer *> (stateHost);
