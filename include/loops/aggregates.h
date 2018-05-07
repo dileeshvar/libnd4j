@@ -53,7 +53,7 @@ __device__ void aggregateBatchGeneric(int numAggregates, int opNum, int maxArgs,
     __shared__ int *intArrays[32];
 
     __shared__ T **arguments;
-    __shared__ int **shapes;
+    __shared__ Nd4jLong **shapes;
     __shared__ int *idxArg;
     __shared__ T *realArg;
 

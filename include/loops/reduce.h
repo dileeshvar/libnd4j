@@ -88,7 +88,7 @@ namespace functions {
 				int dimensionLength,
 				T *reductionBuffer,
 				UnifiedSharedMemory *manager,
-				int *tadOnlyShapeInfo,
+				Nd4jLong *tadOnlyShapeInfo,
 				Nd4jLong *tadOffsets);
 
 			/**
@@ -98,7 +98,7 @@ namespace functions {
 			 * @param extraParams
 			 */
             template<typename OpType>
-			static __device__ void aggregatePartials(T *sPartials, int tid, int numItems, T *extraParams);
+			static __device__ void aggregatePartials(T *sPartials, Nd4jLong tid, Nd4jLong numItems, T *extraParams);
 
             static __host__ void execReduceScalar(dim3 launchDims, cudaStream_t *stream, int opNum, T *x, Nd4jLong *xShapeInfo, T *extraParams, T *z, Nd4jLong *zShapeInfo, int *dimension, int dimensionLength, T *reductionBuffer, Nd4jLong *tadOnlyShapeInfo);
 

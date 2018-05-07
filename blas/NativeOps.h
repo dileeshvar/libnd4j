@@ -3004,6 +3004,7 @@ public:
     int unregisterGraph(Nd4jPointer *extraPointers, Nd4jLong graphId);
 
     void deleteIntArray(Nd4jPointer pointer);
+    void deleteLongArray(Nd4jPointer pointer);
     void deletePointerArray(Nd4jPointer pointer);
 
     void deleteVariablesSetFloat(Nd4jPointer pointer);

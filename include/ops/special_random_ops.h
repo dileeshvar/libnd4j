@@ -94,17 +94,14 @@ namespace randomOps {
                 __shared__ int yRank;
                 __shared__ int zRank;
 
-                __shared__ int *xShape;
-                __shared__ int *yShape;
-                __shared__ int *zShape;
+                __shared__ Nd4jLong *xShape;
+                __shared__ Nd4jLong *yShape;
+                __shared__ Nd4jLong *zShape;
 
-                __shared__ int *xStride;
-                __shared__ int *yStride;
-                __shared__ int *zStride;
+                __shared__ Nd4jLong *xStride;
+                __shared__ Nd4jLong *yStride;
+                __shared__ Nd4jLong *zStride;
 
-                __shared__ int xOffset;
-                __shared__ int yOffset;
-                __shared__ int zOffset;
 
                 if (threadIdx.x == 0) {
                     xRank = shape::rank(xShapeBuffer);
@@ -118,10 +115,6 @@ namespace randomOps {
                     xStride = shape::stride(xShapeBuffer);
                     yStride = shape::stride(yShapeBuffer);
                     zStride = shape::stride(zShapeBuffer);
-
-                    xOffset = shape::offset(xShapeBuffer);
-                    yOffset = shape::offset(yShapeBuffer);
-                    zOffset = shape::offset(zShapeBuffer);
                 }
                 __syncthreads();
 
@@ -141,7 +134,7 @@ namespace randomOps {
 
                         if (prob <= cumProb || f == yLength - 1) {
                             shape::ind2sub(xRank, xShape, f, xCoord);
-                            Nd4jLong xOffset2 = shape::getOffset(xOffset, xShape, xStride, xCoord, xRank);
+                            Nd4jLong xOffset2 = shape::getOffset(0, xShape, xStride, xCoord, xRank);
 
                             z[zOffset2] = x[xOffset2];
                             f += yLength;
@@ -212,11 +205,6 @@ namespace randomOps {
                 auto yStride = shape::stride(yShapeBuffer);
                 auto zStride = shape::stride(zShapeBuffer);
 
-/*
-                auto xOffset = shape::offset(xShapeBuffer);
-                auto yOffset = shape::offset(yShapeBuffer);
-                auto zOffset = shape::offset(zShapeBuffer);
-                */
 
 #pragma omp parallel for num_threads(_threads) if (_threads > 1) schedule(guided)
                 for (Nd4jLong i = 0; i < zLength; i++) {
@@ -313,7 +301,7 @@ namespace randomOps {
             }
             __syncthreads();
 
-            int tid = blockIdx.x * blockDim.x + threadIdx.x;
+            Nd4jLong tid = blockIdx.x * blockDim.x + threadIdx.x;
 
             for (Nd4jLong e = tid; e < zLength; e += step) {
                 // we need to get random values

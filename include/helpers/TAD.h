@@ -620,7 +620,7 @@ namespace shape {
     }
 
     INLINEDEF Nd4jLong* TAD::tad2Sub(Nd4jLong index, void *ptrManager) {
-        Nd4jLong *shape = shape::shapeOf(shapeInfo);
+        auto shape = shape::shapeOf(shapeInfo);
         int rank = shape::rank(shapeInfo);
         int leftOverIndexLen = rank - originalDimensionLength;
         Nd4jLong *tadShape;
@@ -637,11 +637,11 @@ namespace shape {
                 leftOverIndexes = manager->getTempRankBuffer3();
                 sub = manager->getTempRankBuffer4();
             } else {
-                ret = new int[rank];
+                ret = new Nd4jLong[rank];
                 //shape of the tad
-                leftOverIndexes = new int[leftOverIndexLen];
-                sub = new int[rank];
-                tadShape = new int[leftOverIndexLen];
+                leftOverIndexes = new Nd4jLong[leftOverIndexLen];
+                sub = Nd4jLong int[rank];
+                tadShape = new Nd4jLong[leftOverIndexLen];
             }
 #else
         ret = new Nd4jLong[rank];
