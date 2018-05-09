@@ -25,7 +25,7 @@ public:
     FlatBuffersTest() {
         Environment::getInstance()->setDebug(false);
         Environment::getInstance()->setVerbose(false);
-        Environment::getInstance()->setProfiling(true);
+        Environment::getInstance()->setProfiling(false);
     }
 
     ~FlatBuffersTest() {
@@ -650,7 +650,7 @@ TEST_F(FlatBuffersTest, Test_Stitches) {
 
 
     auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/partition_stitch_misc.fb");
-    //graph->printOut();
+    graph->printOut();
 
     auto result = GraphExecutioner<float>::execute(graph);
     ASSERT_EQ(ND4J_STATUS_OK, result);

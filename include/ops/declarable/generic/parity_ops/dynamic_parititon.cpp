@@ -15,10 +15,13 @@ namespace ops {
         auto input = INPUT_VARIABLE(0);
         auto indices = INPUT_VARIABLE(1);
 
+        input->printShapeInfo("input");
+        indices->printShapeInfo("indices");
+
         REQUIRE_TRUE(input->rankOf() >= indices->rankOf(), 0, "dynamic_partition: data tensor rank should be non-lesser than indices\' tensor, but %i < %i given,",
             input->rankOf(), indices->rankOf());
         for (int dim = 0; dim < indices->rankOf(); dim++) {
-            REQUIRE_TRUE(input->sizeAt(dim) == indices->sizeAt(dim), 0, "dynamic_partition: dimensions should be equals for data and indices tensors, but at %i %i != %i given", 
+            REQUIRE_TRUE(input->sizeAt(dim) == indices->sizeAt(dim), 0, "dynamic_partition: dimensions should be equals for data and indices tensors, but at axis[%i] %i != %i given",
                 dim, input->sizeAt(dim), indices->sizeAt(dim));
         }
 

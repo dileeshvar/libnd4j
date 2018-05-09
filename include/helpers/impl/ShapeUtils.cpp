@@ -236,13 +236,13 @@ Nd4jLong* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>&
     if (!arr.nonNull() || rank != arr.rankOf())
         throw "ShapeUtils<T>::evalPermShapeInfo static method: wrong arguments in permute method: either array is nullptr or rank is not suitable!";
     
-    int shapeInfoLength = rank*2 + 4;
+    auto shapeInfoLength = shape::shapeInfoLength(rank);
     // allocate memory for new array - shapeInfo
 
     Nd4jLong* shapeInfoNew = nullptr;
     ALLOCATE(shapeInfoNew, workspace, shapeInfoLength, Nd4jLong);
     // copy arr _shapeInfo into new array       
-    memcpy(shapeInfoNew, arr.getShapeInfo(), shapeInfoLength*sizeof(Nd4jLong));  
+    memcpy(shapeInfoNew, arr.getShapeInfo(), shape::shapeInfoByteLength(rank));
     // perform buffer permutation   
     shape::doPermuteShapeInfo(shapeInfoNew, dimensions);      
 

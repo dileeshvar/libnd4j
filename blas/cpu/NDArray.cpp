@@ -2106,10 +2106,14 @@ void NDArray<T>::permute(const int* dimensions, const int rank, NDArray<T>& targ
     if (target._isBuffAlloc) 
         RELEASE(target._buffer, target._workspace);
 
+    auto shapeInfoNew = ShapeUtils<T>::evalPermShapeInfo(dimensions, rank, *this, target._workspace);
+
     target._buffer = _buffer;
+    target._shapeInfo = shapeInfoNew;
     // don't forget to indicate that memory for new array was allocated
     target._isBuffAlloc = false;
-    target._isView = true;
+    target._isShapeAlloc = true;
+    //target._isView = true;
 
 }
 
