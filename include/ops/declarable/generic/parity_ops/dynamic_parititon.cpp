@@ -12,8 +12,8 @@
 namespace nd4j {
 namespace ops {
     CUSTOM_OP_IMPL(dynamic_partition, 2, 1, false, 0, 1) {
-        NDArray<T>* input = INPUT_VARIABLE(0);
-        NDArray<T>* indices = INPUT_VARIABLE(1);
+        auto input = INPUT_VARIABLE(0);
+        auto indices = INPUT_VARIABLE(1);
 
         REQUIRE_TRUE(input->rankOf() >= indices->rankOf(), 0, "dynamic_partition: data tensor rank should be non-lesser than indices\' tensor, but %i < %i given,",
             input->rankOf(), indices->rankOf());
@@ -22,7 +22,7 @@ namespace ops {
                 dim, input->sizeAt(dim), indices->sizeAt(dim));
         }
 
-        int numPartition = INT_ARG(0);
+        auto numPartition = INT_ARG(0);
         std::vector<NDArray<T>*> outputList(numPartition);
         for(int o = 0; o < numPartition; ++o) {
             outputList[o] = OUTPUT_VARIABLE(o);

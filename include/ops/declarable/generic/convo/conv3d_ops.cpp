@@ -55,7 +55,7 @@ namespace nd4j {
 
                 Nd4jStatus  res = ConvolutionUtils<T>::conv3Dmv(tadOut, (T) 1.0f, (T) 1.0f, tadIn, weights, dT, dH, dW, "V", "X");
                 if (res != ND4J_STATUS_OK)
-                    throw "Boom";
+                    throw std::runtime_error("Failed to apply Conv3D");
             }
 
             STORE_RESULT(*output);
