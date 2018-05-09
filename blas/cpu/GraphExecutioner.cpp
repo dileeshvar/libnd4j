@@ -556,7 +556,7 @@ Nd4jPointer GraphExecutioner<T>::executeFlatBuffer(Nd4jPointer pointer) {
         auto byteVector = array->asByteVector();
 
         auto fBuffer = builder.CreateVector(byteVector);
-        auto fShape = builder.CreateVector(array->getShapeInfoAsVector());
+        auto fShape = builder.CreateVector(array->getShapeInfoAsFlatVector());
 
         nd4j::graph::ByteOrder bo = (nd4j::graph::ByteOrder) BitwiseUtils::asByteOrder();
 

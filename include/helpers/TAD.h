@@ -461,7 +461,7 @@ namespace shape {
         //indexes not specified in the tad indexes
 
         //every coordinate starts as zero
-        memset(ret,0,sizeof(int) * rank);
+        memset(ret,0, shape::shapeInfoByteLength(rank));
 
         //find the length of the elements we
         //are iterating over
@@ -922,7 +922,7 @@ namespace shape {
         }
 
         this->dimension =  new int[dimensionLength];
-        memcpy(this->dimension,this->originalDimension,sizeof(int) * dimensionLength);
+        memcpy(this->dimension,this->originalDimension, sizeof(int) * dimensionLength);
 
         //we can drop trailing dimensions where it's all singular for example:
         // shape: 4,3,1,2
@@ -1008,7 +1008,7 @@ namespace shape {
                         nonOneEncountered = false;
                         collapseMiddleDimensions = false;
                         //intermediary result just needs to have the results copied from dimension since we're just removing the tail
-                        memcpy(intermediaryResult,dimension,sizeof(int) * dimensionLength);
+                        memcpy(intermediaryResult,dimension, sizeof(int) * dimensionLength);
                         changed = true;
                         //break the for loop and force it to go back around starting from the new index
                         break;
@@ -1052,14 +1052,14 @@ namespace shape {
                 //decrement by the number of dimensions where ones appeared
                 (dimensionLength) -= onesDecrement;
                 //update to current result
-                memcpy(dimension,newIntermediary,sizeof(int) * (dimensionLength));
+                memcpy(dimension,newIntermediary, sizeof(int) * (dimensionLength));
                 changed = true;
 
             }
                 //converged: no need to change result
             else {
                 //update to current result
-                memcpy(dimension,intermediaryResult,sizeof(int) * dimensionLength);
+                memcpy(dimension,intermediaryResult, sizeof(int) * dimensionLength);
             }
 
             //converge when there are no singular dimensions specified in the reduce

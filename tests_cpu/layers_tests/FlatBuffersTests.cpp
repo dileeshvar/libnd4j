@@ -75,7 +75,7 @@ TEST_F(FlatBuffersTest, FlatGraphTest1) {
     auto array = new NDArray<float>('c', {5, 5});
     array->assign(-2.0f);
 
-    auto fShape = builder.CreateVector(array->getShapeInfoAsVector());
+    auto fShape = builder.CreateVector(array->getShapeInfoAsFlatVector());
     auto fBuffer = builder.CreateVector(array->asByteVector());
 
     auto fArray = CreateFlatArray(builder, fShape, fBuffer, nd4j::graph::DataType::DataType_FLOAT);

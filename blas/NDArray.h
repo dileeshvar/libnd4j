@@ -613,6 +613,7 @@ namespace nd4j {
         std::vector<T> getBufferAsVector();
         std::vector<Nd4jLong> getShapeAsVector();
         std::vector<Nd4jLong> getShapeInfoAsVector();
+        std::vector<int64_t> getShapeInfoAsFlatVector();
 				
         /**
         *  set new order and shape in case of suitable array length (in-place operation)
@@ -1489,7 +1490,7 @@ template<typename T>
 Nd4jLong  NDArray<T>::memoryFootprint() {
 
     Nd4jLong size = this->lengthOf() * this->sizeOfT();
-    size += (this->rankOf() * 2 + 4) * sizeof(int);
+    size += shape::shapeInfoByteLength(this->rankOf());
     return size;
 }
 

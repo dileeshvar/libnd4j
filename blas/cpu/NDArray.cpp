@@ -275,6 +275,17 @@ template <typename T>
         return vector;
     }
 
+    template<typename T>
+    std::vector<int64_t> NDArray<T>::getShapeInfoAsFlatVector() {
+        std::vector<int64_t > vector;
+
+        int magicNumber = shape::shapeInfoLength(this->rankOf());
+        for (int e = 0; e < magicNumber; e++)
+            vector.push_back(this->_shapeInfo[e]);
+
+        return vector;
+    }
+
 ////////////////////////////////////////////////////////////////////////
     template<typename T>
     std::vector<Nd4jLong> NDArray<T>::getShapeInfoAsVector() {
@@ -1849,7 +1860,7 @@ NDArray<T> NDArray<T>::tile(const std::vector<Nd4jLong>& reps) const {
         NDArray<T> result(*this);
         if(diff < 0) {      // reshape to higher dimension          
             std::vector<Nd4jLong> shapeNew = reps;               // need to have unities at first "diff" positions of new shape
-            memcpy(&shapeNew[-diff], result._shapeInfo+1, rankOld*sizeof(int));   // put old shape numbers at rest of positions
+            memcpy(&shapeNew[-diff], result._shapeInfo+1, rankOld * sizeof(Nd4jLong));   // put old shape numbers at rest of positions
             result.reshapei(ordering(), shapeNew);
         }       
         return result;             // nothing to do, if diff >= 0 -> identity tile 

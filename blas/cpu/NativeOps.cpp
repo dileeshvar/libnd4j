@@ -2023,7 +2023,7 @@ void NativeOps::tadOnlyShapeInfo(Nd4jLong *xShapeInfo, int *dimension, int dimen
     tad->createOffsets();
 
 
-    std::memcpy((void *) target, tad->tadOnlyShapeInfo, (tad->tadOnlyShapeInfo[0] * 2 + 4) * sizeof(int));
+    std::memcpy((void *) target, tad->tadOnlyShapeInfo, shape::shapeInfoByteLength(tad->tadOnlyShapeInfo));
     std::memcpy((void *) offsets, tad->tadOffsets, tad->numTads * sizeof(Nd4jLong));
 
     delete tad;
