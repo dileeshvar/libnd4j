@@ -40,7 +40,7 @@ TEST_F(GraphExecutionerTests, Test_Implicit_Output_1) {
 
 
 TEST_F(GraphExecutionerTests, Test_Implicit_Output_2) {
-    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim.fb");
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_false.fb");
     graph->buildGraph();
 
     auto outputs = graph->fetchOutputs();
@@ -60,7 +60,7 @@ TEST_F(GraphExecutionerTests, Test_Implicit_Output_2) {
 TEST_F(GraphExecutionerTests, Test_Implicit_Output_3) {
     NDArray<float> exp('c', {3}, {3, 3, 3});
 
-    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim.fb");
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_false.fb");
     auto status = GraphExecutioner<float>::execute(graph);
 
     ASSERT_EQ(ND4J_STATUS_OK, status);

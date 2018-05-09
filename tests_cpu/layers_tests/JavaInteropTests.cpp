@@ -395,7 +395,7 @@ TEST_F(JavaInteropTests, Test_Synonyms_3) {
 TEST_F(JavaInteropTests, Test_GraphReuse_1) {
     NativeOps nativeOps;
 
-    uint8_t* data = nd4j::graph::readFlatBuffers("./resources/reduce_dim.fb");
+    uint8_t* data = nd4j::graph::readFlatBuffers("./resources/reduce_dim_false.fb");
 
     nativeOps.registerGraphFloat(nullptr, 119, (Nd4jPointer) data);
 
@@ -420,7 +420,7 @@ TEST_F(JavaInteropTests, Test_GraphReuse_2) {
     NativeOps nativeOps;
 
     // we load graph from file, because we're not in java here, and dont have buffer ready
-    uint8_t* data = nd4j::graph::readFlatBuffers("./resources/reduce_dim.fb");
+    uint8_t* data = nd4j::graph::readFlatBuffers("./resources/reduce_dim_false.fb");
 
     // we ensure that there's no such a graph stored earlier
     ASSERT_FALSE(GraphHolder::getInstance()->hasGraph<float>(119));

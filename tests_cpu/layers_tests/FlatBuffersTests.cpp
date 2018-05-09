@@ -527,9 +527,9 @@ TEST_F(FlatBuffersTest, ReduceDim_1) {
     exp.assign(3.0);
 
 
-    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim.fb");
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_false.fb");
 
-    graph->printOut();
+    //graph->printOut();
 
     auto variableSpace = graph->getVariableSpace();
 
@@ -553,6 +553,39 @@ TEST_F(FlatBuffersTest, ReduceDim_1) {
 
     delete graph;
 }
+
+TEST_F(FlatBuffersTest, ReduceDim_2) {
+    NDArray<float> exp('c', {3, 1});
+    exp.assign(3.0);
+
+
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_true.fb");
+
+    //graph->printOut();
+
+    auto variableSpace = graph->getVariableSpace();
+
+
+    ASSERT_TRUE(variableSpace->hasVariable(1));
+    ASSERT_TRUE(variableSpace->hasVariable(2));
+
+    auto x = variableSpace->getVariable(1)->getNDArray();
+    auto y = variableSpace->getVariable(2)->getNDArray();
+
+    Nd4jStatus status = GraphExecutioner<float>::execute(graph);
+
+    ASSERT_EQ(ND4J_STATUS_OK, status);
+
+    ASSERT_TRUE(variableSpace->hasVariable(3));
+
+    auto result = variableSpace->getVariable(3)->getNDArray();
+
+    ASSERT_TRUE(exp.isSameShape(result));
+    ASSERT_TRUE(exp.equalsTo(result));
+
+    delete graph;
+}
+
 
 TEST_F(FlatBuffersTest, Ae_00) {
     nd4j::ops::rank<float> op1;
@@ -617,7 +650,7 @@ TEST_F(FlatBuffersTest, Test_Stitches) {
 
 
     auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/partition_stitch_misc.fb");
-    graph->printOut();
+    //graph->printOut();
 
     auto result = GraphExecutioner<float>::execute(graph);
     ASSERT_EQ(ND4J_STATUS_OK, result);

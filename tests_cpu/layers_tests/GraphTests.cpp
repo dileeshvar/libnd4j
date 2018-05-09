@@ -1208,7 +1208,7 @@ TEST_F(GraphTests, Test_Clone_1) {
     exp.assign(3.0);
 
 
-    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim.fb");
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_false.fb");
     auto variableSpace = graph->getVariableSpace();
     //graph->buildGraph();
 
@@ -1246,7 +1246,7 @@ TEST_F(GraphTests, Test_Clone_2) {
     exp.assign(3.0);
 
 
-    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim.fb");
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_false.fb");
     auto variableSpace = graph->getVariableSpace();
     graph->buildGraph();
 
@@ -1280,7 +1280,7 @@ TEST_F(GraphTests, Test_Dtype_Conversion_1) {
     NDArray<double> expD('c', {3}, {3.0, 3.0, 3.0});
     NDArray<float> expF('c', {3}, {3.0, 3.0, 3.0});
 
-    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim.fb");
+    auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/reduce_dim_false.fb");
     graph->buildGraph();
 
 
@@ -1317,8 +1317,8 @@ TEST_F(GraphTests, Test_Dtype_Conversion_1) {
 }
 
 TEST_F(GraphTests, Test_Dtype_Conversion_2) {
-    NDArray<float> expF('c', {5, 4}, {0.951276f, 0.501379f, 0.501368f, 0.968136f, -0.951359f, 0.499845f, -0.501381f, 0.976955f, -0.000073f, 0.499154f, 0.000098f, 0.972500f, -0.019765f, -0.499479f, -0.005979f, -0.965330f, 0.016531f, -0.500842f, 0.004861f, -0.965910f});
-    NDArray<double> expD('c', {5, 4}, {0.951276f, 0.501379f, 0.501368f, 0.968136f, -0.951359f, 0.499845f, -0.501381f, 0.976955f, -0.000073f, 0.499154f, 0.000098f, 0.972500f, -0.019765f, -0.499479f, -0.005979f, -0.965330f, 0.016531f, -0.500842f, 0.004861f, -0.965910f});
+    NDArray<float> expF('c', {5, 4}, {0.32454616f, -0.06604697f, 0.22593613f, 0.43166467f, -0.18320604f, 0.00102305f, -0.06963076f, 0.25266643f, 0.07568010f, -0.03009197f, 0.07805517f, 0.33180334f, -0.06220427f, 0.07249600f, -0.06726961f, -0.22998397f, -0.06343779f, 0.07384885f, -0.06891008f,  -0.23745790f});
+    NDArray<double> expD('c', {5, 4}, {0.32454616f, -0.06604697f, 0.22593613f, 0.43166467f, -0.18320604f, 0.00102305f, -0.06963076f, 0.25266643f, 0.07568010f, -0.03009197f, 0.07805517f, 0.33180334f, -0.06220427f, 0.07249600f, -0.06726961f, -0.22998397f, -0.06343779f, 0.07384885f, -0.06891008f,  -0.23745790f});
 
     auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/ae_00.fb");
     graph->buildGraph();
@@ -1462,7 +1462,7 @@ TEST_F(GraphTests, OpListTest_4) {
 
 
 TEST_F(GraphTests, Test_Inplace_Execution_1) {
-    NDArray<float> exp('c', {5, 4}, {0.951276f, 0.501379f, 0.501368f, 0.968136f, -0.951359f, 0.499845f, -0.501381f, 0.976955f, -0.000073f, 0.499154f, 0.000098f, 0.972500f, -0.019765f, -0.499479f, -0.005979f, -0.965330f, 0.016531f, -0.500842f, 0.004861f, -0.965910f});
+    NDArray<float> exp('c', {5, 4}, {0.32454616f, -0.06604697f, 0.22593613f, 0.43166467f, -0.18320604f, 0.00102305f, -0.06963076f, 0.25266643f, 0.07568010f, -0.03009197f, 0.07805517f, 0.33180334f, -0.06220427f, 0.07249600f, -0.06726961f, -0.22998397f, -0.06343779f, 0.07384885f, -0.06891008f,  -0.23745790f});
 
     auto graph = GraphExecutioner<float>::importFromFlatBuffers("./resources/ae_00.fb");
     graph->printOut();
