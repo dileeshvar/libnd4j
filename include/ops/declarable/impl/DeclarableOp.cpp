@@ -513,11 +513,11 @@ namespace nd4j {
         }
 
         template<typename T>
-        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(nd4j::random::RandomBuffer *rng, std::initializer_list<NDArray<T>*> inputs, std::initializer_list<NDArray<T>*> outputs , std::initializer_list<T> tArgs, std::initializer_list<int> iArgs, bool isInplace) {
+        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(nd4j::random::RandomBuffer *rng, std::initializer_list<NDArray<T>*> inputs, std::initializer_list<NDArray<T>*> outputs , std::initializer_list<T> tArgs, std::initializer_list<Nd4jLong> iArgs, bool isInplace) {
             std::vector<NDArray<T>*> ins(inputs);
             std::vector<NDArray<T>*> ous(outputs);
             std::vector<T> tas(tArgs);
-            std::vector<int> ias(iArgs);
+            std::vector<Nd4jLong> ias(iArgs);
             return this->execute(rng, ins, ous, tas, ias, isInplace);
         }
 
@@ -528,7 +528,7 @@ namespace nd4j {
         }
 
         template <typename T>
-        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(nd4j::random::RandomBuffer *rng, std::vector<NDArray<T>*>& inputs, std::vector<NDArray<T>*>& outputs, std::vector<T>& tArgs, std::vector<int>& iArgs, bool isInplace) {
+        Nd4jStatus nd4j::ops::DeclarableOp<T>::execute(nd4j::random::RandomBuffer *rng, std::vector<NDArray<T>*>& inputs, std::vector<NDArray<T>*>& outputs, std::vector<T>& tArgs, std::vector<Nd4jLong>& iArgs, bool isInplace) {
             VariableSpace<T> variableSpace;
             FlowPath fp;
             variableSpace.setFlowPath(&fp);

@@ -166,7 +166,7 @@ namespace nd4j {
                 this->generation = 1;
             }
 
-            Nd4jIndex _CUDA_HD getAllocatedSize() {
+            Nd4jLong _CUDA_HD getAllocatedSize() {
                 return this->size * sizeof(double);
             }
 

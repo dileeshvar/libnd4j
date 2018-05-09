@@ -1885,7 +1885,7 @@ NDArray<T> NDArray<T>::tile(const std::vector<Nd4jLong>& reps) const {
             newBuff[i] = (*this)(shape::subArrayIndex(newShapeInfo, _shapeInfo, i));
     }
     else {
-        int idx[MAX_RANK];
+        Nd4jLong idx[MAX_RANK];
         auto resultShape   = result.shapeOf();
         auto resultStrides = result.stridesOf();
         const auto resultRank = result.rankOf();
@@ -1928,7 +1928,7 @@ void NDArray<T>::tile(const std::vector<Nd4jLong>& reps, NDArray<T>& target) con
             targetBuff[i*ews] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
     }
     else {
-        int idx[MAX_RANK];
+        Nd4jLong idx[MAX_RANK];
         auto targetShape     = target.shapeOf();
         auto targetStrides   = target.stridesOf();
         const auto targetRank = target.rankOf();
@@ -1966,7 +1966,7 @@ void NDArray<T>::tile(NDArray<T>& target) const {
             targetBuff[i*ews] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
     }
     else {
-        int idx[MAX_RANK];
+        Nd4jLong idx[MAX_RANK];
         auto targetShape     = target.shapeOf();
         auto targetStrides   = target.stridesOf();
         const auto targetRank = target.rankOf();
@@ -2821,15 +2821,15 @@ bool NDArray<T>::isUnitary() {
     NDArray<T> NDArray<T>::operator()(const int* idx, bool keepUnitiesInShape)  const {
 
         const int rank = rankOf();
-        int *newShape;
-        ALLOCATE(newShape, _workspace, shape::shapeInfoLength(rank), int);
+        Nd4jLong *newShape;
+        ALLOCATE(newShape, _workspace, shape::shapeInfoLength(rank), Nd4jLong);
         memcpy(newShape, _shapeInfo, shape::shapeInfoByteLength(rank));
         newShape[shape::shapeInfoLength(rank) - 2] = -1;
 
-        int *shapeOf = shape::shapeOf(newShape);
-        int *stridesOf = shape::stride(newShape);
+        auto shapeOf = shape::shapeOf(newShape);
+        auto stridesOf = shape::stride(newShape);
 
-        Nd4jIndex offset = 0;
+        Nd4jLong offset = 0;
         int first, last;
         for (int d = 0; d < rank; ++d) {
             // building new shape first
@@ -2850,7 +2850,7 @@ bool NDArray<T>::isUnitary() {
         if(!keepUnitiesInShape) {
             // check whether units are present in newShape, if yes then remove them by applying corresponding reshape
             // for example if result has shape {1,a,1,b} then after reshaping it acquire new shape {a,b}
-            std::vector<int> nonUnitDims;
+            std::vector<Nd4jLong > nonUnitDims;
             for(int i = 0; i < result.rankOf(); ++i)
                 if(newShape[i+1] != 1)
                     nonUnitDims.push_back(newShape[i+1]);

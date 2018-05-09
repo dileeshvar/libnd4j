@@ -36,7 +36,7 @@ DECLARE_SYN(upsampling, upsampling2d);
 
 DECLARE_SHAPE_FN(upsampling2d) {
 
-    int* inputShapeInfo = inputShape->at(0);
+    auto inputShapeInfo = inputShape->at(0);
 
     REQUIRE_TRUE(inputShapeInfo[0] == 4, 0, "UPSAMPLING2D op: input should be 4D, but got %i instead!", inputShapeInfo[0]);
 
@@ -44,8 +44,8 @@ DECLARE_SHAPE_FN(upsampling2d) {
     const int factorW = INT_ARG(1);
     const int isNCHW  = block.getIArguments()->size() > 2 ? INT_ARG(2) : 0;       // 1-NCHW,  0-NHWC
 
-    int* outputShapeInfo = nullptr;
-    ALLOCATE(outputShapeInfo, block.getWorkspace(), shape::shapeInfoLength(inputShapeInfo[0]), int);
+    Nd4jLong *outputShapeInfo = nullptr;
+    ALLOCATE(outputShapeInfo, block.getWorkspace(), shape::shapeInfoLength(inputShapeInfo[0]), Nd4jLong);
 
     outputShapeInfo[0] = inputShapeInfo[0];
     outputShapeInfo[1] = inputShapeInfo[1];

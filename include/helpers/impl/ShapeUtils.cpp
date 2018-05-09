@@ -234,7 +234,7 @@ Nd4jLong* ShapeUtils<T>::evalReduceShapeInfo(const char order, std::vector<int>&
     Nd4jLong* ShapeUtils<T>::evalPermShapeInfo(const int* dimensions, const int rank, const NDArray<T>& arr, nd4j::memory::Workspace* workspace) {
 
     if (!arr.nonNull() || rank != arr.rankOf())
-        throw "ShapeUtils<T>::evalPermShapeInfo static method: wrong arguments in permute method: either array is nullptr or rank is not suitable!";
+        throw "ShapeUtils<T>::evalPermShapeInfo static method: wrong arguments in pn/termute method: either array is nullptr or rank is not suitable!";
     
     auto shapeInfoLength = shape::shapeInfoLength(rank);
     // allocate memory for new array - shapeInfo
