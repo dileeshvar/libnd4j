@@ -264,7 +264,7 @@ namespace nd4j {
          */
         void streamline(char order = 'a');
 
-        
+
 
         /**
         *  check whether array is contiguous in memory
@@ -756,6 +756,14 @@ namespace nd4j {
         *  keepUnitiesInShape - if false then eliminate unities from resulting array shape, for example {1,a,1,b} -> {a,b}
         */
         NDArray<T> operator()(const Intervals& idx, bool keepUnitiesInShape = false)  const;
+
+        /**
+        *  operator returns sub-array with buffer pointing at this->_buffer with offset defined by given intervals
+        *  idx - intervals of indexes which define the sub-arrays to point on, idx has form {dim0Start,dim0End,  dim1Start,dim1End, ....} and length (2 * this->rankOf())
+        *        when (dimStart == dimEnd) then whole range will be used for current dimension
+        *  keepUnitiesInShape - if false then eliminate unities from resulting array shape, for example {1,a,1,b} -> {a,b}
+        */
+        NDArray<T> operator()(const int* idx, bool keepUnitiesInShape = false)  const;
 
         /**
         *  addition operator: array + other
@@ -1326,7 +1334,7 @@ template<typename T>
     if (i >= shape::length(_shapeInfo))
             throw std::invalid_argument("NDArray::operator(i): dinput index is out of array length !");
 
-    auto ews   = shape::elementWiseStride(_shapeInfo);   
+    auto ews   = shape::elementWiseStride(_shapeInfo);
     char order = ordering();   
 
     if(ews == 1 && order == 'c')
@@ -1349,8 +1357,8 @@ template<typename T>
     if (i >= shape::length(_shapeInfo))
             throw std::invalid_argument("NDArray::operator(i): input index is out of array length !");
 
-    auto  ews   = shape::elementWiseStride(_shapeInfo);   
-    auto order = ordering();   
+    auto  ews   = shape::elementWiseStride(_shapeInfo);
+    auto order = ordering();
 
     if(ews == 1 && order == 'c')
         return _buffer[i];
@@ -1360,7 +1368,7 @@ template<typename T>
         Nd4jLong idx[MAX_RANK];
         shape::ind2subC(rankOf(), shapeOf(), i, idx);
         auto offset = shape::getOffset(0, shapeOf(), stridesOf(), idx, rankOf());
-        return _buffer[offset];        
+        return _buffer[offset];
     }    
 }
 

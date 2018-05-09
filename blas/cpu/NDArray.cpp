@@ -328,7 +328,7 @@ template <typename T>
             Nd4jLong tCoord[MAX_RANK];
             Nd4jLong uCoord[MAX_RANK];
             Nd4jLong vCoord[MAX_RANK];
-            Nd4jLong zCoord[MAX_RANK]; 
+            Nd4jLong zCoord[MAX_RANK];
 
             #pragma omp parallel for schedule(guided) private(tCoord, uCoord, vCoord, zCoord)
             for (int e = 0; e < this->lengthOf(); e++) {
@@ -1878,11 +1878,25 @@ NDArray<T> NDArray<T>::tile(const std::vector<Nd4jLong>& reps) const {
 
     // fill newBuff, loop through all elements of newBuff 
     // looping through _buffer goes automatically by means of getSubArrayIndex applying
-    for(int i=0;  i<result.lengthOf(); ++i)        
-        result(i) = (*this)(shape::subArrayIndex(result._shapeInfo, _shapeInfo, i));
+    const auto resultLen = result.lengthOf();
+    if(result.ordering() == 'c') {           //  ews == 1 always here
+#pragma omp parallel for simd if(resultLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided)
+        for(int i=0;  i<resultLen; ++i)
+            newBuff[i] = (*this)(shape::subArrayIndex(newShapeInfo, _shapeInfo, i));
+    }
+    else {
+        int idx[MAX_RANK];
+        auto resultShape   = result.shapeOf();
+        auto resultStrides = result.stridesOf();
+        const auto resultRank = result.rankOf();
+#pragma omp parallel for simd if(resultLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided) private(idx)
+        for(int i=0;  i<resultLen; ++i) {
+            shape::ind2subC(resultRank, resultShape, i, idx);
+            newBuff[ shape::getOffset(0, resultShape, resultStrides, idx, resultRank) ] = (*this)(shape::subArrayIndex(newShapeInfo, _shapeInfo, i));
+        }
+    }
               
     return result;
-    
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1900,8 +1914,30 @@ void NDArray<T>::tile(const std::vector<Nd4jLong>& reps, NDArray<T>& target) con
 
     // fill newBuff, loop through all elements of newBuff 
     // looping through _buffer goes automatically by means of getSubArrayIndex applying
-    for(Nd4jLong i=0;  i<target.lengthOf(); ++i)        
-        target.putIndexedScalar(i, this->getIndexedScalar(ShapeUtils<T>::getSubArrayIndex(target._shapeInfo, _shapeInfo, i)));
+    const int ews = target.ews();
+    const int targetLen = target.lengthOf();
+    T* targetBuff = target.getBuffer();
+    if(target.ordering() == 'c' && ews == 1) {           //  ews == 1 always here
+#pragma omp parallel for simd if(targetLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided)
+        for(Nd4jLong i=0;  i<targetLen; ++i)
+            targetBuff[i] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
+    }
+    else if(target.ordering() == 'c' && ews > 1) {
+#pragma omp parallel for simd if(targetLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided)
+        for(int i=0;  i<targetLen; ++i)
+            targetBuff[i*ews] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
+    }
+    else {
+        int idx[MAX_RANK];
+        auto targetShape     = target.shapeOf();
+        auto targetStrides   = target.stridesOf();
+        const auto targetRank = target.rankOf();
+#pragma omp parallel for simd if(targetLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided) private(idx)
+        for(int i=0;  i<targetLen; ++i) {
+            shape::ind2subC(targetRank, targetShape, i, idx);
+            targetBuff[ shape::getOffset(0, targetShape, targetStrides, idx, targetRank) ] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1916,8 +1952,30 @@ void NDArray<T>::tile(NDArray<T>& target) const {
 
     // fill newBuff, loop through all elements of newBuff 
     // looping through _buffer goes automatically by means of getSubArrayIndex applying
-    for(int i=0;  i<target.lengthOf(); ++i)        
-        target.putIndexedScalar(i, this->getIndexedScalar(ShapeUtils<T>::getSubArrayIndex(target._shapeInfo, _shapeInfo, i)));
+    const int ews = target.ews();
+    const int targetLen = target.lengthOf();
+    T* targetBuff = target.getBuffer();
+    if(target.ordering() == 'c' && ews == 1) {           //  ews == 1 always here
+#pragma omp parallel for simd if(targetLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided)
+        for(int i=0;  i<targetLen; ++i)
+            targetBuff[i] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
+    }
+    else if(target.ordering() == 'c' && ews > 1) {
+#pragma omp parallel for simd if(targetLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided)
+        for(int i=0;  i<targetLen; ++i)
+            targetBuff[i*ews] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
+    }
+    else {
+        int idx[MAX_RANK];
+        auto targetShape     = target.shapeOf();
+        auto targetStrides   = target.stridesOf();
+        const auto targetRank = target.rankOf();
+#pragma omp parallel for simd if(targetLen > Environment::getInstance()->elementwiseThreshold()) schedule(guided) private(idx)
+        for(int i=0;  i<targetLen; ++i) {
+            shape::ind2subC(targetRank, targetShape, i, idx);
+            targetBuff[ shape::getOffset(0, targetShape, targetStrides, idx, targetRank) ] = (*this)(shape::subArrayIndex(target._shapeInfo, _shapeInfo, i));
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2760,15 +2818,64 @@ bool NDArray<T>::isUnitary() {
     ////////////////////////////////////////////////////////////////////////
     // operator returns sub-array with buffer pointing at this->_buffer + certain offset
     template<typename T>
+    NDArray<T> NDArray<T>::operator()(const int* idx, bool keepUnitiesInShape)  const {
+
+        const int rank = rankOf();
+        int *newShape;
+        ALLOCATE(newShape, _workspace, shape::shapeInfoLength(rank), int);
+        memcpy(newShape, _shapeInfo, shape::shapeInfoByteLength(rank));
+        newShape[shape::shapeInfoLength(rank) - 2] = -1;
+
+        int *shapeOf = shape::shapeOf(newShape);
+        int *stridesOf = shape::stride(newShape);
+
+        Nd4jIndex offset = 0;
+        int first, last;
+        for (int d = 0; d < rank; ++d) {
+            // building new shape first
+            if (idx[2*d] != idx[2*d+1]) {
+
+                first = idx[2*d]   >= 0 ? idx[2*d]   : idx[2*d]   + sizeAt(d) + 1;
+                last  = idx[2*d+1] >= 0 ? idx[2*d+1] : idx[2*d+1] + sizeAt(d) + 1;
+
+                shapeOf[d] = last - first;
+                // for offset we're taking only the first index
+                offset += first * stridesOf[d];
+            }
+        }
+
+        NDArray<T> result(_buffer + offset, newShape, _workspace);
+        result._isShapeAlloc = true;
+
+        if(!keepUnitiesInShape) {
+            // check whether units are present in newShape, if yes then remove them by applying corresponding reshape
+            // for example if result has shape {1,a,1,b} then after reshaping it acquire new shape {a,b}
+            std::vector<int> nonUnitDims;
+            for(int i = 0; i < result.rankOf(); ++i)
+                if(newShape[i+1] != 1)
+                    nonUnitDims.push_back(newShape[i+1]);
+
+            if(nonUnitDims.size() != result.rankOf())
+                result.reshapei(nonUnitDims);
+        }
+
+        return result;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // operator returns sub-array with buffer pointing at this->_buffer + certain offset
+    template<typename T>
     NDArray<T> NDArray<T>::operator()(const Intervals& idx, bool keepUnitiesInShape)  const {
 
-        if (idx.size() != this->rankOf())
+        const int rank = rankOf();
+        if (idx.size() != rank)
             throw "NDArray::operator(Intervals): number of indices should match the rank of array!";
 
         Nd4jLong *newShape;
-        ALLOCATE(newShape, _workspace, shape::shapeInfoLength(this->rankOf()), Nd4jLong);
-        memcpy(newShape, this->_shapeInfo, shape::shapeInfoByteLength(this->rankOf()));
-        newShape[shape::shapeInfoLength(this->rankOf()) - 2] = -1;
+        ALLOCATE(newShape, _workspace, shape::shapeInfoLength(rank), Nd4jLong);
+        memcpy(newShape, _shapeInfo, shape::shapeInfoByteLength(rank));
+        newShape[shape::shapeInfoLength(rank) - 2] = -1;
 
         auto shapeOf = shape::shapeOf(newShape);
         auto stridesOf = shape::stride(newShape);
@@ -2780,8 +2887,8 @@ bool NDArray<T>::isUnitary() {
             if (!idx[d].empty()) {
                 if (idx[d].size() != 2)
                     throw "NDArray::operator(Intervals): the interval must contain only two numbers {first, last} !";
-                first = idx[d][0] >= 0 ? idx[d][0] : idx[d][0] + this->sizeAt(d) + 1;
-                last  = idx[d][1] >= 0 ? idx[d][1] : idx[d][1] + this->sizeAt(d) + 1;
+                first = idx[d][0] >= 0 ? idx[d][0] : idx[d][0] + sizeAt(d) + 1;
+                last  = idx[d][1] >= 0 ? idx[d][1] : idx[d][1] + sizeAt(d) + 1;
 
                 shapeOf[d] = last - first;
                 // for offset we're taking only the first index
@@ -2789,7 +2896,7 @@ bool NDArray<T>::isUnitary() {
             }
         }
 
-        NDArray<T> result(this->_buffer + offset, newShape, this->_workspace);
+        NDArray<T> result(_buffer + offset, newShape, _workspace);
         result._isShapeAlloc = true;
 
         if(!keepUnitiesInShape) {
@@ -3139,7 +3246,7 @@ NDArray<T> NDArray<T>::operator+(const NDArray<T>& other) const {
         else {            
             
             int diagSize  = 100000000;        
-            Nd4jLong indices[MAX_RANK];     
+            Nd4jLong indices[MAX_RANK];
                     
             for(int i = 0; i < rank; ++i) {    
                 if(diagSize > shapeOf()[i])
@@ -3147,7 +3254,7 @@ NDArray<T> NDArray<T>::operator+(const NDArray<T>& other) const {
                 indices[i] = 1;
             }
             
-            auto step = shape::getOffset(0, shapeOf(), stridesOf(), indices, rank);            
+            auto step = shape::getOffset(0, shapeOf(), stridesOf(), indices, rank);
                         
             if(type == 'c') {
                 outShapeInfo[1] = diagSize;

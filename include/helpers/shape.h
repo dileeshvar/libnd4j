@@ -4429,16 +4429,19 @@ template <typename T>
 // return absolute index of array min, min is sub-array of max, index to be returned is min's index and corresponds to maxIdx of max array 
 INLINEDEF _CUDA_H Nd4jLong subArrayIndex(const Nd4jLong* maxShapeInfo, const Nd4jLong* minShapeInfo, const int maxIdx) {
 
-    Nd4jLong *idxPerRank = new Nd4jLong[maxShapeInfo[0]];
-    ind2subC(maxShapeInfo[0], const_cast<Nd4jLong*>(maxShapeInfo)+1, const_cast<int&>(maxIdx), idxPerRank);    
+    const int rankMax = maxShapeInfo[0];
+    const int rankMin = minShapeInfo[0];
+
+    auto* idxPerRank = new Nd4jLong[rankMax];
+    ind2subC(rankMax, const_cast<Nd4jLong *>(maxShapeInfo)+1, const_cast<int&>(maxIdx), idxPerRank);
 
     Nd4jLong minIdx = 0;
-    for(int i = 0; i < minShapeInfo[0]; ++i) {
-        if(minShapeInfo[minShapeInfo[0] - i] == 1 || idxPerRank[maxShapeInfo[0] - i - 1] == 0)
+    for(int i = 0; i < rankMin; ++i) {
+        if(minShapeInfo[rankMin - i] == 1 || idxPerRank[rankMax - i - 1] == 0)
             continue;
-        if(idxPerRank[maxShapeInfo[0] - i - 1] >= minShapeInfo[minShapeInfo[0] - i])
-            idxPerRank[maxShapeInfo[0] - i - 1] %= minShapeInfo[minShapeInfo[0] - i];
-        minIdx += idxPerRank[maxShapeInfo[0] - i - 1] * stride(const_cast<Nd4jLong*>(minShapeInfo))[minShapeInfo[0] - i - 1];
+        if(idxPerRank[rankMax - i - 1] >= minShapeInfo[rankMin - i])
+            idxPerRank[rankMax - i - 1] %= minShapeInfo[rankMin - i];
+        minIdx += idxPerRank[rankMax - i - 1] * stride(const_cast<Nd4jLong*>(minShapeInfo))[rankMin - i - 1];
     }
 
     delete[] idxPerRank;
