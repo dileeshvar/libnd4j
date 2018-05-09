@@ -31,7 +31,7 @@ TEST_F(GraphExecutionerTests, Test_Implicit_Output_1) {
 
     auto var0 = outputs->at(0);
 
-    ASSERT_EQ(8, var0->id());
+    ASSERT_EQ(7, var0->id());
     ASSERT_EQ(0, var0->index());
 
     delete outputs;
@@ -49,7 +49,7 @@ TEST_F(GraphExecutionerTests, Test_Implicit_Output_2) {
 
     auto var0 = outputs->at(0);
 
-    ASSERT_EQ(4, var0->id());
+    ASSERT_EQ(3, var0->id());
     ASSERT_EQ(0, var0->index());
 
     delete outputs;
@@ -71,7 +71,7 @@ TEST_F(GraphExecutionerTests, Test_Implicit_Output_3) {
 
     auto var0 = outputs->at(0);
 
-    ASSERT_EQ(4, var0->id());
+    ASSERT_EQ(3, var0->id());
     ASSERT_EQ(0, var0->index());
 
     auto array = var0->getNDArray();

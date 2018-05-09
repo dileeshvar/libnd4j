@@ -606,8 +606,8 @@ TEST_F(FlatBuffersTest, transpose) {
 
     //graph->printOut();
 
-    //auto result = GraphExecutioner<float>::execute(graph);
-    //ASSERT_EQ(ND4J_STATUS_OK, result);
+    auto result = GraphExecutioner<float>::execute(graph);
+    ASSERT_EQ(ND4J_STATUS_OK, result);
 
     delete graph;
 }

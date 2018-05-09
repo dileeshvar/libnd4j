@@ -659,7 +659,7 @@ TEST_F(JavaInteropTests, Test_SimpleIf_Output) {
 
     NativeOps ops;
 
-    auto pl = nd4j::graph::readFlatBuffers("./resources/simpleif_0_java.fb");
+    auto pl = nd4j::graph::readFlatBuffers("./resources/simpleif_0_1.fb");
     auto ptr = ops.executeFlatGraphFloat(nullptr, pl);
 
     Environment::getInstance()->setDebug(false);

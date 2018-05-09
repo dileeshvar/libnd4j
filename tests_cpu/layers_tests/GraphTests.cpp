@@ -1223,8 +1223,10 @@ TEST_F(GraphTests, Test_Clone_1) {
 
     ASSERT_EQ(ND4J_STATUS_OK, statusClone);
 
-    auto z0 = variableSpace->getVariable(4)->getNDArray();
-    auto z1 = clone->getVariableSpace()->getVariable(4)->getNDArray();
+    ASSERT_TRUE(variableSpace->hasVariable(3));
+
+    auto z0 = variableSpace->getVariable(3)->getNDArray();
+    auto z1 = clone->getVariableSpace()->getVariable(3)->getNDArray();
 
     ASSERT_TRUE(exp.isSameShape(z0));
     ASSERT_TRUE(exp.equalsTo(z0));
@@ -1259,8 +1261,10 @@ TEST_F(GraphTests, Test_Clone_2) {
 
     ASSERT_EQ(ND4J_STATUS_OK, statusClone);
 
-    auto z0 = variableSpace->getVariable(4)->getNDArray();
-    auto z1 = clone->getVariableSpace()->getVariable(4)->getNDArray();
+    ASSERT_TRUE(variableSpace->hasVariable(3));
+
+    auto z0 = variableSpace->getVariable(3)->getNDArray();
+    auto z1 = clone->getVariableSpace()->getVariable(3)->getNDArray();
 
     ASSERT_TRUE(exp.isSameShape(z0));
     ASSERT_TRUE(exp.equalsTo(z0));
@@ -1287,8 +1291,10 @@ TEST_F(GraphTests, Test_Dtype_Conversion_1) {
     Nd4jStatus statusF = GraphExecutioner<float>::execute(gf);
     ASSERT_EQ(ND4J_STATUS_OK, statusF);
 
-    ASSERT_TRUE(gf->getVariableSpace()->hasVariable(4));
-    auto z1 = gf->getVariableSpace()->getVariable(4)->getNDArray();
+    ASSERT_TRUE(gf->getVariableSpace()->hasVariable(3));
+
+    ASSERT_TRUE(gf->getVariableSpace()->hasVariable(3));
+    auto z1 = gf->getVariableSpace()->getVariable(3)->getNDArray();
 
     ASSERT_TRUE(expF.isSameShape(z1));
     ASSERT_TRUE(expF.equalsTo(z1));
@@ -1298,8 +1304,8 @@ TEST_F(GraphTests, Test_Dtype_Conversion_1) {
     Nd4jStatus statusD = GraphExecutioner<double>::execute(gd);
     ASSERT_EQ(ND4J_STATUS_OK, statusD);
 
-    ASSERT_TRUE(gd->getVariableSpace()->hasVariable(4));
-    auto z2 = gd->getVariableSpace()->getVariable(4)->getNDArray();
+    ASSERT_TRUE(gd->getVariableSpace()->hasVariable(3));
+    auto z2 = gd->getVariableSpace()->getVariable(3)->getNDArray();
 
     ASSERT_TRUE(expD.isSameShape(z2));
     ASSERT_TRUE(expD.equalsTo(z2));
@@ -1377,7 +1383,7 @@ TEST_F(GraphTests, OpListTest_1) {
     GraphUtils::filterOperations(ops);
     ASSERT_TRUE(ops.size() == 7);
 
-    std::string exp(" -g \"-DLIBND4J_OPS_LIST='-DOP_rank=true -DOP_range=true -DOP_subtract=true -DOP_transpose=true -DOP_matmul=true -DOP_biasadd=true -DOP_TRANSFORM{15}=true '\"");
+    std::string exp(" -g \"-DLIBND4J_OPS_LIST='-DOP_rank=true -DOP_range=true -DOP_subtract=true -DOP_permute=true -DOP_matmul=true -DOP_biasadd=true -DOP_TRANSFORM{15}=true '\"");
     std::string out = GraphUtils::makeCommandLine(ops);
 //    nd4j_printf("EXP: >%s<\n", exp.c_str());
 //    nd4j_printf("OUT: >%s<\n", out.c_str());
@@ -1402,7 +1408,7 @@ TEST_F(GraphTests, OpListTest_2) {
 
     GraphUtils::filterOperations(ops);
 
-    std::string exp = " -g \"-DLIBND4J_OPS_LIST='-DOP_rank=true -DOP_range=true -DOP_subtract=true -DOP_transpose=true -DOP_matmul=true -DOP_biasadd=true -DOP_TRANSFORM{15}=true -DOP_strided_slice=true -DOP_ACCUMULATION{1}=true '\"";
+    std::string exp = " -g \"-DLIBND4J_OPS_LIST='-DOP_rank=true -DOP_range=true -DOP_subtract=true -DOP_permute=true -DOP_matmul=true -DOP_biasadd=true -DOP_TRANSFORM{15}=true -DOP_strided_slice=true -DOP_ACCUMULATION{1}=true '\"";
 
     ASSERT_TRUE(ops.size() == 9);
     ASSERT_EQ(exp, GraphUtils::makeCommandLine(ops));
