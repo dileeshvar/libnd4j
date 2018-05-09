@@ -84,7 +84,7 @@ namespace nd4j {
                     auto s = x->shapeInfo();
                     auto e = block.numT() > 0 ? block.getTArguments()->data() : nullptr;
 
-                    x->printIndexedBuffer("x");
+                    //x->printIndexedBuffer("x");
 
                     // scalar
                     T res = NativeOpExcutioner<T>::execReduceScalar(opNum, b, s, e);

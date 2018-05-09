@@ -545,7 +545,7 @@ namespace nd4j {
                 // first pass for unmapped nodes, we try to build tale here
                 typename std::map<int, Node<T> *>::iterator it;
                 int cntf = 0;
-                nd4j_printf("-----------\n","");
+                nd4j_debug("-----------\n","");
                 for ( it = _unmapped.begin(); it != _unmapped.end(); it++ ) {
                     auto node = it->second;
                     int tK = it->first;
