@@ -2,7 +2,16 @@
 //  @author raver119@gmail.com
 //
 
+#ifndef LIBND4J_SPECIAL_KERNELS_H
+#define LIBND4J_SPECIAL_KERNELS_H
 
+#include <helpers/shape.h>
+
+#include <cuda.h>
+#include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
+#include <cuda_device_runtime_api.h>
+#include <device_launch_parameters.h>
 
 /**
 * This is utility kernel, that updates given special buffer with proper values in device memory
@@ -23,6 +32,9 @@ extern "C" __global__ void prepareShapeBuffer(int *dimension, int *maxDimension,
     specialPointer[5] = 0;
     specialPointer[6] = 1;
     specialPointer[7] = 99;
+
+    //printf("special[0]: [%lld]\n", (long long) specialPointer[0]);
+    //shape::printShapeInfoLinear("prepareShapeBuffer", specialPointer);
 }
 
 extern "C" __global__ void prepareDimensionalShapeBuffer(Nd4jLong *xShapeInfoBuffer, float *extraParams, Nd4jLong *zShapeInfo) {
@@ -965,3 +977,6 @@ extern "C" __global__ void shuffleKernelFloat(float **x, Nd4jLong **xShapeInfo, 
 extern "C" __global__ void shuffleKernelHalf(float16 **x, Nd4jLong **xShapeInfo, float16 **z, Nd4jLong **zShapeInfo, int N, int *shuffleMap, Nd4jLong **tadOnlyShapeInfo, Nd4jLong **tadOffsets) {
     shuffleKernelGeneric<float16>(x, xShapeInfo, z, zShapeInfo, N, shuffleMap, tadOnlyShapeInfo, tadOffsets);
 }
+
+
+#endif

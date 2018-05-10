@@ -94,7 +94,7 @@
 #endif
 
 #define DEBUG_CALL(STREAM)      if (nd4j::Environment::getInstance()->isDebug()) { cudaError_t tRes = cudaStreamSynchronize(*STREAM); checkCudaErrors(tRes); if (tRes != 0) { throw std::runtime_error(); }; }
-#define DEBUG_KERNEL(STREAM, OP_NUM)       if (nd4j::Environment::getInstance()->isDebug()) { cudaError_t tRes = cudaStreamSynchronize(*STREAM); checkCudaErrors(tRes); if (tRes != 0) {std::string tOp = "Kernel OpNum failed: [" + nd4j::StringUtils::valueToString<int>(OP_NUM) + std::string("]"); throw std::runtime_error(tOp.c_str()); }; }
+#define DEBUG_KERNEL(STREAM, OP_NUM)       if (nd4j::Environment::getInstance()->isDebug()) { cudaError_t tRes = cudaStreamSynchronize(*STREAM); checkCudaErrors(tRes); if (tRes != 0) {std::string tFile(__FILE__); std::string tOp = "Kernel OpNum failed: [" + nd4j::StringUtils::valueToString<int>(OP_NUM) + std::string("]; File: ") + tFile + std::string(":") + nd4j::StringUtils::valueToString<int>(__LINE__); throw std::runtime_error(tOp.c_str()); }; }
 
 #define EXTRACT(...) EXTRACT __VA_ARGS__ 
 #define NOTHING_EXTRACT 
@@ -1369,7 +1369,7 @@
 template <typename OpName>  \
 struct __registratorSynonymFloat_##NAME {\
     __registratorSynonymFloat_##NAME(const char *name, const char *oname) {\
-        OpName *ptr = (OpName *) OpRegistrator::getInstance()->getOperationFloat(oname); \
+        auto ptr = reinterpret_cast<OpName *>(OpRegistrator::getInstance()->getOperationFloat(oname)); \
         if (ptr == nullptr) { \
             std::string newName(name); \
             std::string oldName(oname); \
@@ -1382,7 +1382,7 @@ struct __registratorSynonymFloat_##NAME {\
 template <typename OpName>  \
 struct __registratorSynonymHalf_##NAME {\
     __registratorSynonymHalf_##NAME(const char *name, const char *oname) {\
-        OpName *ptr = (OpName *) OpRegistrator::getInstance()->getOperationHalf(oname); \
+        auto ptr = reinterpret_cast<OpName *>(OpRegistrator::getInstance()->getOperationHalf(oname)); \
         if (ptr == nullptr) { \
             std::string newName(name); \
             std::string oldName(oname); \
@@ -1395,7 +1395,7 @@ struct __registratorSynonymHalf_##NAME {\
 template <typename OpName>  \
 struct __registratorSynonymDouble_##NAME {\
     __registratorSynonymDouble_##NAME(const char *name, const char *oname) {\
-        OpName *ptr = (OpName *) OpRegistrator::getInstance()->getOperationDouble(oname); \
+        auto ptr = reinterpret_cast<OpName *>(OpRegistrator::getInstance()->getOperationDouble(oname)); \
         if (ptr == nullptr) { \
             std::string newName(name); \
             std::string oldName(oname); \
@@ -1522,7 +1522,7 @@ struct __registratorSynonymDouble_##NAME {\
 
 
 
-#define ALLOCATE(VARIABLE, WORKSPACE, LENGTH, TT)   if (WORKSPACE == nullptr) {VARIABLE = new TT[LENGTH]; } else {VARIABLE = (TT*) WORKSPACE->allocateBytes(LENGTH * sizeof(TT)); }
+#define ALLOCATE(VARIABLE, WORKSPACE, LENGTH, TT)   if (WORKSPACE == nullptr) {VARIABLE = new TT[LENGTH]; } else {VARIABLE = reinterpret_cast<TT*>(WORKSPACE->allocateBytes(LENGTH * sizeof(TT))); }
 #define RELEASE(VARIABLE, WORKSPACE)    if (WORKSPACE == nullptr) delete[] VARIABLE;
 
 #define OVERWRITE_RESULT(A)     this->overwriteResult(block, 0, A)
@@ -1537,10 +1537,10 @@ struct __registratorSynonymDouble_##NAME {\
 #define CHECK_STASH(NAME)   block.getStash()->checkStash(block.getNodeId(), NAME);
 #define UNSTASH(NAME)       block.getStash()->extractArray(block.getNodeId(), NAME);
 
-#define INPUT_VARIABLE(INDEX)     (nd4j::NDArray<T> *) block.getVariable(INDEX)->getNDArray()
-#define OUTPUT_VARIABLE(INDEX)     this->getZ(block, INDEX)
+#define INPUT_VARIABLE(INDEX)     reinterpret_cast<nd4j::NDArray<T> *>(block.getVariable(INDEX)->getNDArray())
+#define OUTPUT_VARIABLE(INDEX)    reinterpret_cast<nd4j::NDArray<T> *>(this->getZ(block, INDEX))
 
-#define INPUT_LIST(INDEX)     (nd4j::NDArrayList<T> *) block.getVariable(INDEX)->getNDArrayList()
+#define INPUT_LIST(INDEX)     reinterpret_cast<nd4j::NDArrayList<T> *>(block.getVariable(INDEX)->getNDArrayList())
 
 #define INT_ARG(INDEX)     block.getIArguments()->at(INDEX)
 #define T_ARG(INDEX)     block.getTArguments()->at(INDEX)

@@ -14,25 +14,25 @@ namespace nd4j {
 
         template <typename OpName>
         __registratorFloat<OpName>::__registratorFloat() {
-            OpName *ptr = new OpName();
+            auto ptr = new OpName();
             OpRegistrator::getInstance()->registerOperationFloat(ptr);
         }
 
         template <typename OpName>
         __registratorHalf<OpName>::__registratorHalf() {
-            OpName *ptr = new OpName();
+            auto ptr = new OpName();
             OpRegistrator::getInstance()->registerOperationHalf(ptr);
         }
 
         template <typename OpName>
         __registratorDouble<OpName>::__registratorDouble() {
-            OpName *ptr = new OpName();
+            auto ptr = new OpName();
             OpRegistrator::getInstance()->registerOperationDouble(ptr);
         }
 
         template <typename OpName>
         __registratorSynonymFloat<OpName>::__registratorSynonymFloat(const char *name, const char *oname) {
-            OpName *ptr = (OpName *) OpRegistrator::getInstance()->getOperationFloat(oname);
+            auto ptr = reinterpret_cast<OpName *>(OpRegistrator::getInstance()->getOperationFloat(oname));
             if (ptr == nullptr) {
                 std::string newName(name);
                 std::string oldName(oname);
@@ -45,7 +45,7 @@ namespace nd4j {
 
         template <typename OpName>
         __registratorSynonymHalf<OpName>::__registratorSynonymHalf(const char *name, const char *oname) {
-            OpName *ptr = (OpName *) OpRegistrator::getInstance()->getOperationHalf(oname);
+            auto ptr = reinterpret_cast<OpName *>(OpRegistrator::getInstance()->getOperationHalf(oname));
             if (ptr == nullptr) {
                 std::string newName(name);
                 std::string oldName(oname);
@@ -58,7 +58,7 @@ namespace nd4j {
 
         template <typename OpName>
         __registratorSynonymDouble<OpName>::__registratorSynonymDouble(const char *name, const char *oname) {
-            OpName *ptr = (OpName *) OpRegistrator::getInstance()->getOperationDouble(oname);
+            auto ptr = reinterpret_cast<OpName *>(OpRegistrator::getInstance()->getOperationDouble(oname));
             if (ptr == nullptr) {
                 std::string newName(name);
                 std::string oldName(oname);

@@ -175,8 +175,8 @@ template <typename T>
         _buffer =  new T[arrLength];
         _shapeInfo = new Nd4jLong[shapeLength];
     } else {
-        _buffer = (T*) _workspace->allocateBytes(arrLength * sizeOfT());
-        _shapeInfo = (Nd4jLong *) _workspace->allocateBytes(shape::shapeInfoByteLength(const_cast<Nd4jLong*>(shapeInfo)));
+        _buffer = reinterpret_cast<T*>(_workspace->allocateBytes(arrLength * sizeOfT()));
+        _shapeInfo = reinterpret_cast<Nd4jLong *>(_workspace->allocateBytes(shape::shapeInfoByteLength(const_cast<Nd4jLong*>(shapeInfo))));
     }
 
     memset(_buffer, 0, arrLength*sizeOfT());          // set all elements in new array to be zeros
@@ -481,16 +481,16 @@ template <typename T>
 ////////////////////////////////////////////////////////////////////////
 template <typename T>
 NDArray<T>::NDArray(const NDArray<T> *other, const bool copyStrides, nd4j::memory::Workspace* workspace) {
-    int arrLength = shape::length(other->_shapeInfo);
-    int shapeLength = shape::shapeInfoByteLength(other->_shapeInfo);
+    auto arrLength = shape::length(other->_shapeInfo);
+    auto shapeLength = shape::shapeInfoByteLength(other->_shapeInfo);
 
     _workspace = workspace;
     if (workspace == nullptr) {
         _buffer =  new T[arrLength];
         _shapeInfo = new Nd4jLong[shapeLength];
     } else {
-        _buffer = (T*) _workspace->allocateBytes(arrLength * sizeOfT());
-        _shapeInfo = (Nd4jLong*) _workspace->allocateBytes(shapeLength);
+        _buffer = reinterpret_cast<T*>(_workspace->allocateBytes(arrLength * sizeOfT()));
+        _shapeInfo = reinterpret_cast<Nd4jLong*>(_workspace->allocateBytes(shapeLength));
     }
 
     // FIXME: memcpy should be removed
@@ -536,8 +536,8 @@ NDArray<T>::NDArray(const NDArray<T>& other) {
         _buffer =  new T[arrLength];
         _shapeInfo = new Nd4jLong[shapeLength];
     } else {
-        _buffer = (T*) _workspace->allocateBytes(arrLength * sizeOfT());
-        _shapeInfo = (Nd4jLong*) _workspace->allocateBytes(shapeLength);
+        _buffer = reinterpret_cast<T*>(_workspace->allocateBytes(arrLength * sizeOfT()));
+        _shapeInfo = reinterpret_cast<Nd4jLong*>(_workspace->allocateBytes(shapeLength));
     }
 
     // memcpy(_buffer, other._buffer, arrLength*sizeOfT());      // copy other._buffer information into new array
@@ -725,8 +725,8 @@ void NDArray<T>::replacePointers(T *buffer, Nd4jLong *shapeInfo, const bool rele
 
             _buffer =  new T[shape::length(_shapeInfo)];
         } else {
-            _buffer = (T*) _workspace->allocateBytes(data.size() * sizeOfT());
-            _shapeInfo = (Nd4jLong*) _workspace->allocateBytes(shape::shapeInfoByteLength(rank));
+            _buffer = reinterpret_cast<T*>(_workspace->allocateBytes(data.size() * sizeOfT()));
+            _shapeInfo = reinterpret_cast<Nd4jLong*>(_workspace->allocateBytes(shape::shapeInfoByteLength(rank)));
             if (order == 'f')
                 shape::shapeBufferFortran(rank, shapeOf, _shapeInfo);
             else
@@ -773,14 +773,14 @@ void NDArray<T>::replacePointers(T *buffer, Nd4jLong *shapeInfo, const bool rele
 
             _buffer =  new T[shape::length(_shapeInfo)];
         } else {
-            _shapeInfo = (Nd4jLong*) _workspace->allocateBytes(shape::shapeInfoByteLength(rank));
+            _shapeInfo = reinterpret_cast<Nd4jLong*>(_workspace->allocateBytes(shape::shapeInfoByteLength(rank)));
 
             if (order == 'f')
                 shape::shapeBufferFortran(rank, shapeOf, _shapeInfo);
             else
                 shape::shapeBuffer(rank, shapeOf, _shapeInfo);
 
-            _buffer = (T*) _workspace->allocateBytes(shape::length(_shapeInfo) * sizeOfT());
+            _buffer = reinterpret_cast<T*>(_workspace->allocateBytes(shape::length(_shapeInfo) * sizeOfT()));
         }
 
         memset(_buffer, 0, sizeOfT() * shape::length(_shapeInfo));
@@ -817,7 +817,7 @@ void NDArray<T>::replacePointers(T *buffer, Nd4jLong *shapeInfo, const bool rele
             else
                 _shapeInfo = shape::shapeBuffer(rank, shapeOf);
         } else {
-            _shapeInfo = (Nd4jLong*) _workspace->allocateBytes(shape::shapeInfoByteLength(rank));
+            _shapeInfo = reinterpret_cast<Nd4jLong*>(_workspace->allocateBytes(shape::shapeInfoByteLength(rank)));
 
             if (order == 'f')
                 shape::shapeBufferFortran(rank, shapeOf, _shapeInfo);
@@ -950,8 +950,8 @@ template <typename T>
             newShapeInfo = shape::shapeBuffer(rankOf(), shapeOf());
 
     } else {
-        newBuffer = (T*) _workspace->allocateBytes(newLength * sizeOfT());
-        newShapeInfo = (Nd4jLong*) _workspace->allocateBytes(shape::shapeInfoByteLength(this->rankOf()));
+        newBuffer = reinterpret_cast<T *>(_workspace->allocateBytes(newLength * sizeOfT()));
+        newShapeInfo = reinterpret_cast<Nd4jLong *>(_workspace->allocateBytes(shape::shapeInfoByteLength(this->rankOf())));
 
         if (order == 'f')
             shape::shapeBufferFortran(rankOf(), shapeOf(), newShapeInfo);
@@ -961,7 +961,7 @@ template <typename T>
     // FIXME: we know that EWS is always 1 after dup() result
     newShapeInfo[rankOf() * 2 + 2] = 1;
 
-    NDArray<T> *result = new NDArray<T>(newBuffer, newShapeInfo, _workspace);
+    auto result = new NDArray<T>(newBuffer, newShapeInfo, _workspace);
     // this values should be set, to avoid memleak
     result->_isBuffAlloc = true;
     result->_isShapeAlloc = true;
@@ -1287,9 +1287,9 @@ template <typename T>
 
         Nd4jLong* shapeInfo;
         if (_workspace == nullptr) {
-            shapeInfo = new Nd4jLong[shape::shapeInfoLength(tad.tadOnlyShapeInfo[0])];
+            shapeInfo = new Nd4jLong[shape::shapeInfoLength(tad.tadOnlyShapeInfo)];
         } else {
-            shapeInfo = (Nd4jLong *) _workspace->allocateBytes(shape::shapeInfoByteLength(tad.tadOnlyShapeInfo[0]));
+            shapeInfo = reinterpret_cast<Nd4jLong *>(_workspace->allocateBytes(shape::shapeInfoByteLength(tad.tadOnlyShapeInfo)));
         }
         std::memcpy(shapeInfo, tad.tadOnlyShapeInfo, shape::shapeInfoByteLength(tad.tadOnlyShapeInfo));
 
@@ -2126,7 +2126,7 @@ NDArray<T>* NDArray<T>::permute(const int* dimensions, const int rank) const {
     template <typename T>
     NDArray<T>* NDArray<T>::permute(const Nd4jLong* dimensions, const int rank) const {
         int tempDims[MAX_RANK];
-        shape::convertT<Nd4jLong, int>((Nd4jLong *) dimensions, tempDims, rank);
+        shape::convertT<Nd4jLong, int>(const_cast<Nd4jLong *>(dimensions), tempDims, rank);
         return permute(tempDims, rank);
     }
 

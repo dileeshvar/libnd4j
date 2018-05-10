@@ -545,9 +545,9 @@ namespace nd4j {
             nd4j_debug("Using provided GEMM pointer\n","");
 
             if (sizeof(T) == 4)
-                BlasHelper::getInstance()->sgemm()(CblasColMajor, transA, transB, M, N, K, (float) alpha, (float *) pA->getBuffer(), lda, (float *) pB->getBuffer(), ldb, (float) beta, (float *) pC->getBuffer(), ldc);
+                BlasHelper::getInstance()->sgemm()(CblasColMajor, transA, transB, M, N, K, (float) alpha, reinterpret_cast<float *>(pA->getBuffer()), lda, reinterpret_cast<float *>(pB->getBuffer()), ldb, (float) beta, reinterpret_cast<float *>(pC->getBuffer()), ldc);
             else if (sizeof(T) == 8)
-                BlasHelper::getInstance()->dgemm()(CblasColMajor, transA, transB, M, N, K, (double) alpha, (double *) pA->getBuffer(), lda, (double *) pB->getBuffer(), ldb, (double) beta, (double *) pC->getBuffer(), ldc);
+                BlasHelper::getInstance()->dgemm()(CblasColMajor, transA, transB, M, N, K, (double) alpha, reinterpret_cast<double *>(pA->getBuffer()), lda, reinterpret_cast<double *>(pB->getBuffer()), ldb, (double) beta, reinterpret_cast<double *>(pC->getBuffer()), ldc);
             else
                 nd4j::blas::GEMM<T>::op(rOrder, transA, transB, M, N, K, alpha, pA->getBuffer(), lda, pB->getBuffer(), ldb, beta, pC->getBuffer(), ldc);
         } else {
@@ -600,9 +600,9 @@ namespace nd4j {
                 auto layout = A->ordering() == 'f' ? CblasColMajor : CblasRowMajor;
 
                 if (sizeof(T) == 4)
-                    BlasHelper::getInstance()->sgemv()(layout, CblasNoTrans, A->rows(), A->columns(), (float) alpha, (float *) A->getBuffer(), layout == CblasColMajor ? A->rows() : A->columns(), (float *) B->getBuffer(), 1, (float) beta, (float *) result->getBuffer(), 1);
+                    BlasHelper::getInstance()->sgemv()(layout, CblasNoTrans, A->rows(), A->columns(), (float) alpha, reinterpret_cast<float *>(A->getBuffer()), layout == CblasColMajor ? A->rows() : A->columns(), reinterpret_cast<float *>(B->getBuffer()), 1, (float) beta, reinterpret_cast<float *>(result->getBuffer()), 1);
                 else if (sizeof(T) == 8)
-                    BlasHelper::getInstance()->dgemv()(layout, CblasNoTrans, A->rows(), A->columns(), (double) alpha, (double *) A->getBuffer(), layout == CblasColMajor ? A->rows() : A->columns(), (double *) B->getBuffer(), 1, (double) beta, (double *) result->getBuffer(), 1);
+                    BlasHelper::getInstance()->dgemv()(layout, CblasNoTrans, A->rows(), A->columns(), (double) alpha, reinterpret_cast<double *>(A->getBuffer()), layout == CblasColMajor ? A->rows() : A->columns(), reinterpret_cast<double *>(B->getBuffer()), 1, (double) beta, reinterpret_cast<double *>(result->getBuffer()), 1);
                 else
                     nd4j::blas::GEMV<T>::op(A->ordering() == 'f' ? CblasTrans : 0, A->rows(), A->columns(), alpha, A->getBuffer(), B->rows(), B->getBuffer(), 1, beta, result->getBuffer(), 1);
             } else {

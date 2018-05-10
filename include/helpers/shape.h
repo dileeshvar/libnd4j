@@ -1713,16 +1713,15 @@ __device__ INLINEDEF Nd4jLong *cuMalloc(Nd4jLong *buffer, long size) {
 
         traceNew(11);
 
-        shape::ShapeInformation * shapeInfo = new shape::ShapeInformation();
+        auto shapeInfo = new shape::ShapeInformation();
         shapeInfo->shape = shape;
         shapeInfo->stride = stride;
         shapeInfo->offset = 0;
         shapeInfo->rank = rank;
-        int elementWiseStride = shape::computeElementWiseStride(rank, shape, stride,
-                                                                0);
+        int elementWiseStride = shape::computeElementWiseStride(rank, shape, stride, 0);
         shapeInfo->order = 'c';
         shapeInfo->elementWiseStride = elementWiseStride;
-        Nd4jLong *shapeInfoBuffer = shape::toShapeBuffer(shapeInfo);
+        auto shapeInfoBuffer = shape::toShapeBuffer(shapeInfo);
         delete[] stride;
         delete shapeInfo;
         return shapeInfoBuffer;
@@ -3623,7 +3622,7 @@ template <typename T>
 #endif
 
     INLINEDEF int tadsPerBlock(int blockSize, int tads) {
-        return nd4j::math::nd4j_ceil<double>(tads / (double) blockSize);
+        return (int) nd4j::math::nd4j_ceil<double>(tads / (double) blockSize);
     }
 
 /**
@@ -3638,7 +3637,7 @@ template <typename T>
 
         traceNew(29);
 
-        Nd4jLong *ret = new Nd4jLong[shapeInfoLength(info->rank)];
+        auto ret = new Nd4jLong[shapeInfoLength(info->rank)];
         int count = 1;
         int rank = info->rank;
 
@@ -3654,7 +3653,7 @@ template <typename T>
 
         ret[count++] = info->offset;
         ret[count++] = info->elementWiseStride;
-        ret[count++] = info->order;
+        ret[count] = info->order;
 
         return ret;
     }

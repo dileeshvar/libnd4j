@@ -566,7 +566,7 @@ namespace nd4j {
 
     template<typename T>
     void SpecialMethods<T>::decodeBitmapGeneric(void *dx, Nd4jLong N, T *dz) {
-        int *x = (int *) dx;
+        auto x = reinterpret_cast<int *>(dx);
         Nd4jLong lim = N / 16 + 5;
 
         FloatBits2 fb;
