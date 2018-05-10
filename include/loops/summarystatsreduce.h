@@ -95,22 +95,25 @@ namespace functions {
             _CUDA_HD T variance() {
                 if (n <= 1)
                     return 0.0;
-                return M2 / (n);
+                double res = double(M2) / (n);
+                return static_cast<T>(res);
             }
 
             _CUDA_HD T varianceBiasCorrected() {
                 if (this->n <= 1) {
                     return 0.0;
                 }
-
-                return (M2 - nd4j::math::nd4j_pow<T>(skewness(), 2.0) / n) / (n - 1.0);
+                double sk = skewness();
+                double res = (double(M2) - sk * sk / n) / (n - 1.0);
+                return static_cast<T>(res);
             }
 
 
             _CUDA_HD T variance_n() {
                 if (n <= 1)
                     return 0.0;
-                return M2 / n;
+                double res = double(M2) / n;
+                return static_cast<T>(res);
             }
 
             _CUDA_HD T skewness() { return M2 > 0 ? nd4j::math::nd4j_sqrt<int>(n) * M3 / nd4j::math::nd4j_pow(M2, (T) 1.5) : (T) 0.0f; }

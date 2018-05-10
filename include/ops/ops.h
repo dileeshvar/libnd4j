@@ -1849,15 +1849,17 @@ namespace simdOps {
         no_op_exec_special_accumulation_cuda
 
 		op_def static T startingValue(const T *input) {
-			return (T) 0.0f;
+			return (T) 0.0;
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T *extraParams) {
@@ -2132,11 +2134,13 @@ namespace simdOps {
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T *extraParams) {
@@ -2144,7 +2148,8 @@ namespace simdOps {
 		}
 
 		op_def static T postProcess(T reduction, Nd4jIndex n, T *extraParams) {
-			return reduction / (int) n;
+			double res = double(reduction) / n;
+			return static_cast<T>(res);
 		}
 	};
 
@@ -2334,12 +2339,14 @@ namespace simdOps {
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 
 		}
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 
 		}
 
@@ -2364,16 +2371,19 @@ namespace simdOps {
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T *extraParams) {
-			return d1 * d1;
+			double res = double(d1) * double(d1);
+			return static_cast<T>(res);
 		}
 
 		op_def static T postProcess(T reduction, Nd4jIndex n, T *extraParams) {
@@ -2392,16 +2402,19 @@ namespace simdOps {
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			return opOutput + old;
+			double res = double(opOutput) + double(old);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T *extraParams) {
-			return d1 * d1;
+			double res = double(d1) * double(d1);
+			return static_cast<T>(res);
 		}
 
 		op_def static T postProcess(T reduction, Nd4jIndex n, T *extraParams) {
@@ -2542,18 +2555,26 @@ namespace simdOps {
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			return old + opOutput;
+			double oldD = old;
+			double opOutputD = opOutput;
+			double res = oldD + opOutputD;
+			return static_cast<T>(res);
 		}
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			return old + opOutput;
+			double oldD = old;
+			double opOutputD = opOutput;
+			double res = oldD + opOutputD;
+			return static_cast<T>(res);
 
 		}
 
 		op_def static T op(T d1, T *extraParams) {
-			T mean = extraParams[0];
-			T ret = d1 - mean;
-			return ret * ret;
+			double meanD = extraParams[0];
+			double d1D = d1;
+			double ret = d1D - meanD;
+			ret *= ret;
+			return static_cast<T>(ret);
 		}
 
 		op_def static T postProcess(T reduction, Nd4jIndex n, T *extraParams) {
