@@ -119,17 +119,7 @@ namespace nd4j {
 
             output->assign(0.0);
 
-            nslices = input->sizeAt(dimN);
-            itime = input->shapeOf()[dimt];
-            iheight = input->shapeOf()[dimh];
-            iwidth = input->shapeOf()[dimw];
-            otime = gradNext->shapeOf()[dimt];
-            oheight = gradNext->shapeOf()[dimh];
-            owidth = gradNext->shapeOf()[dimw];
-
-            long nBatch = input->sizeAt(0);
-
-            ConvolutionUtils<T>::avgPool3DBP(*gradNext, *output, nBatch, nslices, itime, iwidth, iheight, otime, owidth, oheight, kT, kW, kH, dT, dW, dH, padT, padW, padH, count_include_pad);
+            ConvolutionUtils<T>::avgPool3DBP(*gradNext, *output,  kT, kW, kH, dT, dW, dH, padT, padW, padH, count_include_pad);
 
             STORE_RESULT(*output);
 
@@ -213,12 +203,9 @@ namespace nd4j {
 
             int nBatch = input->sizeAt(0);
 
-            Nd4jIndex istride = nslices * itime * iwidth * iheight;
-            Nd4jIndex ostride = nslices * otime * owidth * oheight;
-
             REQUIRE_TRUE(output->isSameShape({nBatch, (int) nslices, (int)otime, (int)oheight, (int)owidth}), 0, "Output should have shape of [%i, %i, %i, %i, %i], but got [%i, %i, %i, %i, %i] instead", nBatch, nslices, otime, oheight, owidth, output->sizeAt(0), output->sizeAt(1), output->sizeAt(2), output->sizeAt(3), output->sizeAt(4));
 
-            ConvolutionUtils<T>::avgPool3D(*input, *output, bS, nslices, itime, iheight, iwidth, otime, oheight, owidth, kT, kH, kW, dT, dH, dW, padT, padH, padW, count_include_pad);
+            ConvolutionUtils<T>::avgPool3D(*input, *output,  kT, kH, kW, dT, dH, dW, padT, padH, padW, count_include_pad);
 
             STORE_RESULT(*output);
 

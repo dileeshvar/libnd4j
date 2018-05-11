@@ -58,7 +58,7 @@ CUSTOM_OP_IMPL(avgpool3dnew, 1, 1, false, 0, 10) {
     if(isSameMode)                       // SAME
         ConvolutionUtils<T>::calcPadding3D(pD, pH, pW, oD, oH, oW, iD, iH, iW, kD, kH, kW, sD, sH, sW, 1, 1, 1);    
         
-    ConvolutionUtils<T>::avgPool3D(*input, *output, bS, iC, iD, iH, iW, oD, oH, oW, kD, kH, kW, sD, sH, sW, pD, pH, pW, !isSameMode);
+    ConvolutionUtils<T>::avgPool3D(*input, *output, kD, kH, kW, sD, sH, sW, pD, pH, pW, !isSameMode);
    
     if(!isNCHW) {              
 
@@ -176,7 +176,7 @@ CUSTOM_OP_IMPL(avgpool3dnew_bp, 2, 1, false, 0, 10) {
     if(isSameMode)                       // SAME
         ConvolutionUtils<T>::calcPadding3D(pD, pH, pW, oD, oH, oW, iD, iH, iW, kD, kH, kW, sD, sH, sW, 1, 1, 1);    
     
-    ConvolutionUtils<T>::avgPool3DBP(*gradO, *gradI, bS, iC, iD, iH, iW, oD, oH, oW, kD, kH, kW, sD, sH, sW, pD, pH, pW, !isSameMode);
+    ConvolutionUtils<T>::avgPool3DBP(*gradO, *gradI, kD, kH, kW, sD, sH, sW, pD, pH, pW, !isSameMode);
 
     if(!isNCHW) {              
 
