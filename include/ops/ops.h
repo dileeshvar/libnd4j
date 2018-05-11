@@ -227,11 +227,12 @@ namespace simdOps {
 	class Multiply {
 	public:
 		op_def static T op(T d1, T d2) {
-			return d1 * d2;
+			return static_cast<T>(double(d1) * double(d2));
 		}
 
 		op_def static T op(T d1, T d2, T *params) {
-			return d1 * d2;
+			return static_cast<T>(double(d1) * double(d2));
+//			return d1 * d2;
 		}
 
 		op_def static T op(T d1) {
@@ -240,7 +241,8 @@ namespace simdOps {
 
 		// op for MetaOps
 		op_def static T op(T d1, T *params) {
-			return d1 * params[0];
+			return static_cast<T>(double(d1) * double(params[0]));
+//			return d1 * params[0];
 		}
 	};
 
@@ -248,11 +250,13 @@ namespace simdOps {
 	class Divide {
 	public:
 		op_def static T op(T d1, T d2) {
-			return d1 / d2;
+			double res = double(d1) / double(d2);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T d2, T *params) {
-			return d1 / d2;
+			double res = double(d1) / double(d2);
+			return static_cast<T>(res);
 		}
 		
 		op_def static T op(T d1) {
@@ -261,7 +265,8 @@ namespace simdOps {
 
 		// op for MetaOps
 		op_def static T op(T d1, T *params) {
-			return d1 / params[0];
+			double res = double(d1) / double(params[0]);
+			return static_cast<T>(res);
 		}
 	};
 
@@ -271,13 +276,15 @@ namespace simdOps {
 		op_def static T op(T d1, T d2) {
 			if(d2 == (T)0.)
 				return (T)0.;
-			return d1 / d2;
+			double res = double(d1) / double(d2);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T d2, T *params) {
 			if(d2 == (T)0.)
 				return (T)0.;
-			return d1 / d2;
+			double res = double(d1) / double(d2);
+			return static_cast<T>(res);
 		}
 		
 		op_def static T op(T d1) {
@@ -288,7 +295,8 @@ namespace simdOps {
 		op_def static T op(T d1, T *params) {
 			if(params[0] == (T)0.)
 				return (T)0.;
-			return d1 / params[0];
+			double res = double(d1) / double(params[0]);
+			return static_cast<T>(res);
 		}
 	};
 
@@ -410,11 +418,13 @@ namespace simdOps {
 	class ReverseDivide {
 	public:
 		op_def static T op(T d1, T d2) {
-			return d2 / d1;
+			double res = double(d2) / double(d1);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1, T d2, T *params) {
-			return d2 / d1;
+			double res = double(d2) / double(d1);
+			return static_cast<T>(res);
 		}
 
 		op_def static T op(T d1) {
@@ -423,7 +433,8 @@ namespace simdOps {
 
 		// op for MetaOps
 		op_def static T op(T d1, T *params) {
-			return params[0] / d1;
+			double res = double(params[0]) / double(d1);
+			return static_cast<T>(res);
 		}
 	};
 
@@ -2574,16 +2585,12 @@ namespace simdOps {
 		}
 
 		op_def static T merge(T old, T opOutput, T *extraParams) {
-			double oldD = old;
-			double opOutputD = opOutput;
-			double res = oldD + opOutputD;
+			double res = double(old) + double(opOutput);
 			return static_cast<T>(res);
 		}
 
 		op_def static T update(T old, T opOutput, T *extraParams) {
-			double oldD = old;
-			double opOutputD = opOutput;
-			double res = oldD + opOutputD;
+			double res = double(old) + double(opOutput);
 			return static_cast<T>(res);
 
 		}
@@ -3538,14 +3545,17 @@ namespace simdOps {
         __host__ __device__
 #endif
         static inline T getValue(const bool biasCorrected, functions::summarystats::SummaryStatsData<T> val) {
+			double res;
 			if (biasCorrected) {
 				T ret = val.varianceBiasCorrected();
 				if (ret < (T) 0.0f)
-					return nd4j::math::nd4j_sqrt(val.variance());
+					res = nd4j::math::nd4j_sqrt<double>((double)val.variance());
 				else
-					return nd4j::math::nd4j_sqrt(ret);
+					res = nd4j::math::nd4j_sqrt<double>(double(ret));
 			}
-			return  nd4j::math::nd4j_sqrt(val.variance());
+			else
+				res = nd4j::math::nd4j_sqrt<double>(val.variance());
+			return static_cast<T>(res);
 		}
 
 #ifdef __CUDACC__
@@ -3593,7 +3603,7 @@ template<typename T>
 #ifdef __CUDACC__
 			T length = params[1];
 			T tid = gridDim.x * blockDim.x + threadIdx.x;
-            T rnd = nd4j::math::nd4j_abs<T>(nd4j::math::nd4j_cos<T>((T) clock64() * (T) tid + (T) length * (T) tid));
+	                T rnd = nd4j::math::nd4j_abs<T>(nd4j::math::nd4j_cos<T>((T) clock64() * (T) tid + (T) length * (T) tid));
 #else
 			T rnd = (T) rand() / (T) RAND_MAX;
 #endif
