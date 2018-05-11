@@ -145,128 +145,139 @@ namespace ops  {
 
 
 //////////////////////////////////////////////////////////////////////////
-        template<typename T>
-        void ConvolutionUtils<T>::_avgPool3D_bp(T *gradI_p, T *gradO_p, Nd4jIndex iC, Nd4jIndex iD, Nd4jIndex iH, Nd4jIndex iW, Nd4jIndex oD, Nd4jIndex oH, Nd4jIndex oW, int kD, int kH, int kW, int sD, int sH, int sW, int pD, int pH, int pW, bool count_include_pad) {
-            for (int k = 0; k < iC; k++)
-            {
-                Nd4jIndex i, j, ti;
+template<typename T>
+void ConvolutionUtils<T>::avgPool3DBP(NDArray<T>& gradO, NDArray<T>& gradI, int bS, int iC, int iD, int iH, int iW, int oD, int oH, int oW, int kD, int kH, int kW, int sD, int sH, int sW, int pD, int pH, int pW, bool count_include_pad) {
+    
+    T* pO = gradO.getBuffer();
+    T* pI = gradI.getBuffer();    
 
-                /* local pointers */
-                T *ip = gradI_p + k * iD * iW * iH;
-                T *op = gradO_p + k * oD * oW * oH;
-                for (i = 0; i < iD*iW*iH; i++)
-                    *(ip + i) = 0;
+    const int iStride1 = iD * iH * iW;
+    const int oStride1 = oD * oH * oW;
+    const int iStride0 = iC * iStride1;
+    const int oStride0 = iC * oStride1;
+    const int size0 = bS * iC;
+        
+// #pragma omp parallel for if(size0 > Environment::getInstance()->elementwiseThreshold()) schedule(guided) collapse(2)        
+#pragma omp parallel for schedule(guided) collapse(2)
+    for (int s = 0; s < bS; ++s) {
+        for (int k = 0; k < iC; ++k) {
 
-                /* loop over output */
-                for (ti = 0; ti < oD; ti++)
-                {
-                    for (i = 0; i < oH; i++)
-                    {
-                        for (j = 0; j < oW; j++)
-                        {
-                            Nd4jIndex cstart = ti * sD - pD;
-                            Nd4jIndex hstart = i  * sH - pH;
-                            Nd4jIndex wstart = j  * sW - pW;
-                            Nd4jIndex cend = nd4j::math::nd4j_min<Nd4jIndex>(cstart + kD, iD + pD);
-                            Nd4jIndex hend = nd4j::math::nd4j_min<Nd4jIndex>(hstart + kH, iH + pH);
-                            Nd4jIndex wend = nd4j::math::nd4j_min<Nd4jIndex>(wstart + kW, iW + pW);
-                            Nd4jIndex pool_size = (cend -cstart) * (hend - hstart) * (wend - wstart);
-                            cstart = nd4j::math::nd4j_max<Nd4jIndex>(cstart, 0);
-                            hstart = nd4j::math::nd4j_max<Nd4jIndex>(hstart, 0);
-                            wstart = nd4j::math::nd4j_max<Nd4jIndex>(wstart, 0);
-                            cend = nd4j::math::nd4j_min<Nd4jIndex>(cend, iD);
-                            hend = nd4j::math::nd4j_min<Nd4jIndex>(hend, iH);
-                            wend = nd4j::math::nd4j_min<Nd4jIndex>(wend, iW);
+            /* local pointers */
+            T *ip = pI + s*iStride0 + k*iStride1;
+            T *op = pO + s*oStride0 + k*oStride1;
+            
+#pragma omp parallel for simd                
+            for (int i = 0; i < iStride1; i++)
+                *(ip + i) = 0;
 
-                            Nd4jIndex divide_factor;
-                            if (count_include_pad)
-                                divide_factor = pool_size;
-                            else
-                                divide_factor = (cend - cstart) * (hend - hstart) * (wend - wstart);
+// #pragma omp parallel for if(oStride1 > Environment::getInstance()->elementwiseThreshold()) schedule(guided) collapse(3)
+#pragma omp parallel for schedule(guided) collapse(3)
+            /* loop over output */
+            for (int ti = 0; ti < oD; ti++) {
+                for (int i = 0; i < oH; i++) {
+                    for (int j = 0; j < oW; j++) {
+                            
+                        int cstart = ti * sD - pD;
+                        int hstart = i  * sH - pH;
+                        int wstart = j  * sW - pW;
+                        int cend = nd4j::math::nd4j_min<int>(cstart + kD, iD + pD);
+                        int hend = nd4j::math::nd4j_min<int>(hstart + kH, iH + pH);
+                        int wend = nd4j::math::nd4j_min<int>(wstart + kW, iW + pW);
+                        int pool_size = (cend -cstart) * (hend - hstart) * (wend - wstart);
+                        cstart = nd4j::math::nd4j_max<int>(cstart, 0);
+                        hstart = nd4j::math::nd4j_max<int>(hstart, 0);
+                        wstart = nd4j::math::nd4j_max<int>(wstart, 0);
+                        cend = nd4j::math::nd4j_min<int>(cend, iD);
+                        hend = nd4j::math::nd4j_min<int>(hend, iH);
+                        wend = nd4j::math::nd4j_min<int>(wend, iW);
 
-                            /* scatter gradients out to footprint: */
-                            T val  = *op++;
+                        int divide_factor;
+                        if (count_include_pad)
+                            divide_factor = pool_size;
+                        else
+                            divide_factor = (cend - cstart) * (hend - hstart) * (wend - wstart);
 
-                            long x,y,z;
-                            for (z = cstart; z < cend; z++)
-                            {
-                                for (y = hstart; y < hend; y++)
-                                {
-                                    for (x = wstart; x < wend; x++)
-                                    {
-                                        *(ip + z * iH * iW + y * iW + x) += val / divide_factor;
-                                    }
-                                }
-                            }
-                        }
+                        /* scatter gradients out to footprint: */
+                        T val  = *op++;
+                        
+                        for (int z = cstart; z < cend; z++)
+                            for (int y = hstart; y < hend; y++)
+                                for (int x = wstart; x < wend; x++)
+                                    *(ip + z * iH * iW + y * iW + x) += val / divide_factor;
                     }
                 }
             }
         }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////
-        template<typename T>
-        void ConvolutionUtils<T>::_avgPool3D(T *input_p, T *output_p, Nd4jIndex iC, Nd4jIndex iD, Nd4jIndex iH, Nd4jIndex iW, Nd4jIndex oD, Nd4jIndex oH, Nd4jIndex oW, int kD, int kH, int kW, int sD, int sH, int sW, int pD, int pH, int pW, bool count_include_pad) {
-            for (Nd4jIndex k = 0; k < iC; k++)
-            {
-                long i, j, ti;
+template<typename T>
+void ConvolutionUtils<T>::avgPool3D(NDArray<T>& input, NDArray<T>& output, int bS, int iC, int iD, int iH, int iW, int oD, int oH, int oW, int kD, int kH, int kW, int sD, int sH, int sW, int pD, int pH, int pW, bool count_include_pad) {
 
-                /* local pointers. */
-                T *ip = input_p + k * iD * iW * iH;
-                T *op = output_p + k * oD * oW * oH;
-                for (i = 0; i < oD * oH * oW; ++i)
-                    *(op + i) = 0;
+    T* in  = input.getBuffer();
+    T* out = output.getBuffer();
 
-                /* loop over output */
-                for (ti = 0; ti < oD; ti++)
-                {
-                    for (i = 0; i < oH; i++)
-                    {
-                        for (j = 0; j < oW; j++)
-                        {
-                            /* compute pool range. */
-                            Nd4jIndex cstart = ti * sD - pD;
-                            Nd4jIndex hstart = i  * sH - pH;
-                            Nd4jIndex wstart = j  * sW - pW;
-                            Nd4jIndex cend = nd4j::math::nd4j_min<Nd4jIndex>(cstart + kD, iD + pD);
-                            Nd4jIndex hend = nd4j::math::nd4j_min<Nd4jIndex>(hstart + kH, iH + pH);
-                            Nd4jIndex wend = nd4j::math::nd4j_min<Nd4jIndex>(wstart + kW, iW + pW);
-                            Nd4jIndex pool_size = (cend - cstart) * (hend - hstart) * (wend - wstart);
-                            cstart = nd4j::math::nd4j_max<Nd4jIndex>(cstart, 0);
-                            hstart = nd4j::math::nd4j_max<Nd4jIndex>(hstart, 0);
-                            wstart = nd4j::math::nd4j_max<Nd4jIndex>(wstart, 0);
-                            cend = nd4j::math::nd4j_min<Nd4jIndex>(cend, iD);
-                            hend = nd4j::math::nd4j_min<Nd4jIndex>(hend, iH);
-                            wend = nd4j::math::nd4j_min<Nd4jIndex>(wend, iW);
+    const int inStride1  = iD * iH * iW;
+    const int outStride1 = oD * oH * oW;
+    const int inStride0  = iC * inStride1;
+    const int outStride0 = iC * outStride1;
+    const int size0 = bS * iC;
+        
+#pragma omp parallel for if(size0 > Environment::getInstance()->elementwiseThreshold()) schedule(guided) collapse(2)
+    for(int s = 0; s < bS; ++s)  {            
+        for (int k = 0; k < iC; k++) {
+                
+            /* local pointers. */
+            T *ip = in  + s*inStride0  + k*inStride1;
+            T *op = out + s*outStride0 + k*outStride1;
+#pragma omp parallel for simd
+            for (int i = 0; i < outStride1; ++i)
+                *(op + i) = 0.;
 
-                            Nd4jIndex divide_factor;
-                            if (count_include_pad)
-                                divide_factor = pool_size;
-                            else
-                                divide_factor = (cend - cstart) * (hend - hstart) * (wend - wstart);
+            /* loop over output */
+#pragma omp parallel for if(outStride1 > Environment::getInstance()->elementwiseThreshold()) schedule(guided) collapse(3)
+            for (int ti = 0; ti < oD; ti++) {
+                for (int i = 0; i < oH; i++) {
+                    for (int j = 0; j < oW; j++) {
 
-                            /* compute local sum: */
-                            T sum = (T) 0.0f;
-                            long x, y, z;
+                        /* compute pool range. */
+                        int cstart = ti * sD - pD;
+                        int hstart = i  * sH - pH;
+                        int wstart = j  * sW - pW;
+                        int cend = nd4j::math::nd4j_min<int>(cstart + kD, iD + pD);
+                        int hend = nd4j::math::nd4j_min<int>(hstart + kH, iH + pH);
+                        int wend = nd4j::math::nd4j_min<int>(wstart + kW, iW + pW);
+                        int pool_size = (cend - cstart) * (hend - hstart) * (wend - wstart);
+                        cstart = nd4j::math::nd4j_max<int>(cstart, 0);
+                        hstart = nd4j::math::nd4j_max<int>(hstart, 0);
+                        wstart = nd4j::math::nd4j_max<int>(wstart, 0);
+                        cend = nd4j::math::nd4j_min<int>(cend, iD);
+                        hend = nd4j::math::nd4j_min<int>(hend, iH);
+                        wend = nd4j::math::nd4j_min<int>(wend, iW);
 
-                            for (z = cstart; z < cend; z++)
-                            {
-                                for (y = hstart; y < hend; y++)
-                                {
-                                    for (x = wstart; x < wend; x++)
-                                    {
-                                        sum +=  *(ip + z * iW * iH + y * iW + x);
-                                    }
-                                }
-                            }
+                        int divide_factor;
+                        if (count_include_pad)
+                            divide_factor = pool_size;
+                        else
+                            divide_factor = (cend - cstart) * (hend - hstart) * (wend - wstart);
 
-                            /* set output to local max */
-                            *op++ += sum / divide_factor;
-                        }
+                        /* compute local sum: */
+                        T sum = 0.;
+
+                        for (int z = cstart; z < cend; z++) 
+                            for (int y = hstart; y < hend; y++) 
+                                for (int x = wstart; x < wend; x++) 
+                                    sum +=  *(ip + z * iW * iH + y * iW + x);
+
+                        /* set output to local max */
+                        *op++ += sum / divide_factor;
                     }
                 }
             }
         }
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////
         template<typename T>
